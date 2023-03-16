@@ -4,7 +4,6 @@ import function
 import zmienne
 import scrollbar
 def setting_menu():
-	image = pygame.image.load('instruments.png')
 	print('F_BEGIN')
 	zmiennatmp=True
 
@@ -16,21 +15,15 @@ def setting_menu():
 	
 	box = pygame.Rect((tmp_screen_center[0]+10)+100,tmp_screen_center[1]+10*5, 20, 20)
 	exit = pygame.Rect(tmp_screen_center[0]+zmienne.button_exit_surface.get_size()[0]/2,tmp_screen_center[1]+zmienne.setting_surface.get_size()[1]-zmienne.button_exit_surface.get_size()[1], zmienne.button_exit_surface.get_size()[0], zmienne.button_exit_surface.get_size()[1])
-	scrollbar0 = scrollbar.ScrollBar(image.get_height())
+	
 	while zmiennatmp:
 		for event in pygame.event.get():
-			scrollbar0.event_handler(event)
 			if event.type == pygame.QUIT:
 				sys.exit(0)
 			
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				if event.button == 1:
 					zmienne.click = True
-
-
-		scrollbar0.update()
-		scrollbar0.draw(zmienne.screen)
-
 
 		zmienne.screen.blit(zmienne.setting_surface, tmp_screen_center)
 		function.draw_text("OPCJE",function.font,(0,0,255),zmienne.screen,tmp_screen_center[0]+10,tmp_screen_center[1]+10)
