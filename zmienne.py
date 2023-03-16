@@ -5,7 +5,7 @@ import pygame
 
 res = (1280, 720)
 screen = pygame.display.set_mode(res)
-
+mainClock = pygame.time.Clock()
 
 
 tekstury_path = 'tekstury/'
@@ -23,10 +23,10 @@ m_score = 0
 a_score = 0
 p_score = 1
 wyb = True
-menu_p_bool = False
-menu_s_bool = True
+pause_menu_status = False
+start_menu_status = True
+build_menu_status = False
 game_status = False
-
 
 
 # interfejs
@@ -40,9 +40,9 @@ forest_surface = pygame.image.load(tekstury_path+"las.png")
 water_surface = pygame.image.load(tekstury_path+"woda.png")
 castle_surface = pygame.image.load(tekstury_path+"castle.png")
 imageDEC_surface = pygame.image.load(tekstury_path+"ekran.png")
-button1_surface = pygame.image.load(tekstury_path+"button1.png")
-button2_surface = pygame.image.load(tekstury_path+"button2.png")
-button3_surface = pygame.image.load(tekstury_path+"button3.png")
+gold_surface = pygame.image.load("GUI/gold_button.png")
+army_surface = pygame.image.load("GUI/army_button.png")
+turn_surface = pygame.image.load("GUI/turn_button.png")
 # tło meny pauzy
 menu_s_surface = pygame.image.load('GUI/carlos_menu.png')   # per-pixel alpha
 menu_s_surface = pygame.transform.scale(menu_s_surface, (res[0], res[1]))
@@ -58,6 +58,12 @@ button_exit = pygame.Rect(res[0]/2-200/2, 530, 200, 100)
 button_play_surface = pygame.image.load('GUI/play_button.png')
 button_option_surface = pygame.image.load('GUI/option_button.png')
 button_exit_surface = pygame.image.load('GUI/exit_button.png')
+
+#budynki tekstura tmp
+build1 = pygame.image.load('GUI/Building/tmp.png')
+build2 = pygame.image.load('GUI/Building/tmp2.png')
+build3 = pygame.image.load('GUI/Building/tmp3.png')
+
 
 
 player_hex = pygame.Surface((1000, 1000), pygame.SRCALPHA)
