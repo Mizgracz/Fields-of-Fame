@@ -3,7 +3,7 @@ import pygame,sys
 import game
 import zmienne
 import build
-
+import options
 
 pygame.init()
 
@@ -178,13 +178,13 @@ def draw_text(text, font, color, surface, x, y):
 	surface.blit(textobj, textrect)
 def menu_pause():
 
-	zmienne.screen.blit(zmienne.menu_s_surface, (0, 0))
-
-	zmienne.screen.blit(zmienne.button_play_surface, zmienne.button_play)
-	zmienne.screen.blit(zmienne.button_option_surface, zmienne.button_option)
-	zmienne.screen.blit(zmienne.button_exit_surface, zmienne.button_exit)
 
 	while zmienne.pause_menu_status:
+		zmienne.screen.blit(zmienne.menu_s_surface, (100, 0))
+
+		zmienne.screen.blit(zmienne.button_play_surface, zmienne.button_play)
+		zmienne.screen.blit(zmienne.button_option_surface, zmienne.button_option)
+		zmienne.screen.blit(zmienne.button_exit_surface, zmienne.button_exit)
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				sys.exit(0)
@@ -205,6 +205,7 @@ def menu_pause():
 			if zmienne.click:
 				zmienne.click=False
 				print('Options2')
+				options.setting_menu()
 				#options()
 		if zmienne.button_exit.collidepoint((mx, my)):
 			if zmienne.click:
@@ -221,14 +222,11 @@ def menu_pause():
 		zmienne.click = False
 
 def menu_start():
-	
-	zmienne.screen.blit(zmienne.menu_s_surface, (0, 0))
-
-	zmienne.screen.blit(zmienne.button_play_surface, zmienne.button_play)
-	zmienne.screen.blit(zmienne.button_option_surface, zmienne.button_option)
-	zmienne.screen.blit(zmienne.button_exit_surface, zmienne.button_exit)
-
 	while zmienne.start_menu_status:
+		zmienne.screen.blit(zmienne.menu_s_surface, (0, 0))
+		zmienne.screen.blit(zmienne.button_play_surface, zmienne.button_play)
+		zmienne.screen.blit(zmienne.button_option_surface, zmienne.button_option)
+		zmienne.screen.blit(zmienne.button_exit_surface, zmienne.button_exit)
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				sys.exit(0)
@@ -249,7 +247,7 @@ def menu_start():
 		if zmienne.button_option.collidepoint((mx, my)):
 			if zmienne.click:
 				zmienne.click=False
-				print('Options')
+				options.setting_menu()
 				#options()
 		if zmienne.button_exit.collidepoint((mx, my)):
 			if zmienne.click:

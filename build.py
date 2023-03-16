@@ -18,6 +18,7 @@ def menu_build():
 		zmienne.screen.blit(zmienne.build1, (zmienne.res[0]/4+10,zmienne.res[1]/4+50))
 		zmienne.screen.blit(zmienne.build2, (zmienne.res[0]/4+10+150,zmienne.res[1]/4+50))
 		zmienne.screen.blit(zmienne.build3, (zmienne.res[0]/4+10+150*2,zmienne.res[1]/4+50))
+		
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				sys.exit(0)
