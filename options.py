@@ -2,7 +2,7 @@ import pygame
 import sys
 import function
 import zmienne
-import scrollbar
+
 def setting_menu():
 	print('F_BEGIN')
 	zmiennatmp=True
