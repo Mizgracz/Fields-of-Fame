@@ -8,7 +8,7 @@ import timer
 def gameloop():
 
 	while zmienne.game_status:
-		timer.timer()
+		
 		function.draw()
 		function.playe_hex()
 		zmienne.screen.blit(zmienne.up_bar, (0, 0))
@@ -17,6 +17,7 @@ def gameloop():
 		function.keyboard()
 		function.mouse()
 		function.turn()
+		timer.timer()
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				sys.exit(0)
