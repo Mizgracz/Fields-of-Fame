@@ -2,11 +2,13 @@ import pygame, sys
 import function
 import zmienne
 import build
+import timer
+
 
 def gameloop():
 
 	while zmienne.game_status:
-
+		timer.timer()
 		function.draw()
 		function.playe_hex()
 		zmienne.screen.blit(zmienne.up_bar, (0, 0))
