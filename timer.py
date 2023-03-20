@@ -12,7 +12,7 @@ seconds = 0
 def timer():
     FONT_SIZE = 36
     FONT_NAME = 'timesnewroman'
-    font_2 = pygame.font.SysFont(None, 30)
+    font_2 = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
     # Update the timer
     current_time = time.time()
     elapsed_time = current_time - start_time
