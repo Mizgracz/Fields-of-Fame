@@ -1,34 +1,28 @@
-import pygame, sys
-import function
-import zmienne
-import build
-import timer
+import sys
+import pygame
+from graphics import Map
 
 
-def gameloop():
+class Game:
+    def __init__(self):
+        pygame.init()
+        self.res = (1280, 720)
+        self.screen = pygame.display.set_mode(self.res)
+        self.screen.fill((255, 255, 255))
+        self.z = 1
+        map1 = Map(3, 2,self.screen)
+        map1.generate()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit(0)
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x,y = event.pos
+                    for item in map1.sprites():
+                        if item.is_point_inside_polygon((x,y)):
+                            item.function(map1)
+                    pass
+            map1.draw()
+            pygame.display.update()
+gra = Game()
 
-	while zmienne.game_status:
-		
-		function.draw()
-		function.playe_hex()
-		zmienne.screen.blit(zmienne.up_bar, (0, 0))
-		function.score()
-		function.decision()
-		function.keyboard()
-		function.mouse()
-		function.turn()
-		timer.timer()
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				sys.exit(0)
-			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_ESCAPE and zmienne.pause_menu_status == False:
-					zmienne.pause_menu_status = True
-					function.menu_pause()
-				if event.key == pygame.K_b and zmienne.build_menu_status==False:
-					print('BEGIN')
-					zmienne.build_menu_status=True
-					build.menu_build()
-					print('END')
-		pygame.display.update()
-		zmienne.mainClock.tick(60)
