@@ -10,4 +10,4 @@ while True:
 
 	function.menu_start()
 	pygame.display.update()
-	zmienne.mainClock.tick(60)
+	
