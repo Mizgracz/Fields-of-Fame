@@ -154,11 +154,11 @@ def decision():
 		mouse_pressed = pygame.mouse.get_pressed()
 		if gold_button_rect.collidepoint(colision) and mouse_pressed[0]:
 
-			zmienne.m_score += 10
+			zmienne.m_score =zmienne.m_score+ (10 +zmienne.m_buff)
 			zmienne.wyb = False
 		if army_button_rect.collidepoint(colision) and mouse_pressed[0]:
 
-			zmienne.a_score += 10
+			zmienne.a_score = zmienne.a_score +(10 +zmienne.a_buff)
 			zmienne.wyb = False
 
 

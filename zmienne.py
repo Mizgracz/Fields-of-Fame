@@ -16,9 +16,13 @@ przesuniecie_y = 0
 obramowanie_wymiary_x = [58, 0, 0, 58, 119, 119]
 obramowanie_wymiary_y = [0, 30, 97, 127, 97, 30]
 wymiar_obramowania = []
+
 m_score = 0
 a_score = 0
 p_score = 1
+
+a_buff = 0
+m_buff = 0
 
 click=False
 wyb = True

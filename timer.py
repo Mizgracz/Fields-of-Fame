@@ -9,6 +9,7 @@ WINDOW_HEIGHT = 480
 # Set up the timer
 start_time = time.time()
 seconds = 0
+elapsed_time = 0
 def timer():
     FONT_SIZE = 36
     FONT_NAME = 'timesnewroman'
