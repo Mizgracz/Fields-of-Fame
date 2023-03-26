@@ -38,11 +38,11 @@ up_bar = pygame.Surface((1280, 30))
 up_bar.fill("black")
 
 # wczytanie tekstury hex
-grass_surface = pygame.image.load("tekstury/hex_trawa.png",)
-village_surface = pygame.image.load("tekstury/wioska.png")
-forest_surface = pygame.image.load("tekstury/las.png")
-water_surface = pygame.image.load("tekstury/woda.png")
-castle_surface = pygame.image.load("tekstury/castle.png")
+# grass_surface = pygame.image.load("tekstury/hex_trawa.png",)
+# village_surface = pygame.image.load("tekstury/wioska.png")
+# forest_surface = pygame.image.load("tekstury/las.png")
+# water_surface = pygame.image.load("tekstury/woda.png")
+# castle_surface = pygame.image.load("tekstury/castle.png")
 # tekstury GUI tury
 imageDEC_surface = pygame.image.load("tekstury/ekran.png")
 gold_surface = pygame.image.load("GUI/gold_button.png")

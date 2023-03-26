@@ -21,6 +21,7 @@ class Game:
         self.screen = pygame.display.set_mode(self.res)
         self.screen.fill((255, 255, 255))
         self.z = 1
+        self.status = True
         #score
         self.scoregold = 0
         self.scorearmy = 0
@@ -45,15 +46,21 @@ class Game:
 
         self.map1 = Map(11, 6,self.mainSurface)
         self.map1.generate()
-        
+    def on(self):
+        self.status = True
+    def off(self):
+        self.status = False
     def play(self):
-        while True:
+        while self.status:
             self.mainSurface.blit(self.up_bar,(0,0))
             self.mainSurface.blit(self.right_box,(self.res[0]-300,30))
+            press = pygame.key.get_pressed()
             if not self.bm.on_off:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         sys.exit(0)
+                    if press[pygame.K_UP]:
+                        self.off()
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         # self.updateGui()
                         if event.button ==1:
@@ -111,6 +118,10 @@ class Game:
         self.screen.blit(self.mainSurface,(0,0))
         # Update the display
         pygame.display.update()
-
 gra = Game()
-gra.play()
+import zmienne
+def gameloop():
+    zmienne.start_menu_status = False
+    gra.on()
+    gra.play()
+    zmienne.start_menu_status = True
