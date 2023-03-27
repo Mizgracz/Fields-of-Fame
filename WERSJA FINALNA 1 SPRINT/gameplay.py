@@ -17,35 +17,37 @@ class Camera:
     def mouse(self):
 
         self.mouse_x, self.mouse_y = pygame.mouse.get_pos()
-        predkosc = 8
+        predkosc = 2
+        press = pygame.key.get_pressed()
+        if not press[pygame.K_LCTRL]:
+            if self.mouse_x < 30:
+                self.camera_x += (predkosc + 10)
+            elif self.mouse_x < 80:
+                self.camera_x += (predkosc + 5)
+            elif self.mouse_x < 160:
+                self.camera_x += predkosc
 
-        if self.mouse_x < 30:
-            self.camera_x += predkosc
-        elif self.mouse_x < 80:
-            self.camera_x += predkosc / 2
-        elif self.mouse_x < 160:
-            self.camera_x += predkosc / 3
+            if self.mouse_x > 1240:
+                self.camera_x -= predkosc + 10
+            elif self.mouse_x > 1190:
+                self.camera_x -= predkosc + 5
+            elif self.mouse_x > 1110:
+                self.camera_x -= predkosc
 
-        if self.mouse_x > 1240:
-            self.camera_x -= predkosc
-        elif self.mouse_x > 1190:
-            self.camera_x -= predkosc / 2
-        elif self.mouse_x > 1110:
-            self.camera_x -= predkosc / 3
+            if self.mouse_y < 30:
+                self.camera_y += predkosc +10
+            elif self.mouse_y < 80:
+                self.camera_y += predkosc + 5
+            elif self.mouse_y < 160:
+                self.camera_y += predkosc
 
-        if self.mouse_y < 30:
-            self.camera_y += predkosc
-        elif self.mouse_y < 80:
-            self.camera_y += predkosc / 2
-        elif self.mouse_y < 160:
-            self.camera_y += predkosc / 3
+            if self.mouse_y > 670:
+                self.camera_y -= predkosc + 10
+            elif self.mouse_y > 620:
+                self.camera_y -= predkosc + 5
+            elif self.mouse_y > 540:
+                self.camera_y -= predkosc
 
-        if self.mouse_y > 670:
-            self.camera_y -= predkosc
-        elif self.mouse_y > 620:
-            self.camera_y -= predkosc / 2
-        elif self.mouse_y > 540:
-            self.camera_y -= predkosc / 3
 
     def keybord(self):
         press = pygame.key.get_pressed()
