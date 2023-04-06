@@ -1,6 +1,5 @@
 from graphics import Map
 from gameplay import Camera, UpBar, Hourglass, Decision, Build_Menu, BuildItem, Timer, SideMenu
-from gameplay import build
 from menu import Menu
 
 import pygame
