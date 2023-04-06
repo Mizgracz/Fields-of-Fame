@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 
 SCREEN_WIDTH = 1280
@@ -6,6 +8,7 @@ SCREEN_HEIGHT = 720
 
 class Menu:
     def __init__(self, screen, clock, max_tps):
+        pygame.init()
         self.screen = screen
         self.clock = clock
         self.max_tps = max_tps
@@ -19,6 +22,22 @@ class Menu:
         self.resume_game_button_texture = pygame.image.load("texture/main_menu/wznow_button.png").convert_alpha()
         self.quit_button_texture = pygame.image.load("texture/main_menu/zamknij_button.png").convert_alpha()
         self.load_button_texture = pygame.image.load("texture/main_menu/wczytaj_button.png").convert_alpha()
+        self.gameplay = False
+
+        while self.status:
+
+            choose = self.run()
+
+            pygame.display.update()
+            if choose == 'new_game':
+
+                self.status = False
+                self.gameplay = True
+
+            elif choose == 'quit':
+                sys.exit(0)
+
+
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -46,7 +65,7 @@ class Menu:
         quit_texture = self.quit_button_texture
         self.screen.blit(quit_texture, self.quit_button)
 
-        pygame.display.flip()
+
 
     def run(self):
         choice = self.handle_events()
@@ -55,11 +74,3 @@ class Menu:
         self.draw()
         self.clock.tick(self.max_tps)
 
-
-pygame.init()
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-clock = pygame.time.Clock()
-max_tps = 60.0
-
-menu1 = Menu(screen, clock, max_tps)
-menu1.run()
