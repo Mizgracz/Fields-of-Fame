@@ -28,7 +28,6 @@ class Game:
         self.dec = Decision(screen)
         self.bm = Build_Menu(screen)
         self.timer = Timer(res, screen, screen)
-        self.startmenu = Menu(screen, clock, max_tps)
         self.sd = SideMenu(screen)
 
         self.allItem = [   # Budynki
