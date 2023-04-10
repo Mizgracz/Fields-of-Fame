@@ -74,3 +74,11 @@ class Menu:
         self.draw()
         self.clock.tick(self.max_tps)
 
+
+
+
+class Config:
+    def __init__(self, s1):
+        self.screen = s1
+
+
