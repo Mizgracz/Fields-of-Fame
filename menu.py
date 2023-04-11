@@ -50,7 +50,6 @@ class Menu:
 
 
 
-
     def handle_events(self):
 
         for event in pygame.event.get():
@@ -62,7 +61,7 @@ class Menu:
             elif event.type == pygame.MOUSEBUTTONUP:
 
                 if self.config1.Button_Start_Rect.collidepoint(pos):
-                    self.resume = False
+                    self.gameplay = True
                     self.config1.Active = False
                     self.status = False
                     pygame.display.update()
@@ -73,18 +72,10 @@ class Menu:
                     return 'new_game'
 
 
-
-
-
                 elif self.config1.Button_Back_Rect.collidepoint(pos):
                     self.config1.Active = False
 
                     self.resume = False
-
-
-
-
-
 
 
                 elif self.quit_button.collidepoint(pos):

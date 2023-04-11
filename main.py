@@ -81,7 +81,7 @@ class Game:
 start_menu = Menu(screen, clock, max_tps,)  # wyświetlanie i obsługa menu
 
 
-# if start_menu.gameplay:    # obsługa gry
-#     if __name__ == '__main__':
-game = Game()
-game.run()
+if start_menu.gameplay:    # obsługa gry
+    if __name__ == '__main__':
+        game = Game()
+        game.run()
