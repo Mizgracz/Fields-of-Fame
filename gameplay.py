@@ -1,5 +1,6 @@
+import zipfile
 import pygame
-import time
+import time,os,sys
 
 build_stauts = True
 build = True
@@ -117,7 +118,8 @@ class UpBar:
 
 
 class Timer:
-    def __init__(self, res, main_surface, screen):
+    def __init__(self, res, main_surface, screen,game):
+        self.game = game
         self.res = res
         self.mainSurface = main_surface
         self.screen = screen
@@ -125,7 +127,44 @@ class Timer:
         self.FONT_NAME = 'timesnewroman'
         self.font_timer = pygame.font.SysFont(self.FONT_NAME, self.FONT_SIZE)
         self.start_time = time.time()
+    def autosave_game(self):
+        import gameplay
+        print('SaveGame')
 
+        folder_path = "save"
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+            print(f"Folder {folder_path} został utworzony.")
+        else:
+            print(f"Folder {folder_path} już istnieje.")
+
+        with open('save/map.csv','w') as savefile:
+            savefile.write('x;y;number;texture_index;verticles\n')
+            for h in self.game.map.sprites():
+                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.verticles}')
+                savefile.write('\n')
+        with open('save/stats.txt','w') as savefile:
+            
+            
+            
+            savefile.write(f'build_stauts:{gameplay.build_stauts}\n')
+            savefile.write(f'build:{gameplay.build}\n')
+            savefile.write(f'gold_count:{gameplay.gold_count}\n')
+            savefile.write(f'army_count:{gameplay.army_count}\n')
+            savefile.write(f'terrain_count:{gameplay.terrain_count}\n')
+            savefile.write(f'wyb:{gameplay.wyb}\n')
+            savefile.write(f'player_hex_status:{gameplay.player_hex_status}\n')
+            savefile.write(f'army_count_bonus:{gameplay.army_count_bonus}\n')
+            savefile.write(f'gold_count_bonus:{gameplay.gold_count_bonus}\n')
+            savefile.write(f'turn_count:{gameplay.turn_count}\n')
+        pygame.time.Clock().tick(1)
+        with zipfile.ZipFile("save/QSave.zip", "w") as zip:
+            zip.write("save/stats.txt")
+            zip.write("save/map.csv")
+        os.remove("save/stats.txt")
+        os.remove("save/map.csv")
+        pass
+    
     def update(self):
         # Update the timer
         current_time = time.time()
@@ -133,6 +172,10 @@ class Timer:
         hours = int(elapsed_time // 3600)
         minutes = int((elapsed_time % 3600) // 60)
         seconds = int(elapsed_time % 60)
+
+        if minutes%10==0 and not minutes == 0:
+
+            self.autosave_game()
 
         # Draw the timer box
         timer_box = pygame.Rect(self.res[0] - 90, self.res[1] - 720, 90, 30)
@@ -241,17 +284,16 @@ class SideMenu:
         self.screen.blit(self.down_surfarce, (1034, 440))
 
     def button(self):
-        global build_stauts
         colision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
         if self.button_rect.collidepoint(colision) and mouse_pressed[0]:
-            build_stauts = True
-            print(build)
+            Build_Menu.build_stauts = True
 
 
 class Build_Menu:
+    build_stauts=False
     def __init__(self, screen):
-        self.build_stauts = False
+        
         self.texture = "texture/ui/building/kuptlo.png"
         self.texture_button = "texture/ui/building/CheckBoxFalse.png"
         self.szerokosc = 700
@@ -269,7 +311,6 @@ class Build_Menu:
         self.screen = screen
 
     def draw(self):
-        global build
 
         if self.build_stauts:
             self.screen.blit(self.build_menu_surf, self.build_rect)
@@ -280,7 +321,8 @@ class Build_Menu:
             colision = pygame.mouse.get_pos()
             mouse_pressed = pygame.mouse.get_pressed()
             if exit_button_rect.collidepoint(colision) and mouse_pressed[0]:
-                self.build_stauts = False
+                Build_Menu.build_stauts = False
+            
 
 
 class BuildItem:
@@ -351,6 +393,5 @@ class BuildItem:
                 gold_count -= self.koszt
                 army_count_bonus += self.army_bonus
                 gold_count_bonus += self.gold_bonus
-                print(f'{self.menu.get_size()}')
             pygame.time.Clock().tick(5)
         pass
