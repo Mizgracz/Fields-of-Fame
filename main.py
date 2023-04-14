@@ -20,7 +20,7 @@ class Game:
     def __init__(self):
         pygame.init()
         self.camera = Camera()
-        self.map = Map(30, 30, screen, self.camera)
+        self.map = Map(start_menu.MAP_SIZE, start_menu.MAP_SIZE, screen, self.camera)
         self.map.texture()
         self.map.generate()
         self.up_bar = UpBar(screen)
