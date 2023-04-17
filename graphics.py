@@ -1,47 +1,22 @@
+
+
 import pygame
 import random
+import gameplay
 
 
 class Hex(pygame.sprite.Sprite):
 
-    def __init__(self, x, y, tex, num, group):
+    def __init__(self, x, y, tex, num, group, obw, zaj):
         super().__init__(group)
         self.szerokosc = 130
         self.wysokosc = 152
         self.polozenie_hex_x = x
         self.polozenie_hex_y = y
         self.texture = tex
-        self.type = None
         self.number = num
-        self.verticles = [
-            (self.polozenie_hex_x + self.szerokosc / 2 + group.camera.camera_x,
-             self.polozenie_hex_y + 30 + group.camera.camera_y),
-            (self.polozenie_hex_x + self.szerokosc + group.camera.camera_x,
-             self.polozenie_hex_y + self.wysokosc / 4 + 30 + group.camera.camera_y),
-            (self.polozenie_hex_x + self.szerokosc + group.camera.camera_x,
-             self.polozenie_hex_y + self.wysokosc - self.wysokosc / 4 + 30 + group.camera.camera_y),
-            (self.polozenie_hex_x + self.szerokosc / 2 + group.camera.camera_x,
-             self.polozenie_hex_y + self.wysokosc + 30 + group.camera.camera_y),
-            (self.polozenie_hex_x + group.camera.camera_x,
-             self.polozenie_hex_y + self.wysokosc - self.wysokosc / 4 + 30 + group.camera.camera_y),
-            (self.polozenie_hex_x + group.camera.camera_x,
-             self.polozenie_hex_y + self.wysokosc / 4 + 30 + group.camera.camera_y),
-        ]
-        self.verticles_texture = [
-            (self.szerokosc / 2, 0),  # v1
-            (self.szerokosc, self.wysokosc / 4),  # v2
-            (self.szerokosc, self.wysokosc - self.wysokosc / 4),  # v2
-            (self.szerokosc / 2, self.wysokosc),  # v4
-            (0, self.wysokosc - self.wysokosc / 4),  # v2
-            (0, self.wysokosc / 4),  # v2
-        ]
-
-        self.owner_color = pygame.Surface((130, 152), pygame.SRCALPHA)
-        self.owner_rect = self.owner_color.get_rect(topleft=(self.polozenie_hex_x, self.polozenie_hex_y))
-        self.owner_color.set_alpha(255 * (30 / 100))
-        if self.number == 137:
-            pygame.draw.polygon(self.owner_color, (255, 13, 16), self.verticles_texture)
-        self.texture.blit(self.owner_color, (0, 0))
+        self.obwodka = obw
+        self.zajete = zaj
 
 
 class Map(pygame.sprite.Group):
@@ -51,6 +26,11 @@ class Map(pygame.sprite.Group):
 
         self.colision_surface = pygame.Surface(pygame.display.get_window_size(), pygame.SRCALPHA)
         self.colision_rect = self.colision_surface.get_rect()
+
+        self.hex_obwodka_surface = pygame.image.load("texture/hex/hex_obwodka.png").convert_alpha()
+
+        self.hex_zajete_surface = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
+        self.hex_zajete_surface.set_alpha(100)
 
         self.grass_surface = pygame.image.load("texture/hex/hex_trawa.png", ).convert_alpha()
         self.grass2_surface = pygame.image.load("texture/hex/trawa_hex_2.png", ).convert_alpha()
@@ -81,9 +61,12 @@ class Map(pygame.sprite.Group):
         self.num_hex_y = numy
         self.allhex = {}
         self.alltex = {}
-
         self.screen = screen
         self.camera = camera
+        self.allmask = {}
+        self.allrect = {}
+        self.camerax = self.camera.camera_x
+        self.cameray = self.camera.camera_y
 
     def texture(self):
 
@@ -94,23 +77,26 @@ class Map(pygame.sprite.Group):
             else:
                 self.alltex['hex', i] = random.choices(*zip(*self.elements), k=1)[0]
 
-    def test(self):
-        # polygon = pygame.draw.polygon(self.owner, (0,255,0), self.verticles_texture)
-        pass
-
     def generate(self):
         licz = 0
         przesuniecie_x = 0
         przesuniecie_y = 0
-
+        self.texture()
         for j in range(self.num_hex_y):  # tworzenie hexów (jako nowy obiekt) nadawanie im położenia
             x = -1640
             y = j * 152
             for i in range(self.num_hex_x):
-                self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y),
-                                               self.alltex["hex", licz], licz, self)
+
+                self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz],
+                                               licz, self, False, False)
+
+                self.allrect['hex', licz] = self.alltex["hex", licz].get_rect(midleft=(self.allhex["hex", licz].polozenie_hex_x, self.allhex["hex", licz].polozenie_hex_y + 75))
+                self.allmask['hex', licz] = pygame.mask.from_surface(self.alltex["hex", licz])
 
                 x += self.allhex["hex", licz].szerokosc
+
+                if licz == 137:
+                    self.allhex["hex", licz].zajete = True
                 licz += 1
 
             if j % 2 != 0:
@@ -120,7 +106,67 @@ class Map(pygame.sprite.Group):
             przesuniecie_y += -40
 
     def draw(self):  # wyświetlanie mapy na ekranie
-
         for h in self.sprites():
-            self.screen.blit(h.texture,
-                             (h.polozenie_hex_x + self.camera.camera_x, h.polozenie_hex_y + self.camera.camera_y))
+            self.screen.blit(h.texture, (h.polozenie_hex_x + self.camera.camera_x, h.polozenie_hex_y + 
+                                         self.camera.camera_y))
+
+    def rysuj_obwodke_i_zajete(self):
+        for i in range(self.num_hex_y * self.num_hex_y):
+            if self.allhex["hex", i].obwodka:
+                self.screen.blit(self.hex_obwodka_surface, (self.allhex["hex", i].polozenie_hex_x + self.camera.camera_x,
+                                                            self.allhex["hex", i].polozenie_hex_y + self.camera.camera_y))
+            if self.allhex["hex", i].zajete:
+                self.screen.blit(self.hex_zajete_surface, (self.allhex["hex", i].polozenie_hex_x + self.camera.camera_x,
+                                                            self.allhex["hex", i].polozenie_hex_y + self.camera.camera_y))
+    
+    def colision_detection_obwodka(self):
+        pos = pygame.mouse.get_pos()
+        for c in range(self.num_hex_y * self.num_hex_x):
+
+            if self.camerax != self.camera.camera_x:
+                for ca in range(self.num_hex_y * self.num_hex_x):
+                    if self.camerax < self.camera.camera_x:
+                        self.allrect['hex', ca].x += 5
+                    else:
+                        self.allrect['hex', ca].x -= 5
+
+            if self.cameray != self.camera.camera_y:
+                for co in range(self.num_hex_y * self.num_hex_x):
+                    if self.cameray < self.camera.camera_y:
+                        self.allrect['hex', co].y += 5
+                    else:
+                        self.allrect['hex', co].y -= 5
+
+            self.camerax = self.camera.camera_x
+            self.cameray = self.camera.camera_y
+
+            pos_in_mask = pos[0] - self.allrect['hex', c].x, pos[1] - self.allrect['hex', c].y
+            try:
+
+                touching = self.allrect['hex', c].collidepoint(*pos) and self.allmask['hex', c].get_at(pos_in_mask)
+                if touching:
+
+                    self.allhex["hex", c].obwodka = True
+
+                else:
+                    
+                    self.allhex["hex", c].obwodka = False
+
+            except IndexError as e:
+                print("Wystąpił błąd :", e)
+
+    def zajmij_pole(self):
+        if gameplay.player_hex_status:
+            mouse_presses = pygame.mouse.get_pressed()
+
+            if mouse_presses[0]:
+                pos1 = pygame.mouse.get_pos()
+                for i in range(self.num_hex_y * self.num_hex_x):
+                    pos_in_mask1 = pos1[0] - self.allrect['hex', i].x, pos1[1] - self.allrect['hex', i].y
+                    touching = self.allrect['hex', i].collidepoint(*pos1) and self.allmask['hex', i].get_at(pos_in_mask1)
+
+                    if touching:
+                        self.allhex["hex", i].zajete = True
+                        print(f"klikniecie{i}")
+                        gameplay.player_hex_status = False
+                        gameplay.terrain_count += 1

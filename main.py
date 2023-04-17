@@ -52,9 +52,12 @@ class Game:
         while True:
             screen.fill((255, 255, 255))
             self.handle_events()
-            self.camera.mouse()
+            # self.camera.mouse()
             self.camera.keybord()
             self.map.draw()
+            self.map.zajmij_pole()
+            self.map.colision_detection_obwodka()
+            self.map.rysuj_obwodke_i_zajete()
             self.up_bar.score()
             self.dec.draw()
             self.sd.draw()

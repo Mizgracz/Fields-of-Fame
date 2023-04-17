@@ -212,9 +212,12 @@ class Decision:
             camera_stop = False
             army_count += 10 + army_count_bonus
 
+
+
         if self.field_rect.collidepoint(colision) and mouse_pressed[0] and wyb:
             wyb = False
             camera_stop = False
+            pygame.time.Clock().tick(3)
             player_hex_status = True
 
 
