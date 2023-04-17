@@ -1,19 +1,31 @@
+import zipfile
 from graphics import Map
+<<<<<<< Updated upstream
 from gameplay import Camera, UpBar, Hourglass, Decision, Build_Menu, BuildItem, Timer, SideMenu 
 from gameplay import build
 from menu import Menu, LoadMenu
 import zipfile,os
 
+=======
+from gameplay import Camera, UpBar, Hourglass, Decision, Build_Menu, BuildItem, Timer, SideMenu ,Stats
+from menu import Menu ,LoadMenu,SaveMenu
+>>>>>>> Stashed changes
 import pygame
-import sys
+import sys,os
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 
+folder_path = "save"
+if not os.path.exists(folder_path):
+    os.makedirs(folder_path)
+
+pygame.init()
 
 class Game:
     def __init__(self):
         pygame.init()
+<<<<<<< Updated upstream
         self.status = False
         self.clock = pygame.time.Clock()
         self.res = (SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -34,13 +46,36 @@ class Game:
             BuildItem(self.bm.item_menu_surf, 50, 'wieza', 'Wieża strażniczą (+10 wojska na turę)', 10, 0),
             BuildItem(self.bm.item_menu_surf, 50, 'tartak', 'Farma (+ 10 złota na ture)', 0, 10)]
 
+=======
+        self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
+        self.camera = Camera()
+        self.map = Map(self.start_menu.MAP_SIZE, self.start_menu.MAP_SIZE, screen, self.camera)
+        self.map.texture()
+        self.map.generate()
+        self.up_bar = UpBar(screen)
+        self.klepsydra1 = Hourglass(screen)
+        self.dec = Decision(screen)
+        self.bm = Build_Menu(screen)
+        self.timer = Timer(res, screen, screen,self)
+        self.sd = SideMenu(screen)
+
+        self.allItem = [   # Budynki
+            BuildItem(self.bm.item_menu_surf, 50, 'wieza', 'Wieża strażniczą (+10 wojska na turę)', 10, 0),
+            BuildItem(self.bm.item_menu_surf, 50, 'tartak', 'Farma (+ 10 złota na ture)', 0, 10)]
+
+        self.loadmenu = LoadMenu(screen,self)
+        self.savemenu = SaveMenu(screen,self)
+>>>>>>> Stashed changes
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
         press = pygame.key.get_pressed()
 
+        if press[pygame.K_ESCAPE]:
+            Menu.status = True
         if press[pygame.K_b]:
+<<<<<<< Updated upstream
             Build_Menu.build_stauts = True
             pygame.time.Clock().tick(3)
         if press[pygame.K_s]:
@@ -57,6 +92,13 @@ class Game:
     def save_game(self):
         import gameplay
         print('SaveGame')
+=======
+            self.bm.build_stauts = True
+        if press[pygame.K_s]:
+            self.save_game()
+
+
+>>>>>>> Stashed changes
 
         folder_path = "save"
         if not os.path.exists(folder_path):
@@ -135,6 +177,7 @@ class Game:
     def run(self):
         
         while True:
+<<<<<<< Updated upstream
             while self.startmenu.status:
                 choose = self.startmenu.run()
                 
@@ -182,8 +225,86 @@ class Game:
                 pygame.display.flip()
 
                 self.clock.tick(self.max_tps)
+=======
+            while Menu.status:
+                self.start_menu.run()
+            while LoadMenu.status:
+                self.loadmenu.draw()
+                self.loadmenu.update()
+            while SaveMenu.status:
+                self.savemenu.draw()
+                self.savemenu.update()
+
+
+            screen.fill((255, 255, 255))
+            self.handle_events()
+            self.camera.mouse()
+            self.camera.keybord()
+            self.map.draw()
+            self.map.zajmij_pole()
+            self.map.colision_detection_obwodka()
+            self.map.rysuj_obwodke_i_zajete()
+            self.up_bar.score()
+            
+            self.sd.draw()
+            self.sd.button()
+            if self.bm.build_stauts:
+                self.bm.draw()
+                for item in self.allItem:
+                    item.draw()
+                    item.buy()
+            if not self.bm.build_stauts:
+                self.dec.click()
+
+            self.klepsydra1.draw()
+            if Stats.wyb == False:
+                self.klepsydra1.turn()
+            if Stats.wyb:
+                self.dec.draw()
+            self.timer.update()
+            pygame.display.flip()
+
+            clock.tick(max_tps)
+>>>>>>> Stashed changes
+
+    def save_game(self):
+        print('SaveGame')
+
+<<<<<<< Updated upstream
+if __name__ == '__main__':
+=======
+        folder_path = "save"
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        print('saved 105 main.py')
+
+        with open('save/map.csv','w') as savefile:
+            savefile.write('x;y;number;texture_index;verticles\n')
+            for h in self.map.sprites():
+                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};')
+                savefile.write('\n')
+        with open('save/stats.txt','w') as savefile:
+
+            savefile.write(f'gold_count:{Stats.gold_count}\n')
+            savefile.write(f'army_count:{Stats.army_count}\n')
+            savefile.write(f'terrain_count:{Stats.terrain_count}\n')
+            savefile.write(f'army_count_bonus:{Stats.army_count_bonus}\n')
+            savefile.write(f'gold_count_bonus:{Stats.gold_count_bonus}\n')
+            savefile.write(f'turn_count:{Stats.turn_count}\n')
+        pygame.time.Clock().tick(1)
+        with zipfile.ZipFile("save/QSave.zip", "w") as zip:
+            zip.write("save/stats.txt")
+            zip.write("save/map.csv")
+        os.remove("save/stats.txt")
+        os.remove("save/map.csv")
+        pass
+
+# wykonywanie
+
 
 
 if __name__ == '__main__':
+    
+>>>>>>> Stashed changes
     game = Game()
     game.run()

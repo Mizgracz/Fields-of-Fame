@@ -1,20 +1,30 @@
 import zipfile
 import pygame
+<<<<<<< Updated upstream
 import time,os,sys
+=======
+import time,os
+>>>>>>> Stashed changes
 
-build_stauts = True
-build = True
-gold_count = 0
-army_count = 0
-terrain_count = 1
-turn_count = 1
-wyb = False
 camera_stop = False
 item_offset = pygame.Vector2(0, 115)
-player_hex_status = False
-army_count_bonus = 0
-gold_count_bonus = 0
 
+
+class Stats:
+    
+    gold_count = 0
+    army_count = 0
+    terrain_count = 1
+    turn_count = 1
+    wyb = False
+    camera_stop = False
+    item_offset = pygame.Vector2(0, 115)
+    player_hex_status = False
+    army_count_bonus = 0
+    gold_count_bonus = 0
+    
+    def __init__(self) -> None:
+        pass
 
 class Camera:
 
@@ -95,22 +105,22 @@ class UpBar:
         # money
         money = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
         self.up_bar_surface.blit(bar_gold, (10, 2))
-        money_score = money.render("Ilość Złota: " + str(gold_count), True, "white")
+        money_score = money.render("Ilość Złota: " + str(Stats.gold_count), True, "white")
         self.up_bar_surface.blit(money_score, (20, 2))
 
         # wojsko
         army = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
         self.up_bar_surface.blit(bar_army, (200, 2))
-        army_score = army.render("Ilość Wojska: " + str(army_count), True, "white")
+        army_score = army.render("Ilość Wojska: " + str(Stats.army_count), True, "white")
         self.up_bar_surface.blit(army_score, (210, 2))
         # pola
         tiles = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
         self.up_bar_surface.blit(bar_field, (390, 2))
-        tiles_score = tiles.render("Ilość Posiadanych Pól: " + str(terrain_count), True, "white")
+        tiles_score = tiles.render("Ilość Posiadanych Pól: " + str(Stats.terrain_count), True, "white")
         self.up_bar_surface.blit(tiles_score, (400, 2))
 
         turn = pygame.font.SysFont(self.FONT_NAME, self.FONT_SIZE)
-        turn_score = turn.render("Tura: " + str(turn_count), True, "white")
+        turn_score = turn.render("Tura: " + str(Stats.turn_count), True, "white")
         self.up_bar_surface.blit(turn_score, (1100, 4))
 
         # Wyświetlenie powierzchni górnej belki na ekranie
@@ -172,6 +182,9 @@ class Timer:
         hours = int(elapsed_time // 3600)
         minutes = int((elapsed_time % 3600) // 60)
         seconds = int(elapsed_time % 60)
+        if minutes%1==0 and not minutes == 0 and seconds ==0:
+            self.autosave_game()
+
 
         if minutes%10==0 and not minutes == 0:
 
@@ -190,7 +203,38 @@ class Timer:
         self.screen.blit(self.mainSurface, (0, 0))
         # Update the display
         pygame.display.update()
+    def autosave_game(self):
+        import gameplay
+        print('SaveGame')
 
+        folder_path = "save"
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+            print(f"Folder {folder_path} został utworzony.")
+        else:
+            print(f"Folder {folder_path} już istnieje.")
+
+        with open('save/map.csv','w') as savefile:
+            savefile.write('x;y;number;texture_index;verticles\n')
+            for h in self.game.map.sprites():
+                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.verticles}')
+                savefile.write('\n')
+        with open('save/stats.txt','w') as savefile:
+            
+            savefile.write(f'gold_count:{Stats.gold_count}\n')
+            savefile.write(f'army_count:{Stats.army_count}\n')
+            savefile.write(f'player_hex_status:{Stats.player_hex_status}\n')
+            savefile.write(f'army_count_bonus:{Stats.army_count_bonus}\n')
+            savefile.write(f'gold_count_bonus:{Stats.gold_count_bonus}\n')
+            savefile.write(f'turn_count:{Stats.turn_count}\n')
+            
+        pygame.time.Clock().tick(1)
+        with zipfile.ZipFile("save/AutoSave.zip", "w") as zip:
+            zip.write("save/stats.txt")
+            zip.write("save/map.csv")
+        os.remove("save/stats.txt")
+        os.remove("save/map.csv")
+        pass
 
 class Hourglass:
 
@@ -204,13 +248,12 @@ class Hourglass:
         self.screen.blit(self.hourglass_surface, self.hourglass_rect)
 
     def turn(self):
-        global wyb
-        global turn_count
         colision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
-        if self.hourglass_rect.collidepoint(colision) and mouse_pressed[0] and wyb is False:
-            turn_count += 1
-            wyb = True
+        if self.hourglass_rect.collidepoint(colision) and mouse_pressed[0]:
+            if Stats.wyb == False:    
+                Stats.wyb = True
+                Stats.turn_count += 1
 
 
 class Decision:
@@ -229,7 +272,7 @@ class Decision:
 
     def draw(self):
         global camera_stop
-        if wyb:
+        if Stats.wyb:
             camera_stop = True
             self.screen.blit(self.background_image, self.bacground_rect)
             self.screen.blit(self.gold_button, self.gold_rect)
@@ -237,28 +280,35 @@ class Decision:
             self.screen.blit(self.field_button, self.field_rect)
 
     def click(self):
-        global gold_count
-        global wyb
-        global army_count
         global camera_stop
-        global player_hex_status
+        
 
         colision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
-        if self.gold_rect.collidepoint(colision) and mouse_pressed[0] and wyb:
-            wyb = False
+        if self.gold_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
+            Stats.wyb = False
             camera_stop = False
-            gold_count += 10 + gold_count_bonus
+            Stats.gold_count += 10 + Stats.gold_count_bonus
 
-        if self.army_rect.collidepoint(colision) and mouse_pressed[0] and wyb:
-            wyb = False
+        if self.army_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
+            Stats.wyb = False
             camera_stop = False
-            army_count += 10 + army_count_bonus
+            Stats.army_count += 10 + Stats.army_count_bonus
 
+<<<<<<< Updated upstream
         if self.field_rect.collidepoint(colision) and mouse_pressed[0] and wyb:
             wyb = False
             camera_stop = False
             player_hex_status = True
+=======
+
+
+        if self.field_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
+            Stats.wyb = False
+            camera_stop = False
+            Stats.player_hex_status = True
+            pygame.time.Clock().tick(3)
+>>>>>>> Stashed changes
 
 
 class SideMenu:
@@ -322,7 +372,10 @@ class Build_Menu:
             mouse_pressed = pygame.mouse.get_pressed()
             if exit_button_rect.collidepoint(colision) and mouse_pressed[0]:
                 Build_Menu.build_stauts = False
+<<<<<<< Updated upstream
             
+=======
+>>>>>>> Stashed changes
 
 
 class BuildItem:
