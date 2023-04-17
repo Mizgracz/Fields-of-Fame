@@ -126,16 +126,20 @@ class Map(pygame.sprite.Group):
             if self.camerax != self.camera.camera_x:
                 for ca in range(self.num_hex_y * self.num_hex_x):
                     if self.camerax < self.camera.camera_x:
-                        self.allrect['hex', ca].x += 5
+                        div = self.camera.camera_x - self.camerax
+                        self.allrect['hex', ca].x += div
                     else:
-                        self.allrect['hex', ca].x -= 5
+                        div = self.camerax - self.camera.camera_x
+                        self.allrect['hex', ca].x -= div
 
             if self.cameray != self.camera.camera_y:
                 for co in range(self.num_hex_y * self.num_hex_x):
                     if self.cameray < self.camera.camera_y:
-                        self.allrect['hex', co].y += 5
+                        div = self.camera.camera_y - self.cameray
+                        self.allrect['hex', co].y += div
                     else:
-                        self.allrect['hex', co].y -= 5
+                        div = self.cameray - self.camera.camera_y
+                        self.allrect['hex', co].y -= div
 
             self.camerax = self.camera.camera_x
             self.cameray = self.camera.camera_y

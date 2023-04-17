@@ -6,6 +6,7 @@ SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 MAP_SIZE = 30
 
+
 class Menu:
     def __init__(self, screen, clock, max_tps):
         pygame.init()
@@ -33,8 +34,6 @@ class Menu:
 
             pygame.display.update()
 
-
-
             if choose == 'new_game':
 
                 self.config1.Active = True
@@ -47,9 +46,7 @@ class Menu:
 
 
             elif choose == 'quit':
-                 sys.exit(0)
-
-
+                sys.exit(0)
 
     def handle_events(self):
         self.event = pygame.event.get()
@@ -61,7 +58,7 @@ class Menu:
 
             elif event.type == pygame.MOUSEBUTTONUP:
 
-                if self.config1.Button_Start_Rect.collidepoint(pos):
+                if self.config1.Button_Start_Rect.collidepoint(pos) and self.config1.Active == True:
                     self.gameplay = True
                     self.config1.Active = False
                     self.status = False
@@ -85,9 +82,6 @@ class Menu:
                     self.status = False
                     return 'quit'
 
-
-
-
     def draw(self):
         self.screen.blit(self.background_texture, (0, 0))
         self.screen.blit(self.load_button_texture, (SCREEN_WIDTH / 2 - 150, 360))
@@ -100,15 +94,12 @@ class Menu:
         quit_texture = self.quit_button_texture
         self.screen.blit(quit_texture, self.quit_button)
 
-
-
     def run(self):
         choice = self.handle_events()
         if choice:
             return choice
         self.draw()
         self.clock.tick(self.max_tps)
-
 
 
 class OptionBox():
@@ -124,8 +115,6 @@ class OptionBox():
         self.menu_active = False
         self.active_option = -1
 
-
-
     def draw(self, surf):
         pygame.draw.rect(surf, self.highlight_color if self.menu_active else self.color, self.rect)
         pygame.draw.rect(surf, (0, 0, 0), self.rect, 2)
@@ -140,7 +129,7 @@ class OptionBox():
                 msg = self.font.render(text, 1, (0, 0, 0))
                 surf.blit(msg, msg.get_rect(center=rect.center))
             outer_rect = (
-            self.rect.x, self.rect.y + self.rect.height, self.rect.width, self.rect.height * len(self.option_list))
+                self.rect.x, self.rect.y + self.rect.height, self.rect.width, self.rect.height * len(self.option_list))
             pygame.draw.rect(surf, (0, 0, 0), outer_rect, 2)
 
     def update(self, event_list):
@@ -169,7 +158,6 @@ class OptionBox():
         return -1
 
 
-
 class Config:
     def __init__(self, s1):
         self.screen = s1
@@ -177,7 +165,7 @@ class Config:
         self.Button_Start = pygame.image.load("texture/main_menu/config/Button_Start.png")
         self.Background = pygame.image.load("texture/main_menu/config/Background.png")
         self.Button_Back_Rect = self.Button_Back.get_rect(center=(80, 40))
-        self.Button_Start_Rect = self.Button_Start.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT-80))
+        self.Button_Start_Rect = self.Button_Start.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 80))
         self.Active = False
         self.font = pygame.font.Font(None, 36)
         self.text_map_size = self.font.render("Wielkość mapy : ", True, (255, 255, 255))
@@ -185,9 +173,7 @@ class Config:
             300, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30),
             ["Mała (30x30)", "Średnia (50x50)", "Duża (60x60)"])
 
-
-
-    def draw(self,event):
+    def draw(self, event):
         self.screen.blit(self.Background, (0, 0))
         self.screen.blit(self.Button_Back, self.Button_Back_Rect)
         self.screen.blit(self.Button_Start, self.Button_Start_Rect)
@@ -196,9 +182,7 @@ class Config:
         self.event_list = event
         self.Size()
 
-
         pygame.display.update()
-
 
     def Size(self):
         global MAP_SIZE
