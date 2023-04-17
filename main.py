@@ -15,7 +15,7 @@ max_tps = 60.0
 
 
 
-# class game
+
 class Game:
     def __init__(self):
         pygame.init()

@@ -24,13 +24,18 @@ class Surowiec(Hex):
     def __init__(self, x, y, tex, num, group, obw, zaj):
         super().__init__(x, y, tex, num, group, obw, zaj)
         self.texx = tex
-        self.rodzaj = "Surowiec"
-
-    def przypisz_surowiec(self,tex):
-        if self.texture == tex:
-            self.rodzaj = ""
-
+        self.rodzaj = "surowiec"
+        self.rodzaj_surowca_var = ""
+    def rodzaj_surowca(self, tex):
+        self.rodzaj_surowca_var = tex
         pass
+    def sprzedaj(self, list):
+        self.surowce_lista = list
+        for k in range(len(self.surowce_lista)):
+            if self.rodzaj_surowca_var == self.surowce_lista[k][1]:
+                gameplay.gold_count += self.surowce_lista[k][2]
+
+
 
 
 class Map(pygame.sprite.Group):
@@ -95,6 +100,8 @@ class Map(pygame.sprite.Group):
         self.camerax = self.camera.camera_x
         self.cameray = self.camera.camera_y
 
+        self.surowce_lista = [(self.clay, "clay", 10), (self.mine_diamonds, "mine_diamonds", 200), (self.mine_rocks, "mine_rocks", 60), (self.mine_iron, "mine_iron", 80), (self.mine_gold, "mine_gold", 140), (self.fish_port, "fish_port", 20), (self.sawmill,"sawmill", 40), (self.grain, "grain", 10)]
+
     def texture(self):
 
         for i in range(self.num_hex_y * self.num_hex_x):
@@ -103,6 +110,16 @@ class Map(pygame.sprite.Group):
 
             else:
                 self.alltex['hex', i] = random.choices(*zip(*self.elements), k=1)[0]
+
+    def czy_to_surowiec(self,licz2):
+        for k in range(len(self.surowce_lista)):
+            if self.alltex["hex", licz2] == self.surowce_lista[k][0]:
+                return True
+    def zwroc_liste(self,licz2):
+        for k in range(len(self.surowce_lista)):
+            if self.alltex["hex", licz2] == self.surowce_lista[k][0]:
+                return self.surowce_lista[k][1]
+
 
     def generate(self):
         licz = 0
@@ -113,8 +130,12 @@ class Map(pygame.sprite.Group):
             x = -1640
             y = j * 152
             for i in range(self.num_hex_x):
+                if self.czy_to_surowiec(licz):
+                    buff = self.zwroc_liste(licz)
+                    self.allhex["hex", licz] = Surowiec((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz], licz, self, False, False)
+                    self.allhex["hex", licz].rodzaj_surowca(buff)
 
-                if self.alltex["hex", licz] == self.castle_surface or self.alltex["hex", licz] == self.willage_surface:
+                elif self.alltex["hex", licz] == self.castle_surface or self.alltex["hex", licz] == self.willage_surface:
                     self.allhex["hex", licz] = Budynek((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz], licz, self, False, False)
                 else:
                     self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz], licz, self, False, False)
@@ -181,6 +202,7 @@ class Map(pygame.sprite.Group):
 
                     self.allhex["hex", c].obwodka = True
 
+
                 else:
                     
                     self.allhex["hex", c].obwodka = False
@@ -203,7 +225,11 @@ class Map(pygame.sprite.Group):
                     touching = self.allrect['hex', i].collidepoint(*pos1) and self.allmask['hex', i].get_at(pos_in_mask1)
 
                     if touching:
+                        if self.allhex["hex", i].rodzaj == "surowiec":
+                            print(self.allhex["hex", i].rodzaj_surowca_var)
+                            self.allhex["hex", i].sprzedaj(self.surowce_lista)
                         if self.allhex["hex", i].rodzaj == "budynek":
+                            print("budynek")
                             # dodawanie bonusu do zarabiania
                             if self.allhex["hex", i].texture == self.castle_surface:
                                 gameplay.army_count_bonus += 10
@@ -213,3 +239,5 @@ class Map(pygame.sprite.Group):
                         print(f"klikniecie{i}")
                         gameplay.player_hex_status = False
                         gameplay.terrain_count += 1
+
+
