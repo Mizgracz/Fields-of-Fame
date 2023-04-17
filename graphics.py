@@ -1,12 +1,8 @@
-
-
 import pygame
 import random
 import gameplay
 
-
 class Hex(pygame.sprite.Sprite):
-
     def __init__(self, x, y, tex, num, group, obw, zaj):
         super().__init__(group)
         self.szerokosc = 130
@@ -64,9 +60,9 @@ class Map(pygame.sprite.Group):
         self.elements = [(self.grass_surface, 20), (self.grass2_surface, 20), (self.grass3_surface, 20),
                          (self.forest_surface, 15), (self.mountain_surface, 4), (self.water_surface, 3),
                          (self.water2_surface, 1), (self.water3_surface, 1), (self.cereal_surface, 1),
-                         (self.willage_surface, 0.5), (self.mountain_pass_surface, 2), (self.mountain2_surface, 4),
+                         (self.willage_surface, 0.7), (self.mountain_pass_surface, 2), (self.mountain2_surface, 4),
                          (self.forest_full_surface, 0), (self.forest3_surface, 8), (self.forest4_surface, 8),
-                         (self.castle_surface, 0.5)]
+                         (self.castle_surface, 0.7)]
 
         self.num_hex_x = numx
         self.num_hex_y = numy
@@ -173,6 +169,10 @@ class Map(pygame.sprite.Group):
                 print("Wystąpił błąd :", e)
 
     def zajmij_pole(self):
+
+        global army_count_bonus
+        global gold_count_bonus
+
         if gameplay.player_hex_status:
             mouse_presses = pygame.mouse.get_pressed()
 
@@ -184,7 +184,11 @@ class Map(pygame.sprite.Group):
 
                     if touching:
                         if self.allhex["hex", i].rodzaj == "budynek":
-                            print("budyneczek")
+                            # dodawanie bonusu do zarabiania
+                            if self.allhex["hex", i].texture == self.castle_surface:
+                                gameplay.army_count_bonus += 10
+                            elif self.allhex["hex", i].texture == self.willage_surface:
+                                gameplay.gold_count_bonus += 10
                         self.allhex["hex", i].zajete = True
                         print(f"klikniecie{i}")
                         gameplay.player_hex_status = False
