@@ -17,6 +17,14 @@ class Hex(pygame.sprite.Sprite):
         self.number = num
         self.obwodka = obw
         self.zajete = zaj
+        self.rodzaj = "hex"
+
+class Budynek(Hex):
+    def __init__(self, x, y, tex, num, group, obw, zaj):
+        super().__init__(x, y, tex, num, group, obw, zaj)
+        self.rodzaj = "budynek"
+
+
 
 
 class Map(pygame.sprite.Group):
@@ -35,10 +43,12 @@ class Map(pygame.sprite.Group):
         self.grass_surface = pygame.image.load("texture/hex/hex_trawa.png", ).convert_alpha()
         self.grass2_surface = pygame.image.load("texture/hex/trawa_hex_2.png", ).convert_alpha()
         self.grass3_surface = pygame.image.load("texture/hex/trawa_hex_3.png").convert_alpha()
-        self.dirt_surface = pygame.image.load("texture/hex/budynki.png").convert_alpha()
-        self.cereal_surface = pygame.image.load("texture/hex/zboze_hex.png").convert_alpha()
-        self.castle_surface = pygame.image.load("texture/hex/zamek.png", ).convert_alpha()
 
+        # BUDYNKI
+        self.willage_surface = pygame.image.load("texture/hex/budynki.png").convert_alpha()
+        self.castle_surface = pygame.image.load("texture/hex/zamek.png", ).convert_alpha()
+        # ------
+        self.cereal_surface = pygame.image.load("texture/hex/zboze_hex.png").convert_alpha()
         self.forest_surface = pygame.image.load("texture/hex/las_hex.png", ).convert_alpha()
         self.forest_full_surface = pygame.image.load("texture/hex/las_hex_pelny.png", ).convert_alpha()
         self.forest3_surface = pygame.image.load("texture/hex/las_hex_3_drzewka.png", ).convert_alpha()
@@ -54,8 +64,9 @@ class Map(pygame.sprite.Group):
         self.elements = [(self.grass_surface, 20), (self.grass2_surface, 20), (self.grass3_surface, 20),
                          (self.forest_surface, 15), (self.mountain_surface, 4), (self.water_surface, 3),
                          (self.water2_surface, 1), (self.water3_surface, 1), (self.cereal_surface, 1),
-                         (self.dirt_surface, 0.5), (self.mountain_pass_surface, 2), (self.mountain2_surface, 4),
-                         (self.forest_full_surface, 0), (self.forest3_surface, 8), (self.forest4_surface, 8)]
+                         (self.willage_surface, 0.5), (self.mountain_pass_surface, 2), (self.mountain2_surface, 4),
+                         (self.forest_full_surface, 0), (self.forest3_surface, 8), (self.forest4_surface, 8),
+                         (self.castle_surface, 0.5)]
 
         self.num_hex_x = numx
         self.num_hex_y = numy
@@ -87,8 +98,10 @@ class Map(pygame.sprite.Group):
             y = j * 152
             for i in range(self.num_hex_x):
 
-                self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz],
-                                               licz, self, False, False)
+                if self.alltex["hex", licz] == self.castle_surface or self.alltex["hex", licz] == self.willage_surface:
+                    self.allhex["hex", licz] = Budynek((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz], licz, self, False, False)
+                else:
+                    self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz], licz, self, False, False)
 
                 self.allrect['hex', licz] = self.alltex["hex", licz].get_rect(midleft=(self.allhex["hex", licz].polozenie_hex_x, self.allhex["hex", licz].polozenie_hex_y + 75))
                 self.allmask['hex', licz] = pygame.mask.from_surface(self.alltex["hex", licz])
@@ -170,6 +183,8 @@ class Map(pygame.sprite.Group):
                     touching = self.allrect['hex', i].collidepoint(*pos1) and self.allmask['hex', i].get_at(pos_in_mask1)
 
                     if touching:
+                        if self.allhex["hex", i].rodzaj == "budynek":
+                            print("budyneczek")
                         self.allhex["hex", i].zajete = True
                         print(f"klikniecie{i}")
                         gameplay.player_hex_status = False
