@@ -1,10 +1,6 @@
 import zipfile
 import pygame
-<<<<<<< Updated upstream
-import time,os,sys
-=======
 import time,os
->>>>>>> Stashed changes
 
 camera_stop = False
 item_offset = pygame.Vector2(0, 115)
@@ -137,44 +133,7 @@ class Timer:
         self.FONT_NAME = 'timesnewroman'
         self.font_timer = pygame.font.SysFont(self.FONT_NAME, self.FONT_SIZE)
         self.start_time = time.time()
-    def autosave_game(self):
-        import gameplay
-        print('SaveGame')
 
-        folder_path = "save"
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-            print(f"Folder {folder_path} został utworzony.")
-        else:
-            print(f"Folder {folder_path} już istnieje.")
-
-        with open('save/map.csv','w') as savefile:
-            savefile.write('x;y;number;texture_index;verticles\n')
-            for h in self.game.map.sprites():
-                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.verticles}')
-                savefile.write('\n')
-        with open('save/stats.txt','w') as savefile:
-            
-            
-            
-            savefile.write(f'build_stauts:{gameplay.build_stauts}\n')
-            savefile.write(f'build:{gameplay.build}\n')
-            savefile.write(f'gold_count:{gameplay.gold_count}\n')
-            savefile.write(f'army_count:{gameplay.army_count}\n')
-            savefile.write(f'terrain_count:{gameplay.terrain_count}\n')
-            savefile.write(f'wyb:{gameplay.wyb}\n')
-            savefile.write(f'player_hex_status:{gameplay.player_hex_status}\n')
-            savefile.write(f'army_count_bonus:{gameplay.army_count_bonus}\n')
-            savefile.write(f'gold_count_bonus:{gameplay.gold_count_bonus}\n')
-            savefile.write(f'turn_count:{gameplay.turn_count}\n')
-        pygame.time.Clock().tick(1)
-        with zipfile.ZipFile("save/QSave.zip", "w") as zip:
-            zip.write("save/stats.txt")
-            zip.write("save/map.csv")
-        os.remove("save/stats.txt")
-        os.remove("save/map.csv")
-        pass
-    
     def update(self):
         # Update the timer
         current_time = time.time()
@@ -185,10 +144,6 @@ class Timer:
         if minutes%1==0 and not minutes == 0 and seconds ==0:
             self.autosave_game()
 
-
-        if minutes%10==0 and not minutes == 0:
-
-            self.autosave_game()
 
         # Draw the timer box
         timer_box = pygame.Rect(self.res[0] - 90, self.res[1] - 720, 90, 30)
@@ -295,12 +250,6 @@ class Decision:
             camera_stop = False
             Stats.army_count += 10 + Stats.army_count_bonus
 
-<<<<<<< Updated upstream
-        if self.field_rect.collidepoint(colision) and mouse_pressed[0] and wyb:
-            wyb = False
-            camera_stop = False
-            player_hex_status = True
-=======
 
 
         if self.field_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
@@ -308,7 +257,6 @@ class Decision:
             camera_stop = False
             Stats.player_hex_status = True
             pygame.time.Clock().tick(3)
->>>>>>> Stashed changes
 
 
 class SideMenu:
@@ -372,10 +320,6 @@ class Build_Menu:
             mouse_pressed = pygame.mouse.get_pressed()
             if exit_button_rect.collidepoint(colision) and mouse_pressed[0]:
                 Build_Menu.build_stauts = False
-<<<<<<< Updated upstream
-            
-=======
->>>>>>> Stashed changes
 
 
 class BuildItem:
@@ -446,5 +390,6 @@ class BuildItem:
                 gold_count -= self.koszt
                 army_count_bonus += self.army_bonus
                 gold_count_bonus += self.gold_bonus
+                print(f'{self.menu.get_size()}')
             pygame.time.Clock().tick(5)
         pass

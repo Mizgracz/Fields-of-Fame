@@ -1,52 +1,19 @@
+
+
 import pygame
 import random
-<<<<<<< Updated upstream
-=======
 from gameplay import Stats
->>>>>>> Stashed changes
 
 
 class Hex(pygame.sprite.Sprite):
 
-<<<<<<< Updated upstream
-    def __init__(self, x, y, num, group):
-=======
     def __init__(self, x, y, tex , num, group, obw, zaj,tex_id):
->>>>>>> Stashed changes
         super().__init__(group)
-        self.group = group
         self.szerokosc = 130
         self.wysokosc = 152
         self.polozenie_hex_x = x
         self.polozenie_hex_y = y
         self.number = num
-<<<<<<< Updated upstream
-        self.texture_index =  random.choices(*zip(*group.elements), k=1)[0][1]
-        self.texture = self.texturing(group)
-        self.type = None
-        self.verticles = [
-            (self.polozenie_hex_x + self.szerokosc / 2 + group.camera.camera_x,
-             self.polozenie_hex_y + 30 + group.camera.camera_y),
-            (self.polozenie_hex_x + self.szerokosc + group.camera.camera_x,
-             self.polozenie_hex_y + self.wysokosc / 4 + 30 + group.camera.camera_y),
-            (self.polozenie_hex_x + self.szerokosc + group.camera.camera_x,
-             self.polozenie_hex_y + self.wysokosc - self.wysokosc / 4 + 30 + group.camera.camera_y),
-            (self.polozenie_hex_x + self.szerokosc / 2 + group.camera.camera_x,
-             self.polozenie_hex_y + self.wysokosc + 30 + group.camera.camera_y),
-            (self.polozenie_hex_x + group.camera.camera_x,
-             self.polozenie_hex_y + self.wysokosc - self.wysokosc / 4 + 30 + group.camera.camera_y),
-            (self.polozenie_hex_x + group.camera.camera_x,
-             self.polozenie_hex_y + self.wysokosc / 4 + 30 + group.camera.camera_y),
-        ]
-        self.verticles_texture = [
-            (self.szerokosc / 2, 0),  # v1
-            (self.szerokosc, self.wysokosc / 4),  # v2
-            (self.szerokosc, self.wysokosc - self.wysokosc / 4),  # v2
-            (self.szerokosc / 2, self.wysokosc),  # v4
-            (0, self.wysokosc - self.wysokosc / 4),  # v2
-            (0, self.wysokosc / 4),  # v2
-        ]
-=======
         self.obwodka = obw
         self.zajete = zaj
         self.group = group
@@ -87,50 +54,7 @@ class Hex(pygame.sprite.Sprite):
             return group.forest4_surface
     def update_texture(self):
         self.texture = self.texturing(self.group)
->>>>>>> Stashed changes
 
-        self.owner_color = pygame.Surface((130, 152), pygame.SRCALPHA)
-        self.owner_rect = self.owner_color.get_rect(topleft=(self.polozenie_hex_x, self.polozenie_hex_y))
-        self.owner_color.set_alpha(255 * (30 / 100))
-        if self.number == 137:
-            pygame.draw.polygon(self.owner_color, (255, 13, 16), self.verticles_texture)
-        self.texture.blit(self.owner_color, (0, 0))
-        
-    def update_texture(self):
-        self.texture = self.texturing(self.group)
-    def texturing(self,group):
-        if self.number ==137:
-            return group.castle_surface
-        if self.texture_index == 1:
-            return group.grass_surface
-        elif self.texture_index == 2:
-            return group.grass2_surface
-        elif self.texture_index == 3:
-            return group.grass3_surface
-        elif self.texture_index == 4:
-            return group.forest_surface
-        elif self.texture_index == 5:
-            return group.mountain_surface
-        elif self.texture_index == 6:
-            return group.water_surface
-        elif self.texture_index == 7:
-            return group.water2_surface
-        elif self.texture_index == 8:
-            return group.water3_surface
-        elif self.texture_index == 9:
-            return group.cereal_surface
-        elif self.texture_index == 10:
-            return group.dirt_surface
-        elif self.texture_index == 11:
-            return group.mountain_pass_surface
-        elif self.texture_index == 12:
-            return group.mountain2_surface
-        elif self.texture_index == 13:
-            return group.forest_full_surface
-        elif self.texture_index == 14:
-            return group.forest3_surface
-        elif self.texture_index == 15:
-            return group.forest4_surface
 class Map(pygame.sprite.Group):
 
     def __init__(self, numx, numy, screen, camera):
@@ -138,6 +62,11 @@ class Map(pygame.sprite.Group):
 
         self.colision_surface = pygame.Surface(pygame.display.get_window_size(), pygame.SRCALPHA)
         self.colision_rect = self.colision_surface.get_rect()
+
+        self.hex_obwodka_surface = pygame.image.load("texture/hex/hex_obwodka.png").convert_alpha()
+
+        self.hex_zajete_surface = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
+        self.hex_zajete_surface.set_alpha(100)
 
         self.grass_surface = pygame.image.load("texture/hex/hex_trawa.png", ).convert_alpha()
         self.grass2_surface = pygame.image.load("texture/hex/trawa_hex_2.png", ).convert_alpha()
@@ -168,12 +97,8 @@ class Map(pygame.sprite.Group):
         self.num_hex_y = numy
         self.allhex = {}
         self.alltex = {}
-
         self.screen = screen
         self.camera = camera
-<<<<<<< Updated upstream
-
-=======
         self.allmask = {}
         self.allrect = {}
         self.camerax = self.camera.camera_x
@@ -188,28 +113,26 @@ class Map(pygame.sprite.Group):
             else:
                 self.tex_id += [random.choices(*zip(*self.elements), k=1)[0][1]]
                 self.alltex['hex', i] = random.choices(*zip(*self.elements), k=1)[0]
->>>>>>> Stashed changes
 
     def generate(self):
         licz = 0
         przesuniecie_x = 0
         przesuniecie_y = 0
-
+        self.texture()
         for j in range(self.num_hex_y):  # tworzenie hexów (jako nowy obiekt) nadawanie im położenia
             x = -1640
             y = j * 152
             for i in range(self.num_hex_x):
-<<<<<<< Updated upstream
-                self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), licz, self)
-=======
                 
                 self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz],licz, self, False, False,self.tex_id[licz])
 
                 self.allrect['hex', licz] = self.allhex["hex", licz].texture.get_rect(midleft=(self.allhex["hex", licz].polozenie_hex_x, self.allhex["hex", licz].polozenie_hex_y + 75))
                 self.allmask['hex', licz] = pygame.mask.from_surface(self.allhex["hex", licz].texture)
->>>>>>> Stashed changes
 
                 x += self.allhex["hex", licz].szerokosc
+
+                if licz == 137:
+                    self.allhex["hex", licz].zajete = True
                 licz += 1
 
             if j % 2 != 0:
@@ -219,12 +142,7 @@ class Map(pygame.sprite.Group):
             przesuniecie_y += -40
 
     def draw(self):  # wyświetlanie mapy na ekranie
-
         for h in self.sprites():
-<<<<<<< Updated upstream
-            self.screen.blit(h.texture,
-                             (h.polozenie_hex_x + self.camera.camera_x, h.polozenie_hex_y + self.camera.camera_y))
-=======
             self.screen.blit(h.texture, (h.polozenie_hex_x + self.camera.camera_x, h.polozenie_hex_y + 
                                          self.camera.camera_y))
 
@@ -292,4 +210,3 @@ class Map(pygame.sprite.Group):
                         print(f"klikniecie{i}")
                         Stats.player_hex_status = False
                         Stats.terrain_count += 1
->>>>>>> Stashed changes
