@@ -52,7 +52,7 @@ class Game:
         while True:
             screen.fill((255, 255, 255))
             self.handle_events()
-            # self.camera.mouse()
+            self.camera.mouse()
             self.camera.keybord()
             self.map.draw()
             self.map.zajmij_pole()
