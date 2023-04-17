@@ -20,7 +20,17 @@ class Budynek(Hex):
         super().__init__(x, y, tex, num, group, obw, zaj)
         self.rodzaj = "budynek"
 
+class Surowiec(Hex):
+    def __init__(self, x, y, tex, num, group, obw, zaj):
+        super().__init__(x, y, tex, num, group, obw, zaj)
+        self.texx = tex
+        self.rodzaj = "Surowiec"
 
+    def przypisz_surowiec(self,tex):
+        if self.texture == tex:
+            self.rodzaj = ""
+
+        pass
 
 
 class Map(pygame.sprite.Group):
@@ -31,25 +41,34 @@ class Map(pygame.sprite.Group):
         self.colision_surface = pygame.Surface(pygame.display.get_window_size(), pygame.SRCALPHA)
         self.colision_rect = self.colision_surface.get_rect()
 
+        # obwodka, zajety hex i alpha
         self.hex_obwodka_surface = pygame.image.load("texture/hex/hex_obwodka.png").convert_alpha()
-
         self.hex_zajete_surface = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
         self.hex_zajete_surface.set_alpha(100)
-
-        self.grass_surface = pygame.image.load("texture/hex/hex_trawa.png", ).convert_alpha()
-        self.grass2_surface = pygame.image.load("texture/hex/trawa_hex_2.png", ).convert_alpha()
-        self.grass3_surface = pygame.image.load("texture/hex/trawa_hex_3.png").convert_alpha()
 
         # BUDYNKI
         self.willage_surface = pygame.image.load("texture/hex/budynki.png").convert_alpha()
         self.castle_surface = pygame.image.load("texture/hex/zamek.png", ).convert_alpha()
-        # ------
+
+        # SUROWCE
+        self.clay = pygame.image.load("texture/surowce/hex_glina_surowiec.png").convert_alpha()
+        self.mine_diamonds = pygame.image.load("texture/surowce/hex_kopalnia_diax.png").convert_alpha()
+        self.mine_rocks = pygame.image.load("texture/surowce/hex_kopalnia_kamien.png").convert_alpha()
+        self.mine_iron = pygame.image.load("texture/surowce/hex_kopalnia_zelazo.png").convert_alpha()
+        self.mine_gold = pygame.image.load("texture/surowce/hex_kopalnia_kamien.png").convert_alpha()
+        self.fish_port = pygame.image.load("texture/surowce/hex_port_surowiec.png").convert_alpha()
+        self.sawmill = pygame.image.load("texture/surowce/hex_tartak_surowiec.png").convert_alpha()
+        self.grain = pygame.image.load("texture/surowce/hex_zboze_surowiec_trawa.png").convert_alpha()
+
+        # zwykle hexy
+        self.grass_surface = pygame.image.load("texture/hex/hex_trawa.png", ).convert_alpha()
+        self.grass2_surface = pygame.image.load("texture/hex/trawa_hex_2.png", ).convert_alpha()
+        self.grass3_surface = pygame.image.load("texture/hex/trawa_hex_3.png").convert_alpha()
         self.cereal_surface = pygame.image.load("texture/hex/zboze_hex.png").convert_alpha()
         self.forest_surface = pygame.image.load("texture/hex/las_hex.png", ).convert_alpha()
         self.forest_full_surface = pygame.image.load("texture/hex/las_hex_pelny.png", ).convert_alpha()
         self.forest3_surface = pygame.image.load("texture/hex/las_hex_3_drzewka.png", ).convert_alpha()
         self.forest4_surface = pygame.image.load("texture/hex/las_hex_4_drzewka_wystajace.png", ).convert_alpha()
-
         self.mountain_surface = pygame.image.load("texture/hex/gory_hex.png", ).convert_alpha()
         self.mountain_pass_surface = pygame.image.load("texture/hex/gory_hex_pas.png", ).convert_alpha()
         self.mountain2_surface = pygame.image.load("texture/hex/gory_hex_bez_sniegu.png", ).convert_alpha()
@@ -62,7 +81,8 @@ class Map(pygame.sprite.Group):
                          (self.water2_surface, 1), (self.water3_surface, 1), (self.cereal_surface, 1),
                          (self.willage_surface, 0.7), (self.mountain_pass_surface, 2), (self.mountain2_surface, 4),
                          (self.forest_full_surface, 0), (self.forest3_surface, 8), (self.forest4_surface, 8),
-                         (self.castle_surface, 0.7)]
+                         (self.castle_surface, 0.7),(self.clay,0.3),(self.mine_diamonds,0.1),(self.mine_rocks,0.3),(self.mine_iron,0.3),(self.mine_gold,0.3),
+                         (self.fish_port,0.8),(self.sawmill,0.5),(self.grain,0.65)]
 
         self.num_hex_x = numx
         self.num_hex_y = numy
