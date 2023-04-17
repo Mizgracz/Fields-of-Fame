@@ -100,6 +100,7 @@ class Map(pygame.sprite.Group):
         self.camerax = self.camera.camera_x
         self.cameray = self.camera.camera_y
 
+        # lista z surowcami, trzecie pole w kazdym rzedzie to "wartosc" tego pola
         self.surowce_lista = [(self.clay, "clay", 10), (self.mine_diamonds, "mine_diamonds", 200), (self.mine_rocks, "mine_rocks", 60), (self.mine_iron, "mine_iron", 80), (self.mine_gold, "mine_gold", 140), (self.fish_port, "fish_port", 20), (self.sawmill,"sawmill", 40), (self.grain, "grain", 10)]
 
     def texture(self):
