@@ -273,7 +273,7 @@ class LoadMenu(object):
     def update(self):
         self.allItem = []
         self.ILOSC_PLIKOW = len([f for f in os.listdir(self.folder_path) if os.path.isfile(os.path.join(self.folder_path, f))])
-        x = self.ILOSC_PLIKOW/4.75
+        x = self.ILOSC_PLIKOW/4.5
         if x<1:
             x=1
             pass
@@ -479,14 +479,14 @@ class SaveMenu(object):
         self.background_texture.fill('#00101f')
         ###CZYTAJ ILOŚĆ PLIKÓW PLIKI / 3
         self.folder_path = 'save/'
-        self.ILOSC_PLIKOW = len([f for f in os.listdir(self.folder_path) if os.path.isfile(os.path.join(self.folder_path, f))])
+        self.ILOSC_PLIKOW = len([f for f in os.listdir(self.folder_path) if os.path.isfile(os.path.join(self.folder_path, f))])+1
         x = self.ILOSC_PLIKOW/4.5
         if x<1:
             x=1
             pass
         self.x =x
         #### ZAOKRĄGLIĆ W GURE
-        self.window = pygame.Surface((self.WINDOW_SIZE[0],self.WINDOW_SIZE[1]*x),pygame.SRCALPHA)
+        self.window = pygame.Surface((self.WINDOW_SIZE[0],self.WINDOW_SIZE[1]*x+250),pygame.SRCALPHA)
 
         self.on_bar = False
         self.mouse_diff = 0
@@ -508,21 +508,21 @@ class SaveMenu(object):
     def update(self):
         self.allItem = []
         SaveItem.ID = 0
-        self.allItem += [SaveItem(f'NewSave{SaveItem.ID}',self.screen)]
-        self.ILOSC_PLIKOW = len([f for f in os.listdir(self.folder_path) if os.path.isfile(os.path.join(self.folder_path, f))])
-        x = self.ILOSC_PLIKOW/4.75
+        
+        self.ILOSC_PLIKOW = len([f for f in os.listdir(self.folder_path) if os.path.isfile(os.path.join(self.folder_path, f))])+1
+        x = self.ILOSC_PLIKOW/4.5
         if x<1:
             x=1
             pass
         #### ZAOKRĄGLIĆ W GURE
-        self.window = pygame.Surface((self.WINDOW_SIZE[0],self.WINDOW_SIZE[1]*x),pygame.SRCALPHA)
+        self.window = pygame.Surface((self.WINDOW_SIZE[0],self.WINDOW_SIZE[1]*x+250),pygame.SRCALPHA)
         from os import listdir
         from os.path import isfile, join
         mypath = 'save/'
         onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-        for i in range(self.ILOSC_PLIKOW):
+        for i in range(self.ILOSC_PLIKOW-1):
             self.allItem += [SaveItem(f'{onlyfiles[i]}',self.window)]
-        
+        self.allItem += [SaveItem(f'NewSave{SaveItem.ID}',self.screen)]    
     
     def handle_events(self):
         for event in pygame.event.get():
@@ -591,7 +591,11 @@ class SaveMenu(object):
             savefile.write(f'turn_count:{Stats.turn_count}\n')
             
         pygame.time.Clock().tick(1)
-        with zipfile.ZipFile(f"save/{self.allItem[index].name}.zip", "w") as zip:
+        if self.allItem[index].name[-4:]=='.zip':
+            filename =f"save/{self.allItem[index].name}"
+        else:
+            filename = f"save/{self.allItem[index].name}.zip"
+        with zipfile.ZipFile(filename, "w") as zip:
             zip.write("save/stats.txt")
             zip.write("save/map.csv")
         os.remove("save/stats.txt")
