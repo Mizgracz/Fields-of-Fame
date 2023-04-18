@@ -74,7 +74,6 @@ class Menu:
                 
                 elif self.load_rect.collidepoint(pos):
                     Menu.status = False
-                    
                     print('load')
                     return 'load_game'
                 elif self.save_rect.collidepoint(pos) and Menu.resume:
@@ -241,7 +240,7 @@ class LoadMenu(object):
         self.RECT = pygame.Rect(self.WINDOW_SIZE[0]-30,0,30,self.screen.get_size()[1]*0.25)
         self.RECT.centery = self.screen.get_size()[1]*0.25/2
 
-        self.background_texture.fill('#ffffff')
+        self.background_texture.fill('#00101f')
         ###CZYTAJ ILOŚĆ PLIKÓW PLIKI / 3
         self.folder_path = 'save/'
         self.ILOSC_PLIKOW = len([f for f in os.listdir(self.folder_path) if os.path.isfile(os.path.join(self.folder_path, f))])
@@ -334,7 +333,7 @@ class LoadMenu(object):
         from gameplay import Stats
         print('LoadGame')
         import csv,zipfile
-
+        Menu.resume = True
         with zipfile.ZipFile(f"save/{self.allItem[index].name}", "r") as zip:
             zip.extractall()
         with open(f'save/map.csv','r') as savefile:
@@ -346,9 +345,11 @@ class LoadMenu(object):
                     self.game.map.allhex["hex", i].polozenie_hex_y = int(row[1])
                     self.game.map.allhex["hex", i].number = int(row[2])
                     self.game.map.allhex["hex", i].texture_index = int(row[3])
+                    self.game.map.allhex['hex',i].zajete = True if(row[4])=='True' else False
                     self.game.map.allhex['hex',i].update_texture()
+                    
                 i+=1
-            
+                
             pass
         with open(f'save/stats.txt','r') as savefile:
             # csvfile = csv.reader(savefile,delimiter=':')
@@ -522,7 +523,7 @@ class SaveMenu(object):
         onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
         for i in range(self.ILOSC_PLIKOW-1):
             self.allItem += [SaveItem(f'{onlyfiles[i]}',self.window)]
-        self.allItem += [SaveItem(f'NewSave{SaveItem.ID}',self.screen)]    
+        self.allItem += [SaveItem(f'Save{SaveItem.ID+1}',self.screen)]    
     
     def handle_events(self):
         for event in pygame.event.get():
@@ -577,9 +578,9 @@ class SaveMenu(object):
 
 
         with open('save/map.csv','w') as savefile:
-            savefile.write('x;y;number;texture_index;verticles\n')
+            savefile.write('x;y;number;texture_index;zajete\n')
             for h in self.game.map.sprites():
-                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index}')
+                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.zajete}')
                 savefile.write('\n')
         with open('save/stats.txt','w') as savefile:
             
@@ -624,7 +625,7 @@ class SaveMenu(object):
                 self.bar_rect.top = 20
             elif self.bar_rect.bottom > (self.WINDOW_SIZE[1] - 20):
                 self.bar_rect.bottom = self.WINDOW_SIZE[1] - 20
-            if self.x == 1:
+            elif self.x <= 1:
                 self.y_axis = 0
             else:
                 self.y_axis = int(height_diff / (self.scroll_length * 1.0) * (self.bar_rect.centery - bar_half_lenght) * -1)
@@ -635,8 +636,6 @@ class SaveMenu(object):
             i.update()
             i.drawItem()
 
-
-        pygame.draw.rect(self.screen,(255,255,0),self.bar_rect)
         self.screen.blit(self.window,(0,self.scroll))
         self.screen.blit(self.close_sur,self.close_rect)
         pygame.display.flip()

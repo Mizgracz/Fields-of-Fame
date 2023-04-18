@@ -170,9 +170,9 @@ class Timer:
             print(f"Folder {folder_path} już istnieje.")
 
         with open('save/map.csv','w') as savefile:
-            savefile.write('x;y;number;texture_index;verticles\n')
+            savefile.write('x;y;number;texture_index;zajete\n')
             for h in self.game.map.sprites():
-                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index}')
+                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.zajete}')
                 savefile.write('\n')
         with open('save/stats.txt','w') as savefile:
             

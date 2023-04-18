@@ -55,6 +55,9 @@ class Game:
             self.bm.build_stauts = True
         if press[pygame.K_s]:
             self.save_game()
+        if press[pygame.K_HOME]:
+            self.camera.camera_x = 0
+            self.camera.camera_y = 0
 
 
     def save_game(self):
@@ -100,7 +103,7 @@ class Game:
                     self.map.allhex["hex", i].polozenie_hex_y = int(row[1])
                     self.map.allhex["hex", i].number = int(row[2])
                     self.map.allhex["hex", i].texture_index = int(row[3])
-                    self.map.allhex["hex", i].verticles = (row[4]) 
+                    self.map.allhex["hex", i].zajete = (row[4])
                     self.map.allhex['hex',i].update_texture()
                 i+=1
             
@@ -178,9 +181,9 @@ class Game:
         print('saved 105 main.py')
 
         with open('save/map.csv','w') as savefile:
-            savefile.write('x;y;number;texture_index;verticles\n')
+            savefile.write('x;y;number;texture_index;zajete\n')
             for h in self.map.sprites():
-                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};')
+                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.zajete}')
                 savefile.write('\n')
         with open('save/stats.txt','w') as savefile:
 

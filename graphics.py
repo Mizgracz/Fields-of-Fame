@@ -19,6 +19,8 @@ class Hex(pygame.sprite.Sprite):
         self.group = group
         self.texture_index = tex_id
         self.texture = self.texturing(self.group)
+        if self.number == 137:
+            self.zajete =True
     def texturing(self,group):
         if self.number ==137:
             return group.castle_surface
@@ -128,11 +130,9 @@ class Map(pygame.sprite.Group):
 
                 self.allrect['hex', licz] = self.allhex["hex", licz].texture.get_rect(midleft=(self.allhex["hex", licz].polozenie_hex_x, self.allhex["hex", licz].polozenie_hex_y + 75))
                 self.allmask['hex', licz] = pygame.mask.from_surface(self.allhex["hex", licz].texture)
-
                 x += self.allhex["hex", licz].szerokosc
 
-                if licz == 137:
-                    self.allhex["hex", licz].zajete = True
+                
                 licz += 1
 
             if j % 2 != 0:
@@ -145,6 +145,8 @@ class Map(pygame.sprite.Group):
         for h in self.sprites():
             self.screen.blit(h.texture, (h.polozenie_hex_x + self.camera.camera_x, h.polozenie_hex_y + 
                                          self.camera.camera_y))
+            
+
 
     def rysuj_obwodke_i_zajete(self):
         for i in range(self.num_hex_y * self.num_hex_y):
