@@ -379,17 +379,14 @@ class BuildItem:
         # pygame.draw.rect(rect=self.button_rect, color='#fff000', surface=pygame.display.get_surface())
 
     def buy(self):
-        global gold_count
-        global army_count_bonus
-        global gold_count_bonus
+        
         press = pygame.mouse.get_pressed()
         pos = pygame.mouse.get_pos()
         if self.button_rect.collidepoint(pos) and press[0]:
-            if not gold_count < self.koszt:
+            if not Stats.gold_count < self.koszt:
                 self.posiadanie = True
-                gold_count -= self.koszt
-                army_count_bonus += self.army_bonus
-                gold_count_bonus += self.gold_bonus
-                print(f'{self.menu.get_size()}')
+                Stats.gold_count -= self.koszt
+                Stats.army_count_bonus += self.army_bonus
+                Stats.gold_count_bonus += self.gold_bonus
             pygame.time.Clock().tick(5)
         pass
