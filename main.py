@@ -20,6 +20,9 @@ if not os.path.exists(folder_path):
 
 pygame.init()
 
+pygame.mixer.music.load("music/main.mp3")
+pygame.mixer.music.play(-1)
+
 
 # class game
 class Game:
