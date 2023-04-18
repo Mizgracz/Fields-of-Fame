@@ -129,7 +129,7 @@ class Game:
         os.remove("save/map.csv")
         pass
     def run(self):
-        #
+        
         while True:
             while Menu.status:
                 self.start_menu.run()
