@@ -1,392 +1,215 @@
-import zipfile
+
+
 import pygame
-import time,os
 
-camera_stop = False
-item_offset = pygame.Vector2(0, 115)
-
-
-class Stats:
-    
-    gold_count = 0
-    army_count = 0
-    terrain_count = 1
-    turn_count = 1
-    wyb = False
-    camera_stop = False
-    item_offset = pygame.Vector2(0, 115)
-    player_hex_status = False
-    army_count_bonus = 0
-    gold_count_bonus = 0
-    
-    def __init__(self) -> None:
-        pass
-
-class Camera:
-
-    def __init__(self):
-        self.camera_x = 0
-        self.camera_y = 0
-
-        self.mouse_x = 0
-        self.mouse_y = 0
-
-    def mouse(self):
-
-        self.mouse_x, self.mouse_y = pygame.mouse.get_pos()
-        predkosc = 2
-        press = pygame.key.get_pressed()
-        if camera_stop is False:
-            if not press[pygame.K_LCTRL]:
-                if self.mouse_x < 30:
-                    self.camera_x += (predkosc + 10)
-                elif self.mouse_x < 80:
-                    self.camera_x += (predkosc + 5)
-                elif self.mouse_x < 160:
-                    self.camera_x += predkosc
-
-                if self.mouse_x > 1240:
-                    self.camera_x -= predkosc + 10
-                elif self.mouse_x > 1190:
-                    self.camera_x -= predkosc + 5
-                elif self.mouse_x > 1110:
-                    self.camera_x -= predkosc
-
-                if self.mouse_y < 30:
-                    self.camera_y += predkosc + 10
-                elif self.mouse_y < 80:
-                    self.camera_y += predkosc + 5
-                elif self.mouse_y < 160:
-                    self.camera_y += predkosc
-
-                if self.mouse_y > 670:
-                    self.camera_y -= predkosc + 10
-                elif self.mouse_y > 620:
-                    self.camera_y -= predkosc + 5
-                elif self.mouse_y > 540:
-                    self.camera_y -= predkosc
-
-    def keybord(self):
-        press = pygame.key.get_pressed()
-        if press[pygame.K_RIGHT]:
-            self.camera_x -= 5
-        if press[pygame.K_LEFT]:
-            self.camera_x += 5
-        if press[pygame.K_DOWN]:
-            self.camera_y -= 5
-        if press[pygame.K_UP]:
-            self.camera_y += 5
+import random
+from gameplay import Stats
 
 
-class UpBar:
+class Hex(pygame.sprite.Sprite):
 
-    def __init__(self, screen):
-        self.up_bar_surface = pygame.Surface((1280, 30))
-        self.up_bar_texture = pygame.image.load("texture/ui/up_bar/bar.png")
+    def __init__(self, x, y, tex , num, group, obw, zaj,tex_id):
+        super().__init__(group)
+        self.szerokosc = 130
+        self.wysokosc = 152
+        self.polozenie_hex_x = x
+        self.polozenie_hex_y = y
+        self.number = num
+        self.obwodka = obw
+        self.zajete = zaj
+        self.group = group
+        self.texture_index = tex_id
+        self.texture = self.texturing(self.group)
+        if self.number == 137:
+            self.zajete =True
+    def texturing(self,group):
+        if self.number ==137:
+            return group.castle_surface
+        if self.texture_index == 1:
+            return group.grass_surface
+        elif self.texture_index == 2:
+            return group.grass2_surface
+        elif self.texture_index == 3:
+            return group.grass3_surface
+        elif self.texture_index == 4:
+            return group.forest_surface
+        elif self.texture_index == 5:
+            return group.mountain_surface
+        elif self.texture_index == 6:
+            return group.water_surface
+        elif self.texture_index == 7:
+            return group.water2_surface
+        elif self.texture_index == 8:
+            return group.water3_surface
+        elif self.texture_index == 9:
+            return group.cereal_surface
+        elif self.texture_index == 10:
+            return group.dirt_surface
+        elif self.texture_index == 11:
+            return group.mountain_pass_surface
+        elif self.texture_index == 12:
+            return group.mountain2_surface
+        elif self.texture_index == 13:
+            return group.forest_full_surface
+        elif self.texture_index == 14:
+            return group.forest3_surface
+        elif self.texture_index == 15:
+            return group.forest4_surface
+    def update_texture(self):
+        self.texture = self.texturing(self.group)
+
+class Map(pygame.sprite.Group):
+
+    def __init__(self, numx, numy, screen, camera):
+        super().__init__()
+
+        self.colision_surface = pygame.Surface(pygame.display.get_window_size(), pygame.SRCALPHA)
+        self.colision_rect = self.colision_surface.get_rect()
+
+        self.hex_obwodka_surface = pygame.image.load("texture/hex/hex_obwodka.png").convert_alpha()
+
+        self.hex_zajete_surface = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
+        self.hex_zajete_surface.set_alpha(100)
+
+        self.grass_surface = pygame.image.load("texture/hex/hex_trawa.png", ).convert_alpha()
+        self.grass2_surface = pygame.image.load("texture/hex/trawa_hex_2.png", ).convert_alpha()
+        self.grass3_surface = pygame.image.load("texture/hex/trawa_hex_3.png").convert_alpha()
+        self.dirt_surface = pygame.image.load("texture/hex/budynki.png").convert_alpha()
+        self.cereal_surface = pygame.image.load("texture/hex/zboze_hex.png").convert_alpha()
+        self.castle_surface = pygame.image.load("texture/hex/zamek.png", ).convert_alpha()
+
+        self.forest_surface = pygame.image.load("texture/hex/las_hex.png", ).convert_alpha()
+        self.forest_full_surface = pygame.image.load("texture/hex/las_hex_pelny.png", ).convert_alpha()
+        self.forest3_surface = pygame.image.load("texture/hex/las_hex_3_drzewka.png", ).convert_alpha()
+        self.forest4_surface = pygame.image.load("texture/hex/las_hex_4_drzewka_wystajace.png", ).convert_alpha()
+
+        self.mountain_surface = pygame.image.load("texture/hex/gory_hex.png", ).convert_alpha()
+        self.mountain_pass_surface = pygame.image.load("texture/hex/gory_hex_pas.png", ).convert_alpha()
+        self.mountain2_surface = pygame.image.load("texture/hex/gory_hex_bez_sniegu.png", ).convert_alpha()
+        self.water_surface = pygame.image.load("texture/hex/woda_hex_1.png", ).convert_alpha()
+        self.water2_surface = pygame.image.load("texture/hex/woda_hex_2.png", ).convert_alpha()
+        self.water3_surface = pygame.image.load("texture/hex/woda_hex_statek.png", ).convert_alpha()
+
+        self.elements = [((self.grass_surface,1), 20), ((self.grass2_surface,2), 20), ((self.grass3_surface,3), 20),
+                         ((self.forest_surface,4), 15), ((self.mountain_surface,5), 4), ((self.water_surface,6), 3),
+                         ((self.water2_surface,7), 1), ((self.water3_surface,8), 1), ((self.cereal_surface,9), 1),
+                         ((self.dirt_surface,10), 0.5), ((self.mountain_pass_surface,11), 2), ((self.mountain2_surface,12), 4),
+                         ((self.forest_full_surface,13), 0), ((self.forest3_surface,14), 8), ((self.forest4_surface,15), 8)]
+
+        self.num_hex_x = numx
+        self.num_hex_y = numy
+        self.allhex = {}
+        self.alltex = {}
         self.screen = screen
-        self.FONT_SIZE = 18
-        self.FONT_NAME = 'timesnewroman'
+        self.camera = camera
+        self.allmask = {}
+        self.allrect = {}
+        self.camerax = self.camera.camera_x
+        self.cameray = self.camera.camera_y
+        self.tex_id = []
+    def texture(self):
 
-    def score(self):
-        FONT_NAME = 'timesnewroman'
-        FONT_SIZE = 17
-        # grafiki
-        bar_main = pygame.image.load('texture/ui/up_bar/bar.png').convert_alpha()
-        bar_gold = pygame.image.load('texture/ui/up_bar/bar_zloto.png').convert_alpha()
-        bar_army = pygame.image.load('texture/ui/up_bar/bar_wojsko.png').convert_alpha()
-        bar_field = pygame.image.load('texture/ui/up_bar/bar_pola.png').convert_alpha()
+        for i in range(self.num_hex_y * self.num_hex_x):
+            if i == 137:
+                self.alltex['hex', i] = self.castle_surface
 
-        self.up_bar_surface.blit(bar_main, (0, 0))
+            else:
+                self.tex_id += [random.choices(*zip(*self.elements), k=1)[0][1]]
+                self.alltex['hex', i] = random.choices(*zip(*self.elements), k=1)[0]
 
-        # money
-        money = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
-        self.up_bar_surface.blit(bar_gold, (10, 2))
-        money_score = money.render("Ilość Złota: " + str(Stats.gold_count), True, "white")
-        self.up_bar_surface.blit(money_score, (20, 2))
+    def generate(self):
+        licz = 0
+        przesuniecie_x = 0
+        przesuniecie_y = 0
+        self.texture()
+        for j in range(self.num_hex_y):  # tworzenie hexów (jako nowy obiekt) nadawanie im położenia
+            x = -1640
+            y = j * 152
+            for i in range(self.num_hex_x):
+                
+                self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz],licz, self, False, False,self.tex_id[licz])
 
-        # wojsko
-        army = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
-        self.up_bar_surface.blit(bar_army, (200, 2))
-        army_score = army.render("Ilość Wojska: " + str(Stats.army_count), True, "white")
-        self.up_bar_surface.blit(army_score, (210, 2))
-        # pola
-        tiles = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
-        self.up_bar_surface.blit(bar_field, (390, 2))
-        tiles_score = tiles.render("Ilość Posiadanych Pól: " + str(Stats.terrain_count), True, "white")
-        self.up_bar_surface.blit(tiles_score, (400, 2))
+                self.allrect['hex', licz] = self.allhex["hex", licz].texture.get_rect(midleft=(self.allhex["hex", licz].polozenie_hex_x, self.allhex["hex", licz].polozenie_hex_y + 75))
+                self.allmask['hex', licz] = pygame.mask.from_surface(self.allhex["hex", licz].texture)
+                x += self.allhex["hex", licz].szerokosc
 
-        turn = pygame.font.SysFont(self.FONT_NAME, self.FONT_SIZE)
-        turn_score = turn.render("Tura: " + str(Stats.turn_count), True, "white")
-        self.up_bar_surface.blit(turn_score, (1100, 4))
+                
+                licz += 1
 
-        # Wyświetlenie powierzchni górnej belki na ekranie
-        self.screen.blit(self.up_bar_surface, (0, 0))
+            if j % 2 != 0:
+                przesuniecie_x = 0
+            else:
+                przesuniecie_x += -65
+            przesuniecie_y += -40
 
-
-class Timer:
-    def __init__(self, res, main_surface, screen,game):
-        self.game = game
-        self.res = res
-        self.mainSurface = main_surface
-        self.screen = screen
-        self.FONT_SIZE = 18
-        self.FONT_NAME = 'timesnewroman'
-        self.font_timer = pygame.font.SysFont(self.FONT_NAME, self.FONT_SIZE)
-        self.start_time = time.time()
-
-    def update(self):
-        # Update the timer
-        current_time = time.time()
-        elapsed_time = current_time - self.start_time
-        hours = int(elapsed_time // 3600)
-        minutes = int((elapsed_time % 3600) // 60)
-        seconds = int(elapsed_time % 60)
-        if minutes%1==0 and not minutes == 0 and seconds ==0:
-            self.autosave_game()
-
-
-        # Draw the timer box
-        timer_box = pygame.Rect(self.res[0] - 90, self.res[1] - 720, 90, 30)
-        # pygame.draw.rect(self.mainSurface, (255, 255, 255), timer_box)
-        # pygame.draw.rect(self.mainSurface, (0, 0, 0), timer_box, 2)
-
-        # Draw the timer text
-        timer_text = self.font_timer.render('{:02d}:{:02d}:{:02d}'.format(hours, minutes, seconds), True,
-                                            (255, 255, 255))
-        text_rect = timer_text.get_rect(center=timer_box.center)
-        self.mainSurface.blit(timer_text, text_rect)
-        self.screen.blit(self.mainSurface, (0, 0))
-        # Update the display
-        pygame.display.update()
-    def autosave_game(self):
-        import gameplay
-        print('SaveGame')
-
-        folder_path = "save"
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-            print(f"Folder {folder_path} został utworzony.")
-        else:
-            print(f"Folder {folder_path} już istnieje.")
-
-        with open('save/map.csv','w') as savefile:
-            savefile.write('x;y;number;texture_index;zajete\n')
-            for h in self.game.map.sprites():
-                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.zajete}')
-                savefile.write('\n')
-        with open('save/stats.txt','w') as savefile:
+    def draw(self):  # wyświetlanie mapy na ekranie
+        for h in self.sprites():
+            self.screen.blit(h.texture, (h.polozenie_hex_x + self.camera.camera_x, h.polozenie_hex_y + 
+                                         self.camera.camera_y))
             
-            savefile.write(f'gold_count:{Stats.gold_count}\n')
-            savefile.write(f'army_count:{Stats.army_count}\n')
-            savefile.write(f'player_hex_status:{Stats.player_hex_status}\n')
-            savefile.write(f'army_count_bonus:{Stats.army_count_bonus}\n')
-            savefile.write(f'gold_count_bonus:{Stats.gold_count_bonus}\n')
-            savefile.write(f'turn_count:{Stats.turn_count}\n')
-            
-        pygame.time.Clock().tick(1)
-        with zipfile.ZipFile("save/AutoSave.zip", "w") as zip:
-            zip.write("save/stats.txt")
-            zip.write("save/map.csv")
-        os.remove("save/stats.txt")
-        os.remove("save/map.csv")
-        pass
-
-class Hourglass:
-
-    def __init__(self, screen):
-        self.hourglass_surface = pygame.transform.scale((pygame.image.load("texture/ui/turn/klepsydra.jpg")),
-                                                        (173, 184))
-        self.hourglass_rect = self.hourglass_surface.get_rect(center=(100, 600))
-        self.screen = screen
-
-    def draw(self):
-        self.screen.blit(self.hourglass_surface, self.hourglass_rect)
-
-    def turn(self):
-        colision = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()
-        if self.hourglass_rect.collidepoint(colision) and mouse_pressed[0]:
-            if Stats.wyb == False:    
-                Stats.wyb = True
-                Stats.turn_count += 1
 
 
-class Decision:
-    def __init__(self, screen):
-        self.background_image = pygame.image.load('texture/ui/turn/tlo_wybor.png').convert_alpha()
-        self.army_button = pygame.image.load("texture/ui/turn/wojsko_button.png").convert_alpha()
-        self.gold_button = pygame.image.load("texture/ui/turn/zloto_button.png").convert_alpha()
-        self.field_button = pygame.image.load("texture/ui/turn/zajmij_button.png").convert_alpha()
-
-        self.bacground_rect = self.background_image.get_rect(midright=(775, 350))
-        self.army_rect = self.gold_button.get_rect(midright=(700, 350))
-        self.gold_rect = self.army_button.get_rect(midleft=(403, 250))
-        self.field_rect = self.field_button.get_rect(midleft=(403, 450))
-
-        self.screen = screen
-
-    def draw(self):
-        global camera_stop
-        if Stats.wyb:
-            camera_stop = True
-            self.screen.blit(self.background_image, self.bacground_rect)
-            self.screen.blit(self.gold_button, self.gold_rect)
-            self.screen.blit(self.army_button, self.army_rect)
-            self.screen.blit(self.field_button, self.field_rect)
-
-    def click(self):
-        global camera_stop
-        
-
-        colision = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()
-        if self.gold_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
-            Stats.wyb = False
-            camera_stop = False
-            Stats.gold_count += 10 + Stats.gold_count_bonus
-
-        if self.army_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
-            Stats.wyb = False
-            camera_stop = False
-            Stats.army_count += 10 + Stats.army_count_bonus
-
-
-
-        if self.field_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
-            Stats.wyb = False
-            camera_stop = False
-            Stats.player_hex_status = True
-            pygame.time.Clock().tick(3)
-
-
-class SideMenu:
-    def __init__(self, screen):
-        self.texture_main = "texture/ui/side_bar/praweUI_glowne.png"
-        self.texture_up = "texture/ui/side_bar/praweUI_gorne.png"
-        self.texture_down = "texture/ui/side_bar/praweUI_dolne.png"
-        self.texture_button = "texture/ui/side_bar/praweUI_srodek.png"
-
-        self.main_surfarce = pygame.image.load(self.texture_main)
-        self.main_rect = self.main_surfarce.get_rect(topleft=(1024, 30))
-        self.up_surfarce = pygame.image.load(self.texture_up)
-        self.down_surfarce = pygame.image.load(self.texture_down)
-        self.button_surfarce = pygame.image.load(self.texture_button)
-        self.button_rect = self.button_surfarce.get_rect(topleft=(1034, 288))
-
-        self.screen = screen
-
-    def draw(self):
-        self.screen.blit(self.main_surfarce, self.main_rect)
-        self.screen.blit(self.up_surfarce, (1034, 42))
-        self.screen.blit(self.button_surfarce, self.button_rect)
-        self.screen.blit(self.down_surfarce, (1034, 440))
-
-    def button(self):
-        colision = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()
-        if self.button_rect.collidepoint(colision) and mouse_pressed[0]:
-            Build_Menu.build_stauts = True
-
-
-class Build_Menu:
-    build_stauts=False
-    def __init__(self, screen):
-        
-        self.texture = "texture/ui/building/kuptlo.png"
-        self.texture_button = "texture/ui/building/CheckBoxFalse.png"
-        self.szerokosc = 700
-        self.wysokos = 500
-        self.x = 640
-        self.y = 360
-        self.build_menu_surf = pygame.transform.scale((pygame.image.load(self.texture)).convert_alpha(),
-                                                      (self.szerokosc, self.wysokos))
-
-        self.item_menu_surf = pygame.Surface((self.szerokosc, self.wysokos), pygame.SRCALPHA)
-
-        self.exit_button_surf = pygame.transform.scale(pygame.image.load(self.texture_button).convert_alpha(), (40, 40))
-        self.build_rect = self.build_menu_surf.get_rect(center=(self.x, self.y))
-        self.build_menu_surf.set_alpha(230)
-        self.screen = screen
-
-    def draw(self):
-
-        if self.build_stauts:
-            self.screen.blit(self.build_menu_surf, self.build_rect)
-            self.screen.blit(self.item_menu_surf, self.build_rect)
-            exit_button_rect = self.exit_button_surf.get_rect()
-            exit_button_rect.topright = self.build_rect.topright
-            self.screen.blit(self.exit_button_surf, exit_button_rect)
-            colision = pygame.mouse.get_pos()
-            mouse_pressed = pygame.mouse.get_pressed()
-            if exit_button_rect.collidepoint(colision) and mouse_pressed[0]:
-                Build_Menu.build_stauts = False
-
-
-class BuildItem:
-    def __init__(self, menu, koszt, texture, opis, army_bonus, gold_bonus):
-        self.FONT_SIZE = 18
-        self.FONT_NAME = 'timesnewroman'
-        self.font_opis = pygame.font.SysFont(self.FONT_NAME, self.FONT_SIZE)
-
-        self.font_opis_s = self.font_opis.render(opis, True,
-                                                 (255, 255, 255))
-        self.army_bonus = army_bonus
-        self.gold_bonus = gold_bonus
-
-        global item_offset
-        self.text_description = opis
-        self.menu = menu
-        self.wymiary = pygame.Vector2(self.menu.get_size())
-        self.item_w = self.wymiary.x * 0.9
-        self.item_h = 110
-        self.image = pygame.image.load(f'texture/ui/building/{texture}.png')
-        # self.image = pygame.Surface((100, 100))
-        self.button = pygame.Surface((150, 50))
-        self.button_texture = pygame.image.load('texture/ui/building/button_kup.png')
-        self.button.blit(self.button_texture, (0, 0))
-
-        self.koszt = koszt
-        self.posiadanie = False
-        opis_texture = pygame.image.load('texture/ui/building/opis_tlo.png')
-        opis_texture = pygame.transform.scale(opis_texture, (
-            self.item_w - self.image.get_size()[0] - self.button.get_size()[0] - 30, self.item_h - 10))
-        self.description_surf = pygame.Surface(
-            (self.item_w - self.image.get_size()[0] - self.button.get_size()[0] - 30, self.item_h - 10),
-            pygame.SRCALPHA)
-        item_texture = pygame.image.load('texture/ui/building/kuptlo.png')
-        self.item_surf = pygame.Surface((self.item_w, self.item_h), pygame.SRCALPHA)
-
-        self.item_surf.blit(item_texture, (0, 0))
-
-        self.description_surf.blit(opis_texture, (0, 0))
-
-        self._id = item_offset.x
-        self.button_rect = self.button.get_rect(bottomleft=(
-            pygame.display.get_window_size()[0] / 2 - self.menu.get_size()[0] / 2 + self.image.get_size()[0] + 10 + 35,
-            360 / 2 + 10 + item_offset.y * self._id))
-        # pygame.draw.rect(rect=self.button_rect, color='#fff000', surface=pygame.display.get_surface())
-        item_offset.x += 1
-
-    def draw(self):
-
-        self.item_surf.blit(self.image, (5, self.item_h / 2 - self.image.get_size()[1] / 2))
-        self.item_surf.blit(self.button,
-                            (self.image.get_size()[0] + 10, self.item_h / 2 - self.button.get_size()[1] / 2))
-        self.item_surf.blit(self.description_surf, (self.image.get_size()[0] + 20 + self.button.get_size()[0],
-                                                    self.item_h / 2 - self.description_surf.get_size()[1] / 2))
-        self.description_surf.blit(self.font_opis_s, (5, 5))
-        self.menu.blit(self.item_surf, (self.wymiary.x / 2 - self.item_w / 2, 10 + item_offset.y * self._id))
-        # pygame.draw.rect(rect=self.button_rect, color='#fff000', surface=pygame.display.get_surface())
-
-    def buy(self):
-        
-        press = pygame.mouse.get_pressed()
+    def rysuj_obwodke_i_zajete(self):
+        for i in range(self.num_hex_y * self.num_hex_y):
+            if self.allhex["hex", i].obwodka:
+                self.screen.blit(self.hex_obwodka_surface, (self.allhex["hex", i].polozenie_hex_x + self.camera.camera_x,
+                                                            self.allhex["hex", i].polozenie_hex_y + self.camera.camera_y))
+            if self.allhex["hex", i].zajete:
+                self.screen.blit(self.hex_zajete_surface, (self.allhex["hex", i].polozenie_hex_x + self.camera.camera_x,
+                                                            self.allhex["hex", i].polozenie_hex_y + self.camera.camera_y))
+    
+    def colision_detection_obwodka(self):
         pos = pygame.mouse.get_pos()
-        if self.button_rect.collidepoint(pos) and press[0]:
-            if not Stats.gold_count < self.koszt:
-                self.posiadanie = True
-                Stats.gold_count -= self.koszt
-                Stats.army_count_bonus += self.army_bonus
-                Stats.gold_count_bonus += self.gold_bonus
-            pygame.time.Clock().tick(5)
-        pass
+        for c in range(self.num_hex_y * self.num_hex_x):
+
+            if self.camerax != self.camera.camera_x:
+                for ca in range(self.num_hex_y * self.num_hex_x):
+                    if self.camerax < self.camera.camera_x:
+                        div = self.camera.camera_x - self.camerax
+                        self.allrect['hex', ca].x += div
+                    else:
+                        div = self.camerax - self.camera.camera_x
+                        self.allrect['hex', ca].x -= div
+
+            if self.cameray != self.camera.camera_y:
+                for co in range(self.num_hex_y * self.num_hex_x):
+                    if self.cameray < self.camera.camera_y:
+                        div = self.camera.camera_y - self.cameray
+                        self.allrect['hex', co].y += div
+                    else:
+                        div = self.cameray - self.camera.camera_y
+                        self.allrect['hex', co].y -= div
+
+            self.camerax = self.camera.camera_x
+            self.cameray = self.camera.camera_y
+
+            pos_in_mask = pos[0] - self.allrect['hex', c].x, pos[1] - self.allrect['hex', c].y
+            try:
+
+                touching = self.allrect['hex', c].collidepoint(*pos) and self.allmask['hex', c].get_at(pos_in_mask)
+                if touching:
+
+                    self.allhex["hex", c].obwodka = True
+
+                else:
+                    
+                    self.allhex["hex", c].obwodka = False
+
+            except IndexError as e:
+                print("Wystąpił błąd :", e)
+
+    def zajmij_pole(self):
+        if Stats.player_hex_status:
+            mouse_presses = pygame.mouse.get_pressed()
+
+            if mouse_presses[0]:
+                pos1 = pygame.mouse.get_pos()
+                for i in range(self.num_hex_y * self.num_hex_x):
+                    pos_in_mask1 = pos1[0] - self.allrect['hex', i].x, pos1[1] - self.allrect['hex', i].y
+                    touching = self.allrect['hex', i].collidepoint(*pos1) and self.allmask['hex', i].get_at(pos_in_mask1)
+
+                    if touching:
+                        self.allhex["hex", i].zajete = True
+                        print(f"klikniecie{i}")
+                        Stats.player_hex_status = False
+                        Stats.terrain_count += 1
