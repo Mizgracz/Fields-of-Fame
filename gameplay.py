@@ -14,6 +14,14 @@ player_hex_status = False
 army_count_bonus = 0
 gold_count_bonus = 0
 
+# nazwa, ilosc
+surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "], ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "port rybacki: "], ["sawmill", 0, "tartak: "], ["grain", 0, "zboże: "]]
+
+def dopisz_surowiec(surowiec):
+    for i in range(len(surowce_ilosc)):
+        if surowiec == surowce_ilosc[i][0]:
+            surowce_ilosc[i][1] += 1
+            print(surowce_ilosc[i][1])
 
 class Camera:
 
@@ -212,8 +220,6 @@ class Decision:
             camera_stop = False
             army_count += 10 + army_count_bonus
 
-
-
         if self.field_rect.collidepoint(colision) and mouse_pressed[0] and wyb:
             wyb = False
             camera_stop = False
@@ -234,14 +240,30 @@ class SideMenu:
         self.down_surfarce = pygame.image.load(self.texture_down)
         self.button_surfarce = pygame.image.load(self.texture_button)
         self.button_rect = self.button_surfarce.get_rect(topleft=(1034, 288))
-
         self.screen = screen
 
+    def surowce_staty(self, x, y, tekst):
+        self.tekst = tekst
+        self.FONT_SIZE = 18
+        self.FONT_NAME = 'timesnewroman'
+        self.tekst_opis = pygame.font.SysFont(self.FONT_NAME, self.FONT_SIZE)
+        self.font_opis_s = self.tekst_opis.render(self.tekst, True, (255, 255, 255))
+
+        self.screen.blit(self.font_opis_s, (x,y))
+    def surowce_staty_blituj(self):
+        x = 1045
+        y = 62
+
+        for i in range(len(surowce_ilosc)):
+            self.surowce_staty(x,y, f"{surowce_ilosc[i][2]}: {surowce_ilosc[i][1]}")
+            y += 25
     def draw(self):
         self.screen.blit(self.main_surfarce, self.main_rect)
         self.screen.blit(self.up_surfarce, (1034, 42))
         self.screen.blit(self.button_surfarce, self.button_rect)
         self.screen.blit(self.down_surfarce, (1034, 440))
+        self.surowce_staty_blituj()
+
 
     def button(self):
         global build_stauts
@@ -250,6 +272,9 @@ class SideMenu:
         if self.button_rect.collidepoint(colision) and mouse_pressed[0]:
             build_stauts = True
             print(build)
+
+
+
 
 
 class Build_Menu:

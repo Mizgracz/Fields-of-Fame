@@ -229,6 +229,7 @@ class Map(pygame.sprite.Group):
                         if self.allhex["hex", i].rodzaj == "surowiec":
                             print(self.allhex["hex", i].rodzaj_surowca_var)
                             self.allhex["hex", i].sprzedaj(self.surowce_lista)
+                            gameplay.dopisz_surowiec(self.allhex["hex", i].rodzaj_surowca_var)
                         if self.allhex["hex", i].rodzaj == "budynek":
                             print("budynek")
                             # dodawanie bonusu do zarabiania

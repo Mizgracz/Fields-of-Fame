@@ -6,7 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="386da72b-0c71-4294-905e-ebafbf2c9257" name="Changes" comment="gotowe budynki + surowce basic, zajmujac pole z surowcem dostajesz okreslona ilosc zlota ktora mozna zedytowac (lista_surowcow).">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gameplay.py" beforeDir="false" afterPath="$PROJECT_DIR$/gameplay.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/graphics.py" beforeDir="false" afterPath="$PROJECT_DIR$/graphics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,6 +22,21 @@
       </map>
     </option>
   </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2OZmkPXKvKJc8DmWYaUR414paPv" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task id="LOCAL-00001" summary="budynki, ładują się, przy klikaniu rozpoznaje czy kliknięty jest budynek czy zwykly hex">
       <created>1681756531808</created>
@@ -42,7 +59,21 @@
       <option name="project" value="LOCAL" />
       <updated>1681775682250</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="gotowe budynki + surowce basic, zajmujac pole z surowcem dostajesz okreslona ilosc zlota ktora mozna zedytowac (lista_surowcow).">
+      <created>1681775758730</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1681775758730</updated>
+    </task>
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="386da72b-0c71-4294-905e-ebafbf2c9257" name="Changes" comment="gotowe budynki + surowce basic, zajmujac pole z surowcem dostajesz okreslona ilosc zlota ktora mozna zedytowac (lista_surowcow)." />
+      <created>1681776630102</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1681776630102</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
