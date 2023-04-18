@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="386da72b-0c71-4294-905e-ebafbf2c9257" name="Changes" comment="gotowe budynki + surowce basic, zajmujac pole z surowcem dostajesz okreslona ilosc zlota ktora mozna zedytowac (lista_surowcow).">
+    <list default="true" id="386da72b-0c71-4294-905e-ebafbf2c9257" name="Changes" comment="gotowe budynki + działające surowce + działający podgląd ile się surowców aktualnie posiada">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gameplay.py" beforeDir="false" afterPath="$PROJECT_DIR$/gameplay.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics.py" beforeDir="false" afterPath="$PROJECT_DIR$/graphics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,14 +71,22 @@
       <option name="presentableId" value="Default" />
       <updated>1681776630102</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="gotowe budynki + działające surowce + działający podgląd ile się surowców aktualnie posiada">
+      <created>1681817320672</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1681817320672</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="budynki, ładują się, przy klikaniu rozpoznaje czy kliknięty jest budynek czy zwykly hex" />
     <MESSAGE value="gotowe budynki" />
     <MESSAGE value="gotowe budynki + surowce basic, zajmujac pole z surowcem dostajesz okreslona ilosc zlota ktora mozna zedytowac (lista_surowcow)." />
-    <option name="LAST_COMMIT_MESSAGE" value="gotowe budynki + surowce basic, zajmujac pole z surowcem dostajesz okreslona ilosc zlota ktora mozna zedytowac (lista_surowcow)." />
+    <MESSAGE value="gotowe budynki + działające surowce + działający podgląd ile się surowców aktualnie posiada" />
+    <option name="LAST_COMMIT_MESSAGE" value="gotowe budynki + działające surowce + działający podgląd ile się surowców aktualnie posiada" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

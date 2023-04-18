@@ -252,17 +252,19 @@ class SideMenu:
         self.screen.blit(self.font_opis_s, (x,y))
     def surowce_staty_blituj(self):
         x = 1045
-        y = 62
-
+        y = 87
         for i in range(len(surowce_ilosc)):
             self.surowce_staty(x,y, f"{surowce_ilosc[i][2]}: {surowce_ilosc[i][1]}")
-            y += 25
+            y += 22
     def draw(self):
         self.screen.blit(self.main_surfarce, self.main_rect)
         self.screen.blit(self.up_surfarce, (1034, 42))
         self.screen.blit(self.button_surfarce, self.button_rect)
         self.screen.blit(self.down_surfarce, (1034, 440))
         self.surowce_staty_blituj()
+
+        self.surowce_staty(1045, 65, "POSIADANE SUROWCE:")
+
 
 
     def button(self):
