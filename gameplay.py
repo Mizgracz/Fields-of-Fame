@@ -14,13 +14,13 @@ player_hex_status = False
 army_count_bonus = 0
 gold_count_bonus = 0
 
-# nazwa, ilosc
-surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "], ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "port rybacki: "], ["sawmill", 0, "tartak: "], ["grain", 0, "zboże: "]]
+# nazwa, ilosc, nazwaplxD
+surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "], ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "ryby: "], ["sawmill", 0, "drewno: "], ["grain", 0, "zboże: "]]
 
 def dopisz_surowiec(surowiec):
     for i in range(len(surowce_ilosc)):
         if surowiec == surowce_ilosc[i][0]:
-            surowce_ilosc[i][1] += 1
+            surowce_ilosc[i][1] += 100
             print(surowce_ilosc[i][1])
 
 class Camera:
@@ -263,7 +263,7 @@ class SideMenu:
         self.screen.blit(self.down_surfarce, (1034, 440))
         self.surowce_staty_blituj()
 
-        self.surowce_staty(1045, 65, "POSIADANE SUROWCE:")
+        self.surowce_staty(1045, 65, "SUROWCE:")
 
 
 
