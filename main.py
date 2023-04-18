@@ -52,7 +52,7 @@ class Game:
         if press[pygame.K_ESCAPE]:
             Menu.status = True
         if press[pygame.K_b]:
-            self.bm.build_stauts = True
+            Build_Menu.build_stauts = True
         if press[pygame.K_s]:
             self.save_game()
         if press[pygame.K_HOME]:
@@ -88,7 +88,6 @@ class Game:
         os.remove("save/stats.txt")
         os.remove("save/map.csv")
         pass
-    def load_game(self):
         import gameplay
         print('LoadGame')
         import csv
@@ -154,7 +153,7 @@ class Game:
             
             self.sd.draw()
             self.sd.button()
-            if self.bm.build_stauts:
+            if Build_Menu.build_stauts:
                 self.bm.draw()
                 for item in self.allItem:
                     item.draw()
