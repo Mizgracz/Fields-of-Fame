@@ -386,7 +386,7 @@ class BuildItem:
             if not Stats.gold_count < self.koszt:
                 self.posiadanie = True
                 Stats.gold_count -= self.koszt
-                Stats.army_count_bonus += self.army_bonus
+                Stats.army_count_bonus +=  self.army_bonus
                 Stats.gold_count_bonus += self.gold_bonus
             pygame.time.Clock().tick(5)
         pass
