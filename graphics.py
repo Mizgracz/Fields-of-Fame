@@ -123,8 +123,8 @@ class Map(pygame.sprite.Group):
         przesuniecie_y = 0
         self.texture()
         for j in range(self.num_hex_y):  # tworzenie hexów (jako nowy obiekt) nadawanie im położenia
-            x = -1640
-            y = j * 152
+            x = -1625
+            y = (j * 152) - 10
             for i in range(self.num_hex_x):
                 
                 self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz],licz, self, False, False,self.tex_id[licz])

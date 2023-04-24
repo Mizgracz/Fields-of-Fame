@@ -2,6 +2,7 @@ import zipfile
 import pygame
 import time,os
 
+
 camera_stop = False
 item_offset = pygame.Vector2(0, 115)
 
@@ -30,41 +31,46 @@ class Camera:
 
         self.mouse_x = 0
         self.mouse_y = 0
+        self.move_mouse_max = 160
 
-    def mouse(self):
+
+    def mouse(self,mapsize):
 
         self.mouse_x, self.mouse_y = pygame.mouse.get_pos()
-        predkosc = 2
+        predkosc = 5
         press = pygame.key.get_pressed()
         if camera_stop is False:
             if not press[pygame.K_LCTRL]:
-                if self.mouse_x < 30:
-                    self.camera_x += (predkosc + 10)
-                elif self.mouse_x < 80:
-                    self.camera_x += (predkosc + 5)
-                elif self.mouse_x < 160:
-                    self.camera_x += predkosc
+                if self.camera_x < 1600:
+                    if self.mouse_x < 30:
+                        self.camera_x += (predkosc + 10)
+                    elif self.mouse_x < 80:
+                        self.camera_x += (predkosc + 5)
+                    elif self.mouse_x < self.move_mouse_max:
+                        self.camera_x += predkosc
+                if self.camera_x > 1640 - (mapsize * 130)+1110:
+                    if self.mouse_x > 1240:
+                        self.camera_x -= predkosc + 10
+                    elif self.mouse_x > 1190:
+                        self.camera_x -= predkosc + 5
+                    elif self.mouse_x > 1110:
+                        self.camera_x -= predkosc
 
-                if self.mouse_x > 1240:
-                    self.camera_x -= predkosc + 10
-                elif self.mouse_x > 1190:
-                    self.camera_x -= predkosc + 5
-                elif self.mouse_x > 1110:
-                    self.camera_x -= predkosc
+                if self.camera_y < - 20:
+                    if self.mouse_y < 30:
+                        self.camera_y += predkosc + 10
+                    elif self.mouse_y < 80:
+                        self.camera_y += predkosc + 5
+                    elif self.mouse_y < 160:
+                        self.camera_y += predkosc
 
-                if self.mouse_y < 30:
-                    self.camera_y += predkosc + 10
-                elif self.mouse_y < 80:
-                    self.camera_y += predkosc + 5
-                elif self.mouse_y < 160:
-                    self.camera_y += predkosc
-
-                if self.mouse_y > 670:
-                    self.camera_y -= predkosc + 10
-                elif self.mouse_y > 620:
-                    self.camera_y -= predkosc + 5
-                elif self.mouse_y > 540:
-                    self.camera_y -= predkosc
+                if self.camera_y > (-152*mapsize/2) - (75*mapsize/2) + 825:
+                    if self.mouse_y > 670:
+                        self.camera_y -= predkosc + 10
+                    elif self.mouse_y > 620:
+                        self.camera_y -= predkosc + 5
+                    elif self.mouse_y > 540:
+                        self.camera_y -= predkosc
 
     def keybord(self):
         press = pygame.key.get_pressed()

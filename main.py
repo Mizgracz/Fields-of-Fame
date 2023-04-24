@@ -7,11 +7,11 @@ import sys,os
 
 
 # config
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1080
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
 clock = pygame.time.Clock()
 res = (SCREEN_WIDTH, SCREEN_HEIGHT)
-screen = pygame.display.set_mode((res),pygame.FULLSCREEN)
+screen = pygame.display.set_mode(res)
 max_tps = 60.0
 
 folder_path = "save"
@@ -29,8 +29,9 @@ class Game:
     def __init__(self):
         pygame.init()
         self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
+        self.size = self.start_menu.MAP_SIZE
         self.camera = Camera()
-        self.map = Map(self.start_menu.MAP_SIZE, self.start_menu.MAP_SIZE, screen, self.camera)
+        self.map = Map(self.size, self.size, screen, self.camera)
         self.map.texture()
         self.map.generate()
         self.up_bar = UpBar(screen)
@@ -146,7 +147,7 @@ class Game:
 
             screen.fill((255, 255, 255))
             self.handle_events()
-            self.camera.mouse()
+            self.camera.mouse(self.size)
             self.camera.keybord()
             self.map.draw()
             self.map.zajmij_pole()
