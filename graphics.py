@@ -210,6 +210,5 @@ class Map(pygame.sprite.Group):
 
                     if touching:
                         self.allhex["hex", i].zajete = True
-                        print(f"klikniecie{i}")
                         Stats.player_hex_status = False
                         Stats.terrain_count += 1

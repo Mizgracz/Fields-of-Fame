@@ -7,11 +7,11 @@ import sys,os
 
 
 # config
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 720
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
 clock = pygame.time.Clock()
 res = (SCREEN_WIDTH, SCREEN_HEIGHT)
-screen = pygame.display.set_mode(res)
+screen = pygame.display.set_mode((res),pygame.FULLSCREEN)
 max_tps = 60.0
 
 folder_path = "save"

@@ -165,9 +165,6 @@ class Timer:
         folder_path = "save"
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
-            print(f"Folder {folder_path} został utworzony.")
-        else:
-            print(f"Folder {folder_path} już istnieje.")
 
         with open('save/map.csv','w') as savefile:
             savefile.write('x;y;number;texture_index;zajete\n')
