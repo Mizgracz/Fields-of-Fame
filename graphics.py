@@ -140,7 +140,7 @@ class Map(pygame.sprite.Group):
                 przesuniecie_x = 0
             else:
                 przesuniecie_x += -65
-            przesuniecie_y += -40
+            przesuniecie_y += -38
 
     def draw(self):  # wyświetlanie mapy na ekranie
         for h in self.sprites():
