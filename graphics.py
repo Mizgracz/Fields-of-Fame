@@ -214,14 +214,15 @@ class Map(pygame.sprite.Group):
                 przesuniecie_x += -65
             przesuniecie_y += -38
 
-    def draw(self):  # wyświetlanie mapy na ekranie
+    def Draw(self,width,height):  # wyświetlanie mapy na ekranie
 
 
         for h in self.sprites():
-                if (1920 > h.polozenie_hex_x + self.camera.camera_x > -500) or (
-                        1080 > h.polozenie_hex_y + self.camera.camera_y > -500):
-                    self.screen.blit(h.texture, (h.polozenie_hex_x + self.camera.camera_x, h.polozenie_hex_y +
-                                                      self.camera.camera_y))
+                if width > h.polozenie_hex_x + self.camera.camera_x > -200:
+                    if height > h.polozenie_hex_y + self.camera.camera_y > -200:
+                        self.screen.blit(h.texture, (h.polozenie_hex_x + self.camera.camera_x, h.polozenie_hex_y +
+                                                     self.camera.camera_y))
+
 
     def rysuj_obwodke_i_zajete(self):
         for i in range(self.num_hex_y * self.num_hex_y):

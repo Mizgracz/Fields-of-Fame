@@ -92,7 +92,7 @@ class Game:
                 savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index}')
                 savefile.write('\n')
         with open('save/stats.txt','w') as savefile:
-            
+
             savefile.write(f'gold_count:{Stats.gold_count}\n')
             savefile.write(f'army_count:{Stats.army_count}\n')
             savefile.write(f'player_hex_status:{Stats.player_hex_status}\n')
@@ -123,14 +123,14 @@ class Game:
                     self.map.allhex["hex", i].zajete = (row[4])
                     self.map.allhex['hex',i].update_texture()
                 i+=1
-            
+
             pass
         with open('save/stats.txt','r') as savefile:
             # csvfile = csv.reader(savefile,delimiter=':')
             stats,col2 = [],[]
             for line in savefile:
                 stats += [line.strip().split(":")]
-                
+
             gameplay.build_stauts = bool(stats[0][1])
             gameplay.build =bool(stats[1][1])
             gameplay.gold_count = int(stats[2][1])
@@ -146,49 +146,6 @@ class Game:
         os.remove("save/stats.txt")
         os.remove("save/map.csv")
         pass
-    def run(self):
-        
-        while True:
-            while Menu.status:
-                self.start_menu.run()
-            while LoadMenu.status:
-                self.loadmenu.draw()
-                self.loadmenu.update()
-            while SaveMenu.status:
-                self.savemenu.draw()
-                self.savemenu.update()
-
-
-            screen.fill((255, 255, 255))
-            self.handle_events()
-            self.camera.mouse(self.size)
-            self.camera.keybord()
-            self.map.draw()
-
-            self.map.zajmij_pole()
-            self.map.colision_detection_obwodka()
-            self.map.rysuj_obwodke_i_zajete()
-            self.up_bar.draw()
-            
-            self.sd.draw()
-            self.sd.button()
-            if Build_Menu.build_stauts:
-                self.bm.draw()
-                for item in self.allItem:
-                    item.draw()
-                    item.buy()
-            if not self.bm.build_stauts:
-                self.dec.click()
-
-            self.klepsydra1.draw()
-            if Stats.wyb == False:
-                self.klepsydra1.turn()
-            if Stats.wyb:
-                self.dec.draw()
-            self.timer.update()
-            FPS()
-            pygame.display.flip()
-            clock.tick(max_tps)
 
     def save_game(self):
         print('SaveGame')
@@ -219,11 +176,55 @@ class Game:
         os.remove("save/map.csv")
         pass
 
+
+    def run(self):
+
+        while True:
+            while Menu.status:
+                self.start_menu.run()
+            while LoadMenu.status:
+                self.loadmenu.draw()
+                self.loadmenu.update()
+            while SaveMenu.status:
+                self.savemenu.draw()
+                self.savemenu.update()
+
+            screen.fill((255, 255, 255))
+            self.handle_events()
+            self.camera.mouse(self.size)
+            self.camera.keybord()
+            self.map.Draw(SCREEN_WIDTH, SCREEN_HEIGHT)
+            self.map.zajmij_pole()
+            self.map.colision_detection_obwodka()
+            self.map.rysuj_obwodke_i_zajete()
+            self.up_bar.draw()
+
+            self.sd.draw()
+            self.sd.button()
+            if Build_Menu.build_stauts:
+                self.bm.draw()
+                for item in self.allItem:
+                    item.draw()
+                    item.buy()
+            if not self.bm.build_stauts:
+                self.dec.click()
+
+            self.klepsydra1.draw()
+            if Stats.wyb == False:
+                self.klepsydra1.turn()
+            if Stats.wyb:
+                self.dec.draw()
+            self.timer.update()
+            FPS()
+            pygame.display.flip()
+            clock.tick(max_tps)
+
+
 # wykonywanie
 
 
 
 if __name__ == '__main__':
-    
+
     game = Game()
     game.run()
