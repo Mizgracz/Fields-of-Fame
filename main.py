@@ -11,18 +11,29 @@ SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 clock = pygame.time.Clock()
 res = (SCREEN_WIDTH, SCREEN_HEIGHT)
-screen = pygame.display.set_mode(res)
-max_tps = 60.0
+
+flags = pygame.DOUBLEBUF
+screen = pygame.display.set_mode(res, flags, 16)
+max_tps = 6000.0
 
 folder_path = "save"
 if not os.path.exists(folder_path):
     os.makedirs(folder_path)
 
 pygame.init()
-
+fps_on = True
 pygame.mixer.music.load("music/main.mp3")
 pygame.mixer.music.play(-1)
 
+
+
+def FPS():
+
+    if fps_on:
+        fps = str(int(clock.get_fps()))
+        font = pygame.font.Font(None, 30)
+        fps_text = font.render(fps, 1, pygame.Color('red'))
+        screen.blit(fps_text, (10, 40))
 
 # class game
 class Game:
@@ -38,7 +49,7 @@ class Game:
         self.klepsydra1 = Hourglass(screen)
         self.dec = Decision(screen)
         self.bm = Build_Menu(screen)
-        self.timer = Timer(res, screen, screen,self)
+        self.timer = Timer(screen,self)
         self.sd = SideMenu(screen)
 
         self.allItem = [   # Budynki
@@ -48,9 +59,13 @@ class Game:
         self.loadmenu = LoadMenu(screen,self)
         self.savemenu = SaveMenu(screen,self)
     def handle_events(self):
+        global fps_on
+        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_F5:
+                fps_on = not fps_on
         press = pygame.key.get_pressed()
 
         if press[pygame.K_ESCAPE]:
@@ -64,13 +79,12 @@ class Game:
             self.camera.camera_y = 0
 
 
+
     def save_game(self):
         folder_path = "save"
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
             print(f"Folder {folder_path} został utworzony.")
-        else:
-            print(f"Folder {folder_path} już istnieje.")
 
         with open('save/map.csv','w') as savefile:
             savefile.write('x;y;number;texture_index;verticles\n')
@@ -153,7 +167,7 @@ class Game:
             self.map.zajmij_pole()
             self.map.colision_detection_obwodka()
             self.map.rysuj_obwodke_i_zajete()
-            self.up_bar.score()
+            self.up_bar.draw()
             
             self.sd.draw()
             self.sd.button()
@@ -171,8 +185,8 @@ class Game:
             if Stats.wyb:
                 self.dec.draw()
             self.timer.update()
+            FPS()
             pygame.display.flip()
-
             clock.tick(max_tps)
 
     def save_game(self):
