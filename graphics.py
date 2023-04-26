@@ -30,7 +30,7 @@ class Hex(pygame.sprite.Sprite):
             self.rodzaj_surowca_var = self.zwroc_liste()
     def rodzaj_surowca(self):
         return self.texture
-        
+
     def texturing(self,group):
         if self.number ==137:
             return group.castle_surface
@@ -101,7 +101,7 @@ class Map(pygame.sprite.Group):
 
     def __init__(self, numx, numy, screen, camera):
         super().__init__()
-
+        self.change_surf = pygame.Surface(pygame.display.get_window_size(), pygame.SRCALPHA)
         self.colision_surface = pygame.Surface(pygame.display.get_window_size(), pygame.SRCALPHA)
         self.colision_rect = self.colision_surface.get_rect()
 
@@ -110,7 +110,7 @@ class Map(pygame.sprite.Group):
         self.hex_zajete_surface = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
         self.hex_zajete_surfaceNIE = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
         self.hex_zajete_surface.set_alpha(100)
-        
+
 
         # BUDYNKI
         self.willage_surface = pygame.image.load("texture/hex/budynki.png").convert_alpha()
@@ -189,7 +189,7 @@ class Map(pygame.sprite.Group):
             x = -1640
             y = j * 152
             for i in range(self.num_hex_x):
-                
+
 
                 # elif self.alltex["hex", licz] == self.castle_surface or self.alltex["hex", licz] == self.willage_surface:
                 #     self.allhex["hex", licz] = Budynek((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz], licz, self, False, False,self.tex_id[licz])
@@ -215,9 +215,13 @@ class Map(pygame.sprite.Group):
             przesuniecie_y += -38
 
     def draw(self):  # wyświetlanie mapy na ekranie
+
+
         for h in self.sprites():
-            self.screen.blit(h.texture, (h.polozenie_hex_x + self.camera.camera_x, h.polozenie_hex_y +
-                                         self.camera.camera_y))
+                if (1920 > h.polozenie_hex_x + self.camera.camera_x > -500) or (
+                        1080 > h.polozenie_hex_y + self.camera.camera_y > -500):
+                    self.screen.blit(h.texture, (h.polozenie_hex_x + self.camera.camera_x, h.polozenie_hex_y +
+                                                      self.camera.camera_y))
 
     def rysuj_obwodke_i_zajete(self):
         for i in range(self.num_hex_y * self.num_hex_y):
@@ -227,7 +231,7 @@ class Map(pygame.sprite.Group):
             if self.allhex["hex", i].zajete:
                 self.screen.blit(self.hex_zajete_surface, (self.allhex["hex", i].polozenie_hex_x + self.camera.camera_x,
                                                             self.allhex["hex", i].polozenie_hex_y + self.camera.camera_y))
-    
+
     def colision_detection_obwodka(self):
         pos = pygame.mouse.get_pos()
         for c in range(self.num_hex_y * self.num_hex_x):
@@ -263,7 +267,7 @@ class Map(pygame.sprite.Group):
 
 
                 else:
-                    
+
                     self.allhex["hex", c].obwodka = False
 
             except IndexError as e:

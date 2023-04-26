@@ -164,6 +164,7 @@ class Game:
             self.camera.mouse(self.size)
             self.camera.keybord()
             self.map.draw()
+
             self.map.zajmij_pole()
             self.map.colision_detection_obwodka()
             self.map.rysuj_obwodke_i_zajete()
