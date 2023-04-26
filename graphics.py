@@ -220,10 +220,11 @@ class Map(pygame.sprite.Group):
     def Draw(self, width, height):  # wyświetlanie mapy na ekranie
 
         camera_x = self.camera.camera_x
+        camera_y = self.camera.camera_y
         for h in self.sprites():
             position_x = h.polozenie_hex_x + camera_x
             if width > position_x > -200:
-                position_y = h.polozenie_hex_y + self.camera.camera_y
+                position_y = h.polozenie_hex_y + camera_y
                 if height > position_y > -200:
                     self.screen.blit(h.texture, (position_x, position_y))
 
