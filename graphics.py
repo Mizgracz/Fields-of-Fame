@@ -1,5 +1,4 @@
 
-
 import pygame
 
 import random
@@ -7,8 +6,8 @@ from gameplay import Stats
 
 
 class Hex(pygame.sprite.Sprite):
-    allsurowiec = [17,18,19,20,21,22,23,24]
-    def __init__(self, x, y, num, group, obw, zaj,tex_id):
+    allsurowiec = [17 ,18 ,19 ,20 ,21 ,22 ,23 ,24]
+    def __init__(self, x, y, num, group, obw, zaj ,tex_id):
         super().__init__(group)
         self.szerokosc = 130
         self.wysokosc = 152
@@ -20,7 +19,7 @@ class Hex(pygame.sprite.Sprite):
         self.group = group
         self.texture_index = tex_id
         self.texture = self.texturing(self.group)
-        self.rodzaj = self.surowiec()#self.czy_to_surowiec()
+        self.rodzaj = self.surowiec(  )  # self.czy_to_surowiec()
         self.rodzaj_surowca_var = None
         if self.number == 137:
             self.zajete =True
@@ -28,11 +27,12 @@ class Hex(pygame.sprite.Sprite):
             self.rodzaj_surowca_var = None
         else:
             self.rodzaj_surowca_var = self.zwroc_liste()
+
     def rodzaj_surowca(self):
         return self.texture
 
-    def texturing(self,group):
-        if self.number ==137:
+    def texturing(self, group):
+        if self.number == 137:
             return group.castle_surface
         if self.texture_index == 1:
             return group.grass_surface
@@ -82,6 +82,7 @@ class Hex(pygame.sprite.Sprite):
             return group.mine_iron
         elif self.texture_index == 24:
             return group.mine_gold
+
     def surowiec(self):
         if self.texture_index in Hex.allsurowiec:
             return 'surowiec'
@@ -90,18 +91,18 @@ class Hex(pygame.sprite.Sprite):
 
     def update_texture(self):
         self.texture = self.texturing(self.group)
+
     def zwroc_liste(self):
         for k in range(len(self.group.surowce_lista)):
             if self.texture == self.group.surowce_lista[k][0]:
                 return self.group.surowce_lista[k][1]
 
 
-
 class Map(pygame.sprite.Group):
 
     def __init__(self, numx, numy, screen, camera):
         super().__init__()
-        self.change_surf = pygame.Surface(pygame.display.get_window_size(), pygame.SRCALPHA)
+
         self.colision_surface = pygame.Surface(pygame.display.get_window_size(), pygame.SRCALPHA)
         self.colision_rect = self.colision_surface.get_rect()
 
@@ -110,7 +111,6 @@ class Map(pygame.sprite.Group):
         self.hex_zajete_surface = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
         self.hex_zajete_surfaceNIE = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
         self.hex_zajete_surface.set_alpha(100)
-
 
         # BUDYNKI
         self.willage_surface = pygame.image.load("texture/hex/budynki.png").convert_alpha()
@@ -142,18 +142,21 @@ class Map(pygame.sprite.Group):
         self.water2_surface = pygame.image.load("texture/hex/woda_hex_2.png", ).convert_alpha()
         self.water3_surface = pygame.image.load("texture/hex/woda_hex_statek.png", ).convert_alpha()
         self.water3_surface2 = self.water3_surface
-        print(self.water3_surface==self.water3_surface2)
-        self.elements = [((self.grass_surface,1), 20), ((self.grass2_surface,2), 20), ((self.grass3_surface,3), 20),
-                         ((self.forest_surface,4), 15), ((self.mountain_surface,5), 4), ((self.water_surface,6), 3),
-                         ((self.water2_surface,7), 1), ((self.water3_surface,8), 1), ((self.cereal_surface,9), 1),
-                         ((self.willage_surface,10), 0.7), ((self.mountain_pass_surface,11), 2), ((self.mountain2_surface,12), 4),
-                         ((self.forest_full_surface,13), 0), ((self.forest3_surface,14), 8), ((self.forest4_surface,15), 8),
-                         ((self.castle_surface,16), 0.7),((self.clay,17),0.3),((self.mine_diamonds,18),0.1),
-                         ((self.fish_port,19),0.8),((self.sawmill,20),0.5),((self.grain,21),0.65),
-                         ((self.mine_rocks,22),0.3),((self.mine_iron,23),0.3),((self.mine_gold,24),0.3)]
+        print(self.water3_surface == self.water3_surface2)
+        self.elements = [((self.grass_surface, 1), 20), ((self.grass2_surface, 2), 20), ((self.grass3_surface, 3), 20),
+                         ((self.forest_surface, 4), 15), ((self.mountain_surface, 5), 4), ((self.water_surface, 6), 3),
+                         ((self.water2_surface, 7), 1), ((self.water3_surface, 8), 1), ((self.cereal_surface, 9), 1),
+                         ((self.willage_surface, 10), 0.7), ((self.mountain_pass_surface, 11), 2),
+                         ((self.mountain2_surface, 12), 4),
+                         ((self.forest_full_surface, 13), 0), ((self.forest3_surface, 14), 8),
+                         ((self.forest4_surface, 15), 8),
+                         ((self.castle_surface, 16), 0.7), ((self.clay, 17), 0.3), ((self.mine_diamonds, 18), 0.1),
+                         ((self.fish_port, 19), 0.8), ((self.sawmill, 20), 0.5), ((self.grain, 21), 0.65),
+                         ((self.mine_rocks, 22), 0.3), ((self.mine_iron, 23), 0.3), ((self.mine_gold, 24), 0.3)]
 
         self.num_hex_x = numx
         self.num_hex_y = numy
+        self.num_hex_all = numx * numy
         self.allhex = {}
         self.alltex = {}
         self.screen = screen
@@ -164,7 +167,10 @@ class Map(pygame.sprite.Group):
         self.cameray = self.camera.camera_y
         self.tex_id = []
         # lista z surowcami, trzecie pole w kazdym rzedzie to "wartosc" tego pola
-        self.surowce_lista = [(self.clay, "clay", 10), (self.mine_diamonds, "mine_diamonds", 200), (self.mine_rocks, "mine_rocks", 60), (self.mine_iron, "mine_iron", 80), (self.mine_gold, "mine_gold", 140), (self.fish_port, "fish_port", 20), (self.sawmill,"sawmill", 40), (self.grain, "grain", 10)]
+        self.surowce_lista = [(self.clay, "clay", 10), (self.mine_diamonds, "mine_diamonds", 200),
+                              (self.mine_rocks, "mine_rocks", 60), (self.mine_iron, "mine_iron", 80),
+                              (self.mine_gold, "mine_gold", 140), (self.fish_port, "fish_port", 20),
+                              (self.sawmill, "sawmill", 40), (self.grain, "grain", 10)]
 
     def texture(self):
 
@@ -176,10 +182,6 @@ class Map(pygame.sprite.Group):
                 self.tex_id += [random.choices(*zip(*self.elements), k=1)[0][1]]
                 self.alltex['hex', i] = random.choices(*zip(*self.elements), k=1)[0]
 
-
-
-
-
     def generate(self):
         licz = 0
         przesuniecie_x = 0
@@ -190,13 +192,14 @@ class Map(pygame.sprite.Group):
             y = j * 152
             for i in range(self.num_hex_x):
 
-
                 # elif self.alltex["hex", licz] == self.castle_surface or self.alltex["hex", licz] == self.willage_surface:
                 #     self.allhex["hex", licz] = Budynek((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz], licz, self, False, False,self.tex_id[licz])
                 # else:
-                self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), licz, self, False, False,self.tex_id[licz])
+                self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), licz, self, False, False,
+                                               self.tex_id[licz])
 
-                self.allrect['hex', licz] = self.allhex["hex", licz].texture.get_rect(midleft=(self.allhex["hex", licz].polozenie_hex_x, self.allhex["hex", licz].polozenie_hex_y + 75))
+                self.allrect['hex', licz] = self.allhex["hex", licz].texture.get_rect(
+                    midleft=(self.allhex["hex", licz].polozenie_hex_x, self.allhex["hex", licz].polozenie_hex_y + 75))
                 self.allmask['hex', licz] = pygame.mask.from_surface(self.allhex["hex", licz].texture)
                 x += self.allhex["hex", licz].szerokosc
                 # if self.allhex['hex',licz].rodzaj == 'surowiec':
@@ -214,31 +217,34 @@ class Map(pygame.sprite.Group):
                 przesuniecie_x += -65
             przesuniecie_y += -38
 
-    def Draw(self,width,height):  # wyświetlanie mapy na ekranie
+    def Draw(self, width, height):  # wyświetlanie mapy na ekranie
 
-
+        camera_x = self.camera.camera_x
         for h in self.sprites():
-                if width > h.polozenie_hex_x + self.camera.camera_x > -200:
-                    if height > h.polozenie_hex_y + self.camera.camera_y > -200:
-                        self.screen.blit(h.texture, (h.polozenie_hex_x + self.camera.camera_x, h.polozenie_hex_y +
-                                                     self.camera.camera_y))
+            position_x = h.polozenie_hex_x + camera_x
+            if width > position_x > -200:
+                position_y = h.polozenie_hex_y + self.camera.camera_y
+                if height > position_y > -200:
+                    self.screen.blit(h.texture, (position_x, position_y))
+
 
 
     def rysuj_obwodke_i_zajete(self):
-        for i in range(self.num_hex_y * self.num_hex_y):
-            if self.allhex["hex", i].obwodka:
-                self.screen.blit(self.hex_obwodka_surface, (self.allhex["hex", i].polozenie_hex_x + self.camera.camera_x,
-                                                            self.allhex["hex", i].polozenie_hex_y + self.camera.camera_y))
-            if self.allhex["hex", i].zajete:
-                self.screen.blit(self.hex_zajete_surface, (self.allhex["hex", i].polozenie_hex_x + self.camera.camera_x,
-                                                            self.allhex["hex", i].polozenie_hex_y + self.camera.camera_y))
+
+        for i in self.sprites():
+            if i.obwodka:
+                self.screen.blit(self.hex_obwodka_surface, [i.polozenie_hex_x + self.camera.camera_x,
+                                                            i.polozenie_hex_y + self.camera.camera_y])
+            if i.zajete:
+                self.screen.blit(self.hex_zajete_surface, (i.polozenie_hex_x + self.camera.camera_x,
+                                                           i.polozenie_hex_y + self.camera.camera_y))
 
     def colision_detection_obwodka(self):
         pos = pygame.mouse.get_pos()
-        for c in range(self.num_hex_y * self.num_hex_x):
+        for c in range(self.num_hex_all):
 
             if self.camerax != self.camera.camera_x:
-                for ca in range(self.num_hex_y * self.num_hex_x):
+                for ca in range(self.num_hex_all):
                     if self.camerax < self.camera.camera_x:
                         div = self.camera.camera_x - self.camerax
                         self.allrect['hex', ca].x += div
@@ -247,7 +253,7 @@ class Map(pygame.sprite.Group):
                         self.allrect['hex', ca].x -= div
 
             if self.cameray != self.camera.camera_y:
-                for co in range(self.num_hex_y * self.num_hex_x):
+                for co in range(self.num_hex_all):
                     if self.cameray < self.camera.camera_y:
                         div = self.camera.camera_y - self.cameray
                         self.allrect['hex', co].y += div
@@ -274,15 +280,17 @@ class Map(pygame.sprite.Group):
             except IndexError as e:
                 print("Wystąpił błąd :", e)
 
+
     def zajmij_pole(self):
         import gameplay
         if Stats.player_hex_status:
             mouse_presses = pygame.mouse.get_pressed()
             if mouse_presses[0]:
                 pos1 = pygame.mouse.get_pos()
-                for i in range(self.num_hex_y * self.num_hex_x):
+                for i in range(self.num_hex_all):
                     pos_in_mask1 = pos1[0] - self.allrect['hex', i].x, pos1[1] - self.allrect['hex', i].y
-                    touching = self.allrect['hex', i].collidepoint(*pos1) and self.allmask['hex', i].get_at(pos_in_mask1)
+                    touching = self.allrect['hex', i].collidepoint(*pos1) and self.allmask['hex', i].get_at(
+                        pos_in_mask1)
 
                     if touching:
                         if self.allhex["hex", i].rodzaj == "surowiec":
@@ -298,4 +306,5 @@ class Map(pygame.sprite.Group):
                         self.allhex["hex", i].zajete = True
                         Stats.player_hex_status = False
                         Stats.terrain_count += 1
+
 

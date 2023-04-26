@@ -13,7 +13,7 @@ clock = pygame.time.Clock()
 res = (SCREEN_WIDTH, SCREEN_HEIGHT)
 
 flags = pygame.DOUBLEBUF
-screen = pygame.display.set_mode(res, flags, 16)
+screen = pygame.display.set_mode(res, flags, 8)
 max_tps = 6000.0
 
 folder_path = "save"
@@ -42,7 +42,7 @@ class Game:
         self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
         self.size = self.start_menu.MAP_SIZE
         self.camera = Camera()
-        self.map = Map(self.size, self.size, screen, self.camera)
+        self.map = Map(self.size , self.size , screen, self.camera)
         self.map.texture()
         self.map.generate()
         self.up_bar = UpBar(screen)
