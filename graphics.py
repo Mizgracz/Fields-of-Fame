@@ -171,6 +171,7 @@ class Map(pygame.sprite.Group):
                               (self.mine_rocks, "mine_rocks", 60), (self.mine_iron, "mine_iron", 80),
                               (self.mine_gold, "mine_gold", 140), (self.fish_port, "fish_port", 20),
                               (self.sawmill, "sawmill", 40), (self.grain, "grain", 10)]
+        self.visible_hex = {}
 
     def texture(self):
 
@@ -218,16 +219,19 @@ class Map(pygame.sprite.Group):
             przesuniecie_y += -38
 
     def Draw(self, width, height):  # wyświetlanie mapy na ekranie
-
+        licznik = -1
         camera_x = self.camera.camera_x
         camera_y = self.camera.camera_y
+        k = 0
         for h in self.sprites():
+            licznik += 1
             position_x = h.polozenie_hex_x + camera_x
             if width > position_x > -200:
                 position_y = h.polozenie_hex_y + camera_y
                 if height > position_y > -200:
                     self.screen.blit(h.texture, (position_x, position_y))
-
+                    self.visible_hex['hex', k] = licznik
+                    k += 1
 
 
     def rysuj_obwodke_i_zajete(self):
@@ -242,45 +246,29 @@ class Map(pygame.sprite.Group):
 
     def colision_detection_obwodka(self):
         pos = pygame.mouse.get_pos()
-        for c in range(self.num_hex_all):
 
-            if self.camerax != self.camera.camera_x:
-                for ca in range(self.num_hex_all):
-                    if self.camerax < self.camera.camera_x:
-                        div = self.camera.camera_x - self.camerax
-                        self.allrect['hex', ca].x += div
-                    else:
-                        div = self.camerax - self.camera.camera_x
-                        self.allrect['hex', ca].x -= div
+        if self.camerax != self.camera.camera_x or self.cameray != self.camera.camera_y:
 
-            if self.cameray != self.camera.camera_y:
-                for co in range(self.num_hex_all):
-                    if self.cameray < self.camera.camera_y:
-                        div = self.camera.camera_y - self.cameray
-                        self.allrect['hex', co].y += div
-                    else:
-                        div = self.cameray - self.camera.camera_y
-                        self.allrect['hex', co].y -= div
+            dx = self.camera.camera_x - self.camerax
+            dy = self.camera.camera_y - self.cameray
+
+
+            for rect in self.allrect.values():
+                rect.x += dx
+                rect.y += dy
+
 
             self.camerax = self.camera.camera_x
             self.cameray = self.camera.camera_y
 
-            pos_in_mask = pos[0] - self.allrect['hex', c].x, pos[1] - self.allrect['hex', c].y
-            try:
 
-                touching = self.allrect['hex', c].collidepoint(*pos) and self.allmask['hex', c].get_at(pos_in_mask)
-                if touching:
+        for c, rect in self.allrect.items():
+            pos_in_mask = pos[0] - rect.x, pos[1] - rect.y
 
-                    self.allhex["hex", c].obwodka = True
-
-
-                else:
-
-                    self.allhex["hex", c].obwodka = False
-
-            except IndexError as e:
-                print("Wystąpił błąd :", e)
-
+            if rect.collidepoint(*pos) and self.allmask[c].get_at(pos_in_mask):
+                self.allhex[c].obwodka = True
+            else:
+                self.allhex[c].obwodka = False
 
     def zajmij_pole(self):
         import gameplay

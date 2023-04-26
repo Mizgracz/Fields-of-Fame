@@ -13,7 +13,7 @@ clock = pygame.time.Clock()
 res = (SCREEN_WIDTH, SCREEN_HEIGHT)
 
 flags = pygame.DOUBLEBUF
-screen = pygame.display.set_mode(res, flags, 8)
+screen = pygame.display.set_mode(res, flags, 32)
 max_tps = 6000.0
 
 folder_path = "save"
