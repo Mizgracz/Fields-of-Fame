@@ -104,23 +104,13 @@ class UpBar:
         self.up_bar_surface = pygame.Surface((self.SCREEN_WIDTH, 30))
         # grafiki
         self.bar_main = pygame.image.load('texture/ui/up_bar/bar.png').convert_alpha()
-        self.bar_gold = pygame.image.load('texture/ui/up_bar/bar_zloto.png').convert_alpha()
-        self.bar_army = pygame.image.load('texture/ui/up_bar/bar_wojsko.png').convert_alpha()
-        self.bar_field = pygame.image.load('texture/ui/up_bar/bar_pola.png').convert_alpha()
-
         self.screen = screen
 
-        self.up_bar_surface.blit(self.bar_main, (0, 0))
-
-        self.up_bar_surface.blit(self.bar_gold, (10, 2))
-        self.up_bar_surface.blit(self.bar_army, (200, 2))
-        self.up_bar_surface.blit(self.bar_field, (390, 2))
-        self.bar.blit(self.up_bar_surface,(0,0))
 
 
     def draw(self):
         # Wyświetlenie powierzchni górnej belki na ekranie
-        self.screen.blit(self.bar, (0, 0))
+        self.screen.blit(self.bar_main, (0, 0))
         self.update()
     def update(self):
 
@@ -287,27 +277,24 @@ class SideMenu:
         FONT_NAME = 'timesnewroman'
         self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
         ########
-        self.texture_main = "texture/ui/side_bar/praweUI_glowne.png"
-        self.texture_up = "texture/ui/side_bar/praweUI_gorne.png"
-        self.texture_down = "texture/ui/side_bar/praweUI_dolne.png"
+        self.texture_main = "texture/ui/side_bar/sideUI.png"
+
         self.texture_button = "texture/ui/side_bar/praweUI_srodek.png"
 
         self.main_surfarce = pygame.image.load(self.texture_main).convert_alpha()
-        self.up_surfarce = pygame.image.load(self.texture_up).convert_alpha()
-        self.down_surfarce = pygame.image.load(self.texture_down).convert_alpha()
+
         self.button_surfarce = pygame.image.load(self.texture_button).convert_alpha()
         self.main_rect = self.main_surfarce.get_rect(topleft=(self.SCREEN_WIDTH-256, 30))
         self.button_rect = self.button_surfarce.get_rect(topleft=(self.SCREEN_WIDTH-246, 258))
-        self.up_rect = self.up_surfarce.get_rect(topleft=(10,12))
-        self.down_rect = self.down_surfarce.get_rect(topleft=(10,410))
+
         self.screen = screen
 
         ####
         self.main_surface = pygame.Surface((256,self.SCREEN_HEIGHT-30),pygame.SRCALPHA)
         self.main_surface.blit(self.main_surfarce,(0,0))
-        self.main_surface.blit(self.up_surfarce,self.up_rect)
+
         self.main_surface.blit(self.button_surfarce,(10, 258))
-        self.main_surface.blit(self.down_surfarce,self.down_rect)
+
         ####
 
 

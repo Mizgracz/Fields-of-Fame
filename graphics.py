@@ -22,7 +22,7 @@ class Hex(pygame.sprite.Sprite):
         self.rodzaj = self.surowiec(  )  # self.czy_to_surowiec()
         self.rodzaj_surowca_var = None
         if self.number == 137:
-            self.zajete =True
+            self.zajete = True
         if self.rodzaj == 'hex':
             self.rodzaj_surowca_var = None
         else:
@@ -219,6 +219,7 @@ class Map(pygame.sprite.Group):
             przesuniecie_y += -38
 
     def Draw(self, width, height):  # wyświetlanie mapy na ekranie
+
         licznik = -1
         camera_x = self.camera.camera_x
         camera_y = self.camera.camera_y

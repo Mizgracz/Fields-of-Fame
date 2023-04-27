@@ -1,10 +1,10 @@
 import zipfile
 from graphics import Map
-from gameplay import Camera, UpBar, Hourglass, Decision, Build_Menu, BuildItem, Timer, SideMenu ,Stats
-from menu import Menu ,LoadMenu,SaveMenu
+from gameplay import Camera, UpBar, Hourglass, Decision, Build_Menu, BuildItem, Timer, SideMenu, Stats
+from menu import Menu, LoadMenu, SaveMenu
 import pygame
-import sys,os
-
+import sys
+import os
 
 # config
 SCREEN_WIDTH = 1280
@@ -26,14 +26,13 @@ pygame.mixer.music.load("music/main.mp3")
 pygame.mixer.music.play(-1)
 
 
-
-def FPS():
-
+def fps():
     if fps_on:
-        fps = str(int(clock.get_fps()))
+        fps_str = str(int(clock.get_fps()))
         font = pygame.font.Font(None, 30)
-        fps_text = font.render(fps, 1, pygame.Color('red'))
+        fps_text = font.render(fps_str, True, pygame.Color('red'))
         screen.blit(fps_text, (10, 40))
+
 
 # class game
 class Game:
@@ -42,22 +41,23 @@ class Game:
         self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
         self.size = self.start_menu.MAP_SIZE
         self.camera = Camera()
-        self.map = Map(self.size , self.size , screen, self.camera)
+        self.map = Map(self.size, self.size, screen, self.camera)
         self.map.texture()
         self.map.generate()
         self.up_bar = UpBar(screen)
         self.klepsydra1 = Hourglass(screen)
         self.dec = Decision(screen)
         self.bm = Build_Menu(screen)
-        self.timer = Timer(screen,self)
+        self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
 
-        self.allItem = [   # Budynki
+        self.allItem = [  # Budynki
             BuildItem(self.bm.item_menu_surf, 50, 'wieza', 'Wieża strażniczą (+10 wojska na turę)', 10, 0),
             BuildItem(self.bm.item_menu_surf, 50, 'tartak', 'Farma (+ 10 złota na ture)', 0, 10)]
 
-        self.loadmenu = LoadMenu(screen,self)
-        self.savemenu = SaveMenu(screen,self)
+        self.loadmenu = LoadMenu(screen, self)
+        self.savemenu = SaveMenu(screen, self)
+
     def handle_events(self):
         global fps_on
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
@@ -78,20 +78,18 @@ class Game:
             self.camera.camera_x = 0
             self.camera.camera_y = 0
 
-
-
     def save_game(self):
         folder_path = "save"
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
             print(f"Folder {folder_path} został utworzony.")
 
-        with open('save/map.csv','w') as savefile:
+        with open('save/map.csv', 'w') as savefile:
             savefile.write('x;y;number;texture_index;verticles\n')
             for h in self.map.sprites():
                 savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index}')
                 savefile.write('\n')
-        with open('save/stats.txt','w') as savefile:
+        with open('save/stats.txt', 'w') as savefile:
 
             savefile.write(f'gold_count:{Stats.gold_count}\n')
             savefile.write(f'army_count:{Stats.army_count}\n')
@@ -111,28 +109,28 @@ class Game:
         import csv
         with zipfile.ZipFile("save/QSave.zip", "r") as zip:
             zip.extractall()
-        with open('save/map.csv','r') as savefile:
-            csvfile = csv.reader(savefile,delimiter=';')
+        with open('save/map.csv', 'r') as savefile:
+            csvfile = csv.reader(savefile, delimiter=';')
             i = -1
             for row in csvfile:
-                if i !=-1:
+                if i != -1:
                     self.map.allhex["hex", i].polozenie_hex_x = int(row[0])
                     self.map.allhex["hex", i].polozenie_hex_y = int(row[1])
                     self.map.allhex["hex", i].number = int(row[2])
                     self.map.allhex["hex", i].texture_index = int(row[3])
                     self.map.allhex["hex", i].zajete = (row[4])
-                    self.map.allhex['hex',i].update_texture()
-                i+=1
+                    self.map.allhex['hex', i].update_texture()
+                i += 1
 
             pass
-        with open('save/stats.txt','r') as savefile:
+        with open('save/stats.txt', 'r') as savefile:
             # csvfile = csv.reader(savefile,delimiter=':')
-            stats,col2 = [],[]
+            stats, col2 = [], []
             for line in savefile:
                 stats += [line.strip().split(":")]
 
             gameplay.build_stauts = bool(stats[0][1])
-            gameplay.build =bool(stats[1][1])
+            gameplay.build = bool(stats[1][1])
             gameplay.gold_count = int(stats[2][1])
             gameplay.army_count = int(stats[3][1])
             gameplay.terrain_count = int(stats[4][1])
@@ -155,12 +153,12 @@ class Game:
             os.makedirs(folder_path)
         print('saved 105 main.py')
 
-        with open('save/map.csv','w') as savefile:
+        with open('save/map.csv', 'w') as savefile:
             savefile.write('x;y;number;texture_index;zajete\n')
             for h in self.map.sprites():
                 savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.zajete}')
                 savefile.write('\n')
-        with open('save/stats.txt','w') as savefile:
+        with open('save/stats.txt', 'w') as savefile:
 
             savefile.write(f'gold_count:{Stats.gold_count}\n')
             savefile.write(f'army_count:{Stats.army_count}\n')
@@ -175,7 +173,6 @@ class Game:
         os.remove("save/stats.txt")
         os.remove("save/map.csv")
         pass
-
 
     def run(self):
 
@@ -210,21 +207,17 @@ class Game:
                 self.dec.click()
 
             self.klepsydra1.draw()
-            if Stats.wyb == False:
+            if not Stats.wyb:
                 self.klepsydra1.turn()
             if Stats.wyb:
                 self.dec.draw()
             self.timer.update()
-            FPS()
+            fps()
             pygame.display.flip()
             clock.tick(max_tps)
 
 
 # wykonywanie
-
-
-
 if __name__ == '__main__':
-
     game = Game()
     game.run()
