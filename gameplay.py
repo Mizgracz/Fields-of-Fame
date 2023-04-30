@@ -1,7 +1,7 @@
 import zipfile
 import pygame
 import time,os
-
+import random
 
 camera_stop = False
 item_offset = pygame.Vector2(0, 115)
@@ -23,10 +23,12 @@ class Stats:
     def __init__(self) -> None:
         pass
 
+
 def dopisz_surowiec(surowiec):
     for i in range(len(Stats.surowce_ilosc)):
         if surowiec == Stats.surowce_ilosc[i][0]:
             Stats.surowce_ilosc[i][1] += 100
+
 
 class Camera:
 
@@ -103,7 +105,7 @@ class UpBar:
         self.bar = pygame.Surface((self.SCREEN_WIDTH, 30))
         self.up_bar_surface = pygame.Surface((self.SCREEN_WIDTH, 30))
         # grafiki
-        self.bar_main = pygame.image.load('texture/ui/up_bar/bar.png').convert_alpha()
+        self.bar_main = pygame.transform.scale(pygame.image.load('texture/ui/up_bar/bar.png').convert_alpha(),(self.SCREEN_WIDTH,30))
         self.screen = screen
 
 
@@ -123,6 +125,7 @@ class UpBar:
         self.screen.blit(army_score, (210, 2))
         self.screen.blit(tiles_score, (400, 2))
         self.screen.blit(turn_score, (1100, 4))
+
 
 class Timer:
     def __init__(self, screen,game):
@@ -186,28 +189,50 @@ class Timer:
         os.remove("save/map.csv")
         pass
 
-class Hourglass:
 
-    def __init__(self, screen):
-        #SCREEN#
+class Hourglass:
+    def __init__(self, screen, frame_rate, animation_frame_interval):
         self.SCREEN_WIDTH = screen.get_size()[0]
         self.SCREEN_HEIGHT = screen.get_size()[1]
-        ########
-        self.hourglass_surface = pygame.transform.scale((pygame.image.load("texture/ui/turn/klepsydra.jpg")),
-                                                        (173, 184)).convert_alpha()
-        self.hourglass_rect = self.hourglass_surface.get_rect(center=(100, self.SCREEN_HEIGHT-100))
         self.screen = screen
+        self.hourglass_rect = pygame.Rect(10, self.SCREEN_HEIGHT - 190, 173, 184)
+        # Load animation frames
+        path_to_images = "texture/ui/klepsydra"
+        self.animation_frames = []
+        for file_name in sorted(os.listdir(path_to_images)):
+            if file_name.endswith(".png"):
+                image = pygame.image.load(os.path.join(path_to_images, file_name))
+                self.animation_frames.append(pygame.transform.scale(image, (173, 184)).convert_alpha())
+        self.frame_index = 0
+        self.frame_rate = frame_rate
+        self.animation_frame_interval = animation_frame_interval
+        self.last_frame_time = pygame.time.get_ticks()
 
     def draw(self):
-        self.screen.blit(self.hourglass_surface, self.hourglass_rect)
+        self.screen.blit(self.animation_frames[self.frame_index], self.hourglass_rect)
+
+    def next_frame(self):
+        # Switch to the next animation frame
+        self.frame_index += 1
+        if self.frame_index >= len(self.animation_frames):
+            self.frame_index = 0
 
     def turn(self):
-        colision = pygame.mouse.get_pos()
+        collision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
-        if self.hourglass_rect.collidepoint(colision) and mouse_pressed[0]:
-            if Stats.wyb == False:    
+        if self.hourglass_rect.collidepoint(collision) and mouse_pressed[0]:
+            if Stats.wyb == False:
                 Stats.wyb = True
                 Stats.turn_count += 1
+                self.next_frame()
+                self.last_frame_time = pygame.time.get_ticks()
+
+        # Check if it's time to switch animation frame
+        current_time = pygame.time.get_ticks()
+        time_since_last_frame = current_time - self.last_frame_time
+        if time_since_last_frame >= 1000 / self.frame_rate * self.animation_frame_interval:
+            self.next_frame()
+            self.last_frame_time = current_time
 
 
 class Decision:
@@ -359,7 +384,6 @@ class Build_Menu:
             
             if self.exit_button_rect.collidepoint(colision) and mouse_pressed[0]:
                 Build_Menu.build_stauts = False
-            
 
 
 class BuildItem:
@@ -428,3 +452,6 @@ class BuildItem:
                 Stats.gold_count_bonus += self.gold_bonus
             pygame.time.Clock().tick(5)
         pass
+
+
+

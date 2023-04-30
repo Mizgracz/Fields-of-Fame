@@ -1,6 +1,6 @@
 import zipfile
 from graphics import Map
-from gameplay import Camera, UpBar, Hourglass, Decision, Build_Menu, BuildItem, Timer, SideMenu, Stats
+from gameplay import Camera, UpBar, Hourglass, Decision, Build_Menu, BuildItem, Timer, SideMenu, Stats ,EventOptions,EventRender
 from menu import Menu, LoadMenu, SaveMenu
 import pygame
 import sys
@@ -11,7 +11,8 @@ SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 clock = pygame.time.Clock()
 res = (SCREEN_WIDTH, SCREEN_HEIGHT)
-
+frame_rate = 60
+animation_frame_interval = 5
 flags = pygame.DOUBLEBUF
 screen = pygame.display.set_mode(res, flags, 32)
 max_tps = 6000.0
@@ -45,11 +46,13 @@ class Game:
         self.map.texture()
         self.map.generate()
         self.up_bar = UpBar(screen)
-        self.klepsydra1 = Hourglass(screen)
+        self.klepsydra1 = Hourglass(screen, frame_rate, animation_frame_interval)
         self.dec = Decision(screen)
         self.bm = Build_Menu(screen)
         self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
+        self.ev = EventRender(screen)
+
 
         self.allItem = [  # Budynki
             BuildItem(self.bm.item_menu_surf, 50, 'wieza', 'Wieża strażniczą (+10 wojska na turę)', 10, 0),
@@ -194,7 +197,10 @@ class Game:
             self.map.zajmij_pole()
             self.map.colision_detection_obwodka()
             self.map.rysuj_obwodke_i_zajete()
+
             self.up_bar.draw()
+
+
 
             self.sd.draw()
             self.sd.button()
@@ -212,8 +218,11 @@ class Game:
             if Stats.wyb:
                 self.dec.draw()
             self.timer.update()
+
             fps()
+
             pygame.display.flip()
+
             clock.tick(max_tps)
 
 

@@ -143,9 +143,10 @@ class Map(pygame.sprite.Group):
         self.water3_surface = pygame.image.load("texture/hex/woda_hex_statek.png", ).convert_alpha()
         self.water3_surface2 = self.water3_surface
         print(self.water3_surface == self.water3_surface2)
+
         self.elements = [((self.grass_surface, 1), 20), ((self.grass2_surface, 2), 20), ((self.grass3_surface, 3), 20),
                          ((self.forest_surface, 4), 15), ((self.mountain_surface, 5), 4), ((self.water_surface, 6), 3),
-                         ((self.water2_surface, 7), 1), ((self.water3_surface, 8), 1), ((self.cereal_surface, 9), 1),
+                         ((self.water2_surface, 7), 1), ((self.water3_surface, 8), 1),
                          ((self.willage_surface, 10), 0.7), ((self.mountain_pass_surface, 11), 2),
                          ((self.mountain2_surface, 12), 4),
                          ((self.forest_full_surface, 13), 0), ((self.forest3_surface, 14), 8),
