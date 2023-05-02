@@ -3,8 +3,12 @@ import pygame
 import time,os
 import random
 
+
 camera_stop = False
 item_offset = pygame.Vector2(0, 115)
+
+
+
 
 
 class Stats:
@@ -101,6 +105,7 @@ class UpBar:
         FONT_NAME = 'timesnewroman'
         FONT_SIZE = 17
         self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
+
         ########
         self.bar = pygame.Surface((self.SCREEN_WIDTH, 30))
         self.up_bar_surface = pygame.Surface((self.SCREEN_WIDTH, 30))
@@ -454,4 +459,92 @@ class BuildItem:
         pass
 
 
+class Event:
+    def __init__(self, ekran, opis, grafika, ilosc_opcji, opisy_opcji):
+        Render = EventRender(ekran, opis, grafika)
+        Render.draw()
+        Choose = EventOptions(ilosc_opcji, opisy_opcji, ekran)
+        Choose.draw()
+        Choose.colision_check()
 
+
+
+class EventRender:
+    def __init__(self, screen, opis, grafika):
+
+        self.screen = screen
+        screen_x, screen_y = self.screen.get_size()
+        self.font = pygame.font.SysFont("cambria", 20)
+
+        # wizualne rzeczy config
+        wysokosc_background = screen_y * (92/100)
+        szerokosc_background = screen_x * (64/100)
+        wysokosc_img = wysokosc_background * (50/100)
+        szerokosc_img = szerokosc_background * (98.5/100)
+
+        # pozycja
+        self.x = (screen_x / 2) - (szerokosc_background / 2)
+        self.y = (screen_y / 2) - (wysokosc_background / 2)
+        self.img_posx = self.x - 30
+        self.img_posy = self.y + 20
+        self.opis_posy = wysokosc_img + self.img_posy
+        self.opis_posx = self.img_posx
+
+        # tekst i obrazki
+        self.event_back = pygame.transform.scale(pygame.image.load('texture/Events/back.png'),
+                                                 (szerokosc_background, wysokosc_background))
+
+        self.event_img = pygame.transform.scale(pygame.image.load(grafika),
+                                                (szerokosc_img, wysokosc_img))
+        self.opis_linie = opis.split('\n')
+
+    def draw(self):
+
+        self.screen.blit(self.event_back, (self.x - 36, self.y + 15))
+        self.screen.blit(self.event_img, (self.img_posx, self.img_posy))
+        odstep = 0
+        for linia in self.opis_linie:
+            tekst = self.font.render(linia, True, 'white')
+            self.screen.blit(tekst, (self.opis_posx, self.opis_posy + odstep))
+            odstep += 20
+
+
+class EventOptions:
+
+    def __init__(self, licz, opisy, screen):
+        self.licz = licz
+        self.x, self.y = screen.get_size()
+        self.screen = screen
+        self.event_options = pygame.transform.scale(pygame.image.load('texture/Events/option.png'), (self.x*0.62, self.y*0.07))
+        self.option_high = self.y*0.085
+        self.font = pygame.font.SysFont("georgia", 20)
+        self.option_detecion = True
+        self.rects = []
+        self.option_selected = False
+        self.opisy = opisy
+
+    def draw(self):
+        if not self.option_selected:
+            for i in range(self.licz):
+                event_options_posx = self.x / 2 * 0.33
+                event_options_posy = self.y / 2  + self.y * 0.39
+                self.screen.blit(self.event_options,(event_options_posx, event_options_posy))
+                self.screen.blit(self.font.render(self.opisy[i], True, (255, 255, 255)), (self.x / 2 * 0.35, self.y / 2 + self.y * 0.41))
+                img_rect = self.event_options.get_rect()
+                img_rect[0] = event_options_posx
+                img_rect[1] = event_options_posy
+                self.rects.append(img_rect)
+                self.y -= self.option_high
+
+    def colision_check(self):
+
+        while not self.option_selected:
+            pygame.event.get()
+            collision = pygame.mouse.get_pos()
+            pygame.display.flip()
+
+            for i in range(len(self.rects)):
+                if self.rects[i].collidepoint(collision):
+                    print("kolizja")
+                    self.option_selected = True
+                    return i

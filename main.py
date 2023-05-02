@@ -1,6 +1,6 @@
 import zipfile
 from graphics import Map
-from gameplay import Camera, UpBar, Hourglass, Decision, Build_Menu, BuildItem, Timer, SideMenu, Stats ,EventOptions,EventRender
+from gameplay import*
 from menu import Menu, LoadMenu, SaveMenu
 import pygame
 import sys
@@ -13,7 +13,7 @@ clock = pygame.time.Clock()
 res = (SCREEN_WIDTH, SCREEN_HEIGHT)
 frame_rate = 60
 animation_frame_interval = 5
-flags = pygame.DOUBLEBUF
+flags = pygame.DOUBLEBUF #| pygame.FULLSCREEN
 screen = pygame.display.set_mode(res, flags, 32)
 max_tps = 6000.0
 
@@ -39,6 +39,7 @@ def fps():
 class Game:
     def __init__(self):
         pygame.init()
+
         self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
         self.size = self.start_menu.MAP_SIZE
         self.camera = Camera()
@@ -51,7 +52,11 @@ class Game:
         self.bm = Build_Menu(screen)
         self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
-        self.ev = EventRender(screen)
+
+
+
+
+        self.music_on = 1
 
 
         self.allItem = [  # Budynki
@@ -61,14 +66,26 @@ class Game:
         self.loadmenu = LoadMenu(screen, self)
         self.savemenu = SaveMenu(screen, self)
 
+
     def handle_events(self):
         global fps_on
-        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
+
+
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F5:
                 fps_on = not fps_on
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+                if self.music_on == 1:
+                    pygame.mixer.music.set_volume(0.0)
+                    self.music_on = 0
+
+                elif self.music_on == 0:
+                    pygame.mixer.music.set_volume(1.0)
+                    self.music_on = 1
+
         press = pygame.key.get_pressed()
 
         if press[pygame.K_ESCAPE]:
@@ -79,7 +96,7 @@ class Game:
             self.save_game()
         if press[pygame.K_HOME]:
             self.camera.camera_x = 0
-            self.camera.camera_y = 0
+            self.camera.camera_y = -100
 
     def save_game(self):
         folder_path = "save"
@@ -198,10 +215,9 @@ class Game:
             self.map.colision_detection_obwodka()
             self.map.rysuj_obwodke_i_zajete()
 
+
+
             self.up_bar.draw()
-
-
-
             self.sd.draw()
             self.sd.button()
             if Build_Menu.build_stauts:
@@ -219,9 +235,17 @@ class Game:
                 self.dec.draw()
             self.timer.update()
 
+            opisy = ["1 opis", "2 opis", "3 opis"]
+            self.najemnicy = Event(screen, "Fajny Opis\n Wspaniałego Eventu\n AVBASFAFSDA","texture/Events/najemnicy_img.png", 3, opisy)
+
+
             fps()
 
+
+
             pygame.display.flip()
+
+
 
             clock.tick(max_tps)
 
