@@ -242,19 +242,17 @@ class Hourglass:
 
 class Decision:
     def __init__(self, screen):
-        #SCREEN#
+
         self.SCREEN_WIDTH = screen.get_size()[0] - 256
         self.SCREEN_HEIGHT = screen.get_size()[1]
-        ########
         self.background_image = pygame.image.load('texture/ui/turn/tlo_wybor.png').convert_alpha()
         self.army_button = pygame.image.load("texture/ui/turn/wojsko_button.png").convert_alpha()
         self.gold_button = pygame.image.load("texture/ui/turn/zloto_button.png").convert_alpha()
         self.field_button = pygame.image.load("texture/ui/turn/zajmij_button.png").convert_alpha()
 
-        ##### CO TU SIĘ DZIEJE
+
 
         self.bacground_rect = self.background_image.get_rect(center=(self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2))
-        # self.bacground_rect = self.background_image.get_rect(topleft=(775, 350))
         self.gold_rect = self.gold_button.get_rect(midtop=(self.SCREEN_WIDTH/2, 230))
         self.army_rect = self.army_button.get_rect(midtop=(self.SCREEN_WIDTH/2, 330))
         self.field_rect = self.field_button.get_rect(midtop=(self.SCREEN_WIDTH/2, 430))
@@ -265,9 +263,8 @@ class Decision:
         self.background_image.blit(self.gold_button, (self.gold_button.get_size()[0]/4-2,50))
         self.background_image.blit(self.army_button, (self.army_button.get_size()[0]/4-2,150))
         self.background_image.blit(self.field_button, (self.field_button.get_size()[0]/4-2,250))
-        self.RED = (255,100,0)
-        self.GREEN = (0,255,0)
-        self.BLUE = (0,0,255)
+
+
     def draw(self):
         global camera_stop
         if Stats.wyb:
@@ -459,15 +456,55 @@ class BuildItem:
         pass
 
 
+class EventMenagment:
+    def __init__(self, screen):
+        self.chance = 0
+        self.screen = screen
+        self.turn = Stats.turn_count
+        self.events = []
+
+    def random_event(self):
+
+        if self.turn < Stats.turn_count:
+
+            if random.randint(0,99) < self.chance:
+
+                opisy = ["Odrzuć ich oferte", "Na moich ziemiach nie powinno być najemników wyślij wojsko żeby zabić najemników", "Zrekrutuj najemników i zapłać 200 złota"]
+                event_text = " Na granicy Twojego królestwa pojawia się grupa najemników, \n którzy oferują swoje usługi w zamian za złoto.\n " \
+                             "Mają oni reputację twardych wojowników ale są też znani z brutalności i małych rozbojów.\n"
+                self.najemnicy = Event(self.screen, event_text,
+                                       "texture/Events/najemnicy_img.png", 3, opisy,"najemnicy")
+                del self.najemnicy
+                self.turn = Stats.turn_count
+                self.chance = 0
+
+            else:
+                self.chance += 5
+
+                self.turn = Stats.turn_count
+
 class Event:
-    def __init__(self, ekran, opis, grafika, ilosc_opcji, opisy_opcji):
+    def __init__(self, ekran, opis, grafika, ilosc_opcji, opisy_opcji,nazwa):
         Render = EventRender(ekran, opis, grafika)
         Render.draw()
         Choose = EventOptions(ilosc_opcji, opisy_opcji, ekran)
         Choose.draw()
-        Choose.colision_check()
+        self.Wybor = Choose.colision_check()
+        getattr(self, nazwa)()
 
+    def najemnicy(self):
+        if self.Wybor == 0:
+            print("wybrano zero")
+        if self.Wybor == 1:
+            x = random.randint(0, 99)
+            if x < 60:
+                Stats.gold_count += 100
+            else:
+                Stats.army_count -= 50
 
+        if self.Wybor == 2:
+            Stats.gold_count -= 200
+            Stats.army_count += 100
 
 class EventRender:
     def __init__(self, screen, opis, grafika):
@@ -529,7 +566,11 @@ class EventOptions:
                 event_options_posx = self.x / 2 * 0.33
                 event_options_posy = self.y / 2  + self.y * 0.39
                 self.screen.blit(self.event_options,(event_options_posx, event_options_posy))
-                self.screen.blit(self.font.render(self.opisy[i], True, (255, 255, 255)), (self.x / 2 * 0.35, self.y / 2 + self.y * 0.41))
+                if i < len(self.opisy):
+                    opis = self.opisy[i]
+                else:
+                    opis = "Brak Opisu"
+                self.screen.blit(self.font.render(opis, True, (255, 255, 255)), (self.x / 2 * 0.35, self.y / 2 + self.y * 0.41))
                 img_rect = self.event_options.get_rect()
                 img_rect[0] = event_options_posx
                 img_rect[1] = event_options_posy
@@ -541,10 +582,11 @@ class EventOptions:
         while not self.option_selected:
             pygame.event.get()
             collision = pygame.mouse.get_pos()
+            mouse_pressed = pygame.mouse.get_pressed()
             pygame.display.flip()
 
             for i in range(len(self.rects)):
-                if self.rects[i].collidepoint(collision):
+                if self.rects[i].collidepoint(collision) and mouse_pressed[0]:
                     print("kolizja")
                     self.option_selected = True
                     return i

@@ -236,6 +236,7 @@ class Map(pygame.sprite.Group):
                     k += 1
 
 
+
     def rysuj_obwodke_i_zajete(self):
 
         for i in self.sprites():

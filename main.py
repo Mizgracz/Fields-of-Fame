@@ -52,7 +52,7 @@ class Game:
         self.bm = Build_Menu(screen)
         self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
-
+        self.event = EventMenagment(screen)
 
 
 
@@ -213,6 +213,7 @@ class Game:
             self.map.Draw(SCREEN_WIDTH, SCREEN_HEIGHT)
             self.map.zajmij_pole()
             self.map.colision_detection_obwodka()
+            self.event.random_event()
             self.map.rysuj_obwodke_i_zajete()
 
 
@@ -235,8 +236,8 @@ class Game:
                 self.dec.draw()
             self.timer.update()
 
-            opisy = ["1 opis", "2 opis", "3 opis"]
-            self.najemnicy = Event(screen, "Fajny Opis\n Wspaniałego Eventu\n AVBASFAFSDA","texture/Events/najemnicy_img.png", 3, opisy)
+
+
 
 
             fps()
