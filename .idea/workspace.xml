@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="386da72b-0c71-4294-905e-ebafbf2c9257" name="Changes" comment="gotowe budynki + działające surowce + działający podgląd ile się surowców aktualnie posiada">
+    <list default="true" id="6f1151ba-73cf-44b4-908e-62a9fb400cc0" name="Changes" comment="starsza wersja Seby która działa">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gameplay.py" beforeDir="false" afterPath="$PROJECT_DIR$/gameplay.py" afterDir="false" />
     </list>
@@ -13,97 +13,69 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="main" />
-      </map>
-    </option>
-  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectId" id="2OZmkPXKvKJc8DmWYaUR414paPv" />
+  <component name="ProjectId" id="2PMbDU06Pulpjvs0OJFZ1YG1A1I" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true"
   }
-}</component>
+}]]></component>
+  <component name="RunManager">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Projekt-Zespo-owy-systemu-informatycznego" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.main" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
-    <task id="LOCAL-00001" summary="budynki, ładują się, przy klikaniu rozpoznaje czy kliknięty jest budynek czy zwykly hex">
-      <created>1681756531808</created>
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6f1151ba-73cf-44b4-908e-62a9fb400cc0" name="Changes" comment="" />
+      <created>1683269783284</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1683269783284</updated>
+    </task>
+    <task id="LOCAL-00001" summary="starsza wersja Seby która działa">
+      <created>1683270106547</created>
       <option name="number" value="00001" />
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1681756531808</updated>
+      <updated>1683270106547</updated>
     </task>
-    <task id="LOCAL-00002" summary="gotowe budynki">
-      <created>1681759192023</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1681759192023</updated>
-    </task>
-    <task id="LOCAL-00003" summary="gotowe budynki + surowce basic, zajmujac pole z surowcem dostajesz okreslona ilosc zlota ktora mozna zedytowac (lista_surowcow).">
-      <created>1681775682250</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1681775682250</updated>
-    </task>
-    <task id="LOCAL-00004" summary="gotowe budynki + surowce basic, zajmujac pole z surowcem dostajesz okreslona ilosc zlota ktora mozna zedytowac (lista_surowcow).">
-      <created>1681775758730</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1681775758730</updated>
-    </task>
-    <task active="true" id="Default" summary="Default task">
-      <changelist id="386da72b-0c71-4294-905e-ebafbf2c9257" name="Changes" comment="gotowe budynki + surowce basic, zajmujac pole z surowcem dostajesz okreslona ilosc zlota ktora mozna zedytowac (lista_surowcow)." />
-      <created>1681776630102</created>
-      <option name="number" value="Default" />
-      <option name="presentableId" value="Default" />
-      <updated>1681776630102</updated>
-    </task>
-    <task id="LOCAL-00005" summary="gotowe budynki + działające surowce + działający podgląd ile się surowców aktualnie posiada">
-      <created>1681817320672</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1681817320672</updated>
-    </task>
-    <task id="LOCAL-00006" summary="gotowe budynki + działające surowce + działający podgląd ile się surowców aktualnie posiada">
-      <created>1681817755727</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1681817755727</updated>
-    </task>
-    <option name="localTasksCounter" value="7" />
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="budynki, ładują się, przy klikaniu rozpoznaje czy kliknięty jest budynek czy zwykly hex" />
-    <MESSAGE value="gotowe budynki" />
-    <MESSAGE value="gotowe budynki + surowce basic, zajmujac pole z surowcem dostajesz okreslona ilosc zlota ktora mozna zedytowac (lista_surowcow)." />
-    <MESSAGE value="gotowe budynki + działające surowce + działający podgląd ile się surowców aktualnie posiada" />
-    <option name="LAST_COMMIT_MESSAGE" value="gotowe budynki + działające surowce + działający podgląd ile się surowców aktualnie posiada" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <default-breakpoints>
-        <breakpoint type="python-exception">
-          <properties notifyOnTerminate="true" exception="BaseException">
-            <option name="notifyOnTerminate" value="true" />
-          </properties>
-        </breakpoint>
-      </default-breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="starsza wersja Seby która działa" />
+    <option name="LAST_COMMIT_MESSAGE" value="starsza wersja Seby która działa" />
   </component>
 </project>

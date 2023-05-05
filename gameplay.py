@@ -6,6 +6,9 @@ import time,os
 camera_stop = False
 item_offset = pygame.Vector2(0, 115)
 
+def zmien_rozmiar_surface(surface, width, height):
+    return pygame.transform.scale(surface, (width, height))
+
 class Player:
     ID = 0
     def __init__(self) -> None:
@@ -318,6 +321,35 @@ class SideMenu:
         self.texture_down = "texture/ui/side_bar/praweUI_dolne.png"
         self.texture_button = "texture/ui/side_bar/praweUI_srodek.png"
 
+        self.clay_icon = "texture/surowce/surowce_icons/glina.png"
+        self.diax_icon = "texture/surowce/surowce_icons/diax.png"
+        self.rocks_icon = "texture/surowce/surowce_icons/kamien.png"
+        self.iron_icon = "texture/surowce/surowce_icons/zelazo.png"
+        self.gold_icon = "texture/surowce/surowce_icons/zloto.png"
+        self.fish_icon = "texture/surowce/surowce_icons/ryba.png"
+        self.wood_icon = "texture/surowce/surowce_icons/tartak.png"
+        self.cereal_icon = "texture/surowce/surowce_icons/klos.png"
+
+        self.clay_icon_surface = pygame.image.load(self.clay_icon).convert_alpha()
+        self.diax_icon_surface = pygame.image.load(self.diax_icon).convert_alpha()
+        self.rocks_icon_surface = pygame.image.load(self.rocks_icon).convert_alpha()
+        self.iron_icon_surface = pygame.image.load(self.iron_icon).convert_alpha()
+        self.gold_icon_surface = pygame.image.load(self.gold_icon).convert_alpha()
+        self.fish_icon_surface = pygame.image.load(self.fish_icon).convert_alpha()
+        self.wood_icon_surface = pygame.image.load(self.wood_icon).convert_alpha()
+        self.cereal_icon_surface = pygame.image.load(self.cereal_icon).convert_alpha()
+
+        self.surowce_icons = []
+        self.surowce_icons.append(self.clay_icon_surface)
+        self.surowce_icons.append(self.diax_icon_surface)
+        self.surowce_icons.append(self.rocks_icon_surface)
+        self.surowce_icons.append(self.iron_icon_surface)
+        self.surowce_icons.append(self.gold_icon_surface)
+        self.surowce_icons.append(self.fish_icon_surface)
+        self.surowce_icons.append(self.wood_icon_surface)
+        self.surowce_icons.append(self.cereal_icon_surface)
+
+
         self.main_surfarce = pygame.image.load(self.texture_main).convert_alpha()
         self.up_surfarce = pygame.image.load(self.texture_up).convert_alpha()
         self.down_surfarce = pygame.image.load(self.texture_down).convert_alpha()
@@ -338,20 +370,21 @@ class SideMenu:
 
     def surowce_staty(self, x, y, tekst):
         self.tekst = tekst
-        
         self.font_opis_s = self.font.render(self.tekst, True, (255, 255, 255))
-
         self.screen.blit(self.font_opis_s, (x,y))
+
     def surowce_staty_blituj(self,player):
-        x = self.SCREEN_WIDTH-235
-        y = 87
+        x = self.SCREEN_WIDTH-190
+        y = 67
         for i in range(len(player.surowce_ilosc)):
             self.surowce_staty(x,y, f"{player.surowce_ilosc[i][2]} {player.surowce_ilosc[i][1]}")
-            y += 22
+            self.surowce_icons[i] = zmien_rozmiar_surface(self.surowce_icons[i],21,25)
+            self.screen.blit(self.surowce_icons[i],(x-30,y))
+            y += 26
     def draw(self):
         
         self.screen.blit(self.main_surface,self.main_rect)
-        self.surowce_staty(self.SCREEN_WIDTH-235, 65, f"SUROWCE {self.game.players[self.game.playerID].ID}:")
+        self.surowce_staty(self.SCREEN_WIDTH-190, 47, f"SUROWCE {self.game.players[self.game.playerID].ID}:")
         self.surowce_staty_blituj(player=self.game.players[self.game.playerID])
 
     def button(self):
