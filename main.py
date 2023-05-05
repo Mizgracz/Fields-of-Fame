@@ -53,7 +53,7 @@ class Game:
         self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
         self.event = EventMenagment(screen)
-
+        self.event.start_event_list()
 
 
         self.music_on = 1

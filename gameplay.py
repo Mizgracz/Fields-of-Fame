@@ -463,48 +463,73 @@ class EventMenagment:
         self.turn = Stats.turn_count
         self.events = []
 
+    def start_event_list(self):
+        # najemnicy
+        opisy = ["Odrzuć ich oferte",
+                 "Na moich ziemiach nie powinno być najemników wyślij wojsko żeby zabić najemników",
+                 "Zrekrutuj najemników i zapłać 200 złota"]
+        event_text = " Na granicy Twojego królestwa pojawia się grupa najemników, \n którzy oferują swoje usługi w zamian za złoto.\n " \
+                     "Mają oni reputację twardych wojowników ale są też znani z brutalności i małych rozbojów.\n"
+        najemnicy = Event(self.screen, event_text, "texture/Events/najemnicy_img.png", 3, opisy,"najemnicy")
+
+        self.events.append(najemnicy)
+
+        #
+
+
     def random_event(self):
 
         if self.turn < Stats.turn_count:
+            if self.events:
+                if random.randint(0,99) < self.chance:
 
-            if random.randint(0,99) < self.chance:
+                    x = random.choice(self.events)
+                    x.execute()
+                    self.events.remove(x)
+                    self.turn = Stats.turn_count
+                    self.chance = 0
 
-                opisy = ["Odrzuć ich oferte", "Na moich ziemiach nie powinno być najemników wyślij wojsko żeby zabić najemników", "Zrekrutuj najemników i zapłać 200 złota"]
-                event_text = " Na granicy Twojego królestwa pojawia się grupa najemników, \n którzy oferują swoje usługi w zamian za złoto.\n " \
-                             "Mają oni reputację twardych wojowników ale są też znani z brutalności i małych rozbojów.\n"
-                self.najemnicy = Event(self.screen, event_text,
-                                       "texture/Events/najemnicy_img.png", 3, opisy,"najemnicy")
-                del self.najemnicy
-                self.turn = Stats.turn_count
-                self.chance = 0
+                else:
+                    self.chance += 30
 
-            else:
-                self.chance += 5
-
-                self.turn = Stats.turn_count
+                    self.turn = Stats.turn_count
 
 class Event:
     def __init__(self, ekran, opis, grafika, ilosc_opcji, opisy_opcji,nazwa):
-        Render = EventRender(ekran, opis, grafika)
+        self.ekran = ekran
+        self.opis = opis
+        self.grafika = grafika
+        self.ilosc_opcji = ilosc_opcji
+        self.opisy_opcji = opisy_opcji
+        self.nazwa = nazwa
+        self.Wybor = None
+
+    def execute (self):
+
+        Render = EventRender(self.ekran, self.opis, self.grafika)
         Render.draw()
-        Choose = EventOptions(ilosc_opcji, opisy_opcji, ekran)
+        Choose = EventOptions(self.ilosc_opcji, self.opisy_opcji, self.ekran)
         Choose.draw()
         self.Wybor = Choose.colision_check()
-        getattr(self, nazwa)()
+        getattr(self, self.nazwa)()
 
     def najemnicy(self):
-        if self.Wybor == 0:
-            print("wybrano zero")
+
         if self.Wybor == 1:
             x = random.randint(0, 99)
             if x < 60:
-                Stats.gold_count += 100
+                Stats.gold_count += 100    # Zabij ich
+                Stats.army_count -= 10
+
             else:
                 Stats.army_count -= 50
 
         if self.Wybor == 2:
-            Stats.gold_count -= 200
+            Stats.gold_count -= 200     # Zaplać im
             Stats.army_count += 100
+
+            x = random.randint(0,99)
+
 
 class EventRender:
     def __init__(self, screen, opis, grafika):
