@@ -24,9 +24,9 @@ if not os.path.exists(folder_path):
 
 pygame.init()
 
-pygame.mixer.music.load("music/main.mp3")
-pygame.mixer.music.play(-1)
-pygame.mixer.music.set_volume(0.0)
+# pygame.mixer.music.load("music/main.mp3")
+# pygame.mixer.music.play(-1)
+# pygame.mixer.music.set_volume(0.0)
 
 def FPS():
     fps = str(int(clock.get_fps()))
