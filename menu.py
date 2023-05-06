@@ -124,7 +124,7 @@ class Menu:
 
 
 class OptionBox():
-
+    
     def __init__(self, x, y, w, h, color, highlight_color, font, option_list, selected=0):
         self.color = color
         self.highlight_color = highlight_color
@@ -156,11 +156,12 @@ class OptionBox():
     def update(self, event_list):
         mpos = pygame.mouse.get_pos()
         self.menu_active = self.rect.collidepoint(mpos)
-
         self.active_option = -1
+        
         for i in range(len(self.option_list)):
             rect = self.rect.copy()
             rect.y += (i + 1) * self.rect.height
+            
             if rect.collidepoint(mpos):
                 self.active_option = i
                 break
@@ -175,6 +176,7 @@ class OptionBox():
                 elif self.draw_menu and self.active_option >= 0:
                     self.selected = self.active_option
                     self.draw_menu = False
+                    pygame.time.Clock().tick(3)
                     return self.active_option
         return -1
 
@@ -190,15 +192,19 @@ class Config:
         self.Active = False
         self.font = pygame.font.Font(None, 36)
         self.text_map_size = self.font.render("Wielkość mapy : ", True, (255, 255, 255))
+        self.text_player = self.font.render("Ilość graczy : ", True, (255, 255, 255))
         self.map_size = OptionBox(
             300, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30),
             ["Mała (30x30)", "Średnia (50x50)", "Duża (60x60)"])
+        self.player_count = OptionBox(300,223+60+10,180,60,(150, 150, 150), (100, 200, 255),pygame.font.SysFont(None, 30),['2','3','4'])
 
     def draw(self, event):
         self.screen.blit(self.Background, (0, 0))
         self.screen.blit(self.Button_Back, self.Button_Back_Rect)
         self.screen.blit(self.Button_Start, self.Button_Start_Rect)
         self.screen.blit(self.text_map_size, (60, 240))
+        self.screen.blit(self.text_player, (60, 240+60+10))
+        self.player_count.draw(self.screen)
         self.map_size.draw(self.screen)
         self.event_list = event
         self.Size()
@@ -208,6 +214,7 @@ class Config:
     def Size(self):
         global MAP_SIZE
         self.selected_option = self.map_size.update(self.event_list)
+        self.selected_option2 = self.player_count.update(self.event_list)
         if self.selected_option == 0:
             MAP_SIZE = 30
         elif self.selected_option == 1:

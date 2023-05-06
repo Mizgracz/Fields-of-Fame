@@ -27,7 +27,7 @@ pygame.mixer.music.load("music/main.mp3")
 pygame.mixer.music.play(-1)
 ####################################
 ####################################
-# pygame.mixer.music.set_volume(0.0)
+pygame.mixer.music.set_volume(0.0)
 ####################################
 ####################################
 
@@ -44,7 +44,7 @@ def fps():
 class Game:
     def __init__(self):
         pygame.init()
-        self.PlayerList = [Player('Player1'),Player('Player2')]
+        
         self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
         self.size = self.start_menu.MAP_SIZE
         self.camera = Camera()
@@ -57,6 +57,7 @@ class Game:
         self.bm = Build_Menu(screen)
         self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
+        self.PlayerList = [Player('Player1'),Player('Player2')]
         self.eventPlayer = []
         for player in self.PlayerList:
             self.eventPlayer.append(EventMenagment(screen,player))

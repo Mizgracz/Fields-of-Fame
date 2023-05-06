@@ -494,6 +494,7 @@ class EventMenagment:
         self.screen = screen
         self.turn = player.turn_count
         self.events = []
+        self.player = player
 
     def start_event_list(self):
         # najemnicy
@@ -503,7 +504,7 @@ class EventMenagment:
         event_text = " Na granicy Twojego królestwa pojawia się grupa najemników, \n którzy oferują swoje usługi w zamian za złoto.\n " \
                      "Mają oni reputację twardych wojowników ale są też znani z brutalności i małych rozbojów.\n"
 
-        najemnicy = Event(self.screen, event_text, "texture/Events/najemnicy_img.png", 3, opisy,"najemnicy", self)
+        najemnicy = Event(self.screen, event_text, "texture/Events/najemnicy_img.png", 3, opisy,"najemnicy", self,self.player)
 
         self.events.append(najemnicy)
 
@@ -528,7 +529,7 @@ class EventMenagment:
                     self.turn = player.turn_count
 
 class Event:
-    def __init__(self, ekran, opis, grafika, ilosc_opcji, opisy_opcji,nazwa,managment):
+    def __init__(self, ekran, opis, grafika, ilosc_opcji, opisy_opcji,nazwa,managment,player):
         self.ekran = ekran
         self.opis = opis
         self.grafika = grafika
@@ -537,7 +538,7 @@ class Event:
         self.nazwa = nazwa
         self.Wybor = None
         self.managment = managment
-
+        self.player = player
     def execute(self):
 
         Render = EventRender(self.ekran, self.opis, self.grafika)
@@ -545,34 +546,34 @@ class Event:
         Choose = EventOptions(self.ilosc_opcji, self.opisy_opcji, self.ekran)
         Choose.draw()
         self.Wybor = Choose.colision_check()
-        # getattr(self, self.nazwa)(self.managment) Powodowało błąd ale nie wiem co to robiło 
+        getattr(self, self.nazwa)(self.managment,self.player)
 
     def najemnicy(self, managment,player):
 
         if self.Wybor == 1:
             x = random.randint(0, 99)
             if x < 60:
-                player.gold_count += 100    # Zabij ich
-                player.army_count -= 10
+                self.player.gold_count += 100    # Zabij ich
+                self.player.army_count -= 10
 
             else:
-                player.army_count -= 50
+                self.player.army_count -= 50
 
         if self.Wybor == 2:
-            player.gold_count -= 200     # Zaplać im
-            player.army_count += 100
+            self.player.gold_count -= 200     # Zaplać im
+            self.player.army_count += 100
 
             x = random.randint(0,99)
             if x < 30:
                 event_text = "Najemnicy których wcześniej zrekrutowałeś za złoto postanowili cię oszukać,\n ukradli twoje złoto i uciekli !"
                 opisy =[" OK "]
-                najemnicy_thief = Event(managment.screen, event_text, "texture/Events/najemnicy_img.png", 1, opisy,"najemnicy_thief", player)
+                najemnicy_thief = Event(managment.screen, event_text, "texture/Events/najemnicy_img.png", 1, opisy,"najemnicy_thief", self,self.player)
                 managment.events.append(najemnicy_thief)
 
-    def najemnicy_thief(self,player):
+    def najemnicy_thief(self,menagment,player):
         if self.Wybor == 0:
-            player.army_count -= 100
-            player.gold_count -= 50
+            self.player.army_count -= 100
+            self.player.gold_count -= 50
 
 class EventRender:
     def __init__(self, screen, opis, grafika):
