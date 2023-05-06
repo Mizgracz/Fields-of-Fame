@@ -456,6 +456,7 @@ class BuildItem:
         pass
 
 
+
 class EventMenagment:
     def __init__(self, screen):
         self.chance = 0
@@ -470,11 +471,12 @@ class EventMenagment:
                  "Zrekrutuj najemników i zapłać 200 złota"]
         event_text = " Na granicy Twojego królestwa pojawia się grupa najemników, \n którzy oferują swoje usługi w zamian za złoto.\n " \
                      "Mają oni reputację twardych wojowników ale są też znani z brutalności i małych rozbojów.\n"
-        najemnicy = Event(self.screen, event_text, "texture/Events/najemnicy_img.png", 3, opisy,"najemnicy")
+
+        najemnicy = Event(self.screen, event_text, "texture/Events/najemnicy_img.png", 3, opisy,"najemnicy", self)
 
         self.events.append(najemnicy)
 
-        #
+
 
 
     def random_event(self):
@@ -490,12 +492,12 @@ class EventMenagment:
                     self.chance = 0
 
                 else:
-                    self.chance += 30
+                    self.chance += 20
 
                     self.turn = Stats.turn_count
 
 class Event:
-    def __init__(self, ekran, opis, grafika, ilosc_opcji, opisy_opcji,nazwa):
+    def __init__(self, ekran, opis, grafika, ilosc_opcji, opisy_opcji,nazwa,managment):
         self.ekran = ekran
         self.opis = opis
         self.grafika = grafika
@@ -503,17 +505,18 @@ class Event:
         self.opisy_opcji = opisy_opcji
         self.nazwa = nazwa
         self.Wybor = None
+        self.managment = managment
 
-    def execute (self):
+    def execute(self):
 
         Render = EventRender(self.ekran, self.opis, self.grafika)
         Render.draw()
         Choose = EventOptions(self.ilosc_opcji, self.opisy_opcji, self.ekran)
         Choose.draw()
         self.Wybor = Choose.colision_check()
-        getattr(self, self.nazwa)()
+        getattr(self, self.nazwa)(self.managment)
 
-    def najemnicy(self):
+    def najemnicy(self, managment):
 
         if self.Wybor == 1:
             x = random.randint(0, 99)
@@ -529,6 +532,17 @@ class Event:
             Stats.army_count += 100
 
             x = random.randint(0,99)
+            if x < 30:
+                event_text = "Najemnicy których wcześniej zrekrutowałeś za złoto postanowili cię oszukać,\n ukradli twoje złoto i uciekli !"
+                opisy =[" OK "]
+                najemnicy_thief = Event(managment.screen, event_text, "texture/Events/najemnicy_img.png", 1, opisy,"najemnicy_thief", managment)
+                managment.events.append(najemnicy_thief)
+
+    def najemnicy_thief(self,managment):
+        if self.Wybor == 0:
+            Stats.army_count -= 100
+            Stats.gold_count -= 50
+
 
 
 class EventRender:
