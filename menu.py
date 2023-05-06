@@ -21,10 +21,10 @@ class Menu:
         Menu.status = True
         Menu.resume = False
         self.font = pygame.font.Font(None, 48)
-        self.new_game_rect = pygame.Rect(SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 - 120, 200, 100)
-        self.load_rect = pygame.Rect(SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 + 0, 200, 100)
-        self.save_rect = pygame.Rect(SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 + 120, 200, 100)
-        self.quit_rect = pygame.Rect(SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 + 240, 200, 100)
+        self.new_game_rect = pygame.Rect(SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 - 120, 290, 100)
+        self.load_rect = pygame.Rect(SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 + 0, 290, 100)
+        self.save_rect = pygame.Rect(SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 + 120, 290, 100)
+        self.quit_rect = pygame.Rect(SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 + 240, 290, 100)
         self.background_texture = pygame.image.load("texture/main_menu/background.png").convert()
         self.new_game_button_texture = pygame.image.load("texture/main_menu/graj_button.png").convert_alpha()
         self.resume_game_button_texture = pygame.image.load("texture/main_menu/wznow_button.png").convert_alpha()
