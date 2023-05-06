@@ -47,6 +47,7 @@ class Game:
         
         self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
         self.size = self.start_menu.MAP_SIZE
+        self.players = self.start_menu.PLAYERS
         self.camera = Camera()
         self.map = Map(self.size, self.size, screen, self.camera)
         self.map.texture()
@@ -57,7 +58,9 @@ class Game:
         self.bm = Build_Menu(screen)
         self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
-        self.PlayerList = [Player('Player1'),Player('Player2')]
+        self.PlayerList = []
+        for p in range(self.players):
+            self.PlayerList.append(Player(f'Player {p+1}'))    
         self.eventPlayer = []
         for player in self.PlayerList:
             self.eventPlayer.append(EventMenagment(screen,player))
@@ -142,8 +145,7 @@ class Game:
     def run(self):
 
         while True:
-            self.actual_player = self.PlayerList[Player.ID]
-            self.event = self.eventPlayer[Player.ID]
+            
             while Menu.status:
                 self.start_menu.run()
             while LoadMenu.status:
@@ -153,6 +155,8 @@ class Game:
                 self.savemenu.draw()
                 self.savemenu.update()
 
+            self.actual_player = self.PlayerList[Player.ID]
+            self.event = self.eventPlayer[Player.ID]
             screen.fill((255, 255, 255))
             self.handle_events()
             self.camera.mouse(self.size)

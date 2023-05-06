@@ -8,7 +8,7 @@ from gameplay import Stats
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 MAP_SIZE = 30
-
+PLAYERS = 2
 
 class Menu:
     status = True
@@ -51,7 +51,7 @@ class Menu:
                     self.config1.Active = False
                     Menu.status = False
                     self.MAP_SIZE = MAP_SIZE
-                    print(self.MAP_SIZE)
+                    self.PLAYERS = PLAYERS
                     pygame.display.update()
 
 
@@ -176,7 +176,6 @@ class OptionBox():
                 elif self.draw_menu and self.active_option >= 0:
                     self.selected = self.active_option
                     self.draw_menu = False
-                    pygame.time.Clock().tick(3)
                     return self.active_option
         return -1
 
@@ -213,6 +212,7 @@ class Config:
 
     def Size(self):
         global MAP_SIZE
+        global PLAYERS
         self.selected_option = self.map_size.update(self.event_list)
         self.selected_option2 = self.player_count.update(self.event_list)
         if self.selected_option == 0:
@@ -221,6 +221,13 @@ class Config:
             MAP_SIZE = 50
         elif self.selected_option == 2:
             MAP_SIZE = 60
+        
+        if self.selected_option2 == 0:
+            PLAYERS = 2
+        elif self.selected_option2 == 1:
+            PLAYERS = 3
+        elif self.selected_option2 == 2:
+            PLAYERS = 4
 
 
 #################################################################################################################
