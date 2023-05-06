@@ -298,6 +298,7 @@ class Map(pygame.sprite.Group):
                         self.allhex["hex", i].zajete = True
                         player.player_hex_status = False
                         player.terrain_count += 1
+                        player.turn_count += 1
                         if Player.ID == Player.MAX_ID-1:
                             Player.ID = 0
                         else:

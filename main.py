@@ -57,9 +57,14 @@ class Game:
         self.bm = Build_Menu(screen)
         self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
-        self.event = EventMenagment(screen)
-        self.event.start_event_list()
+        self.eventPlayer = []
+        for player in self.PlayerList:
+            self.eventPlayer.append(EventMenagment(screen,player))
+
+        self.event = self.eventPlayer[Player.ID]
         self.actual_player = self.PlayerList[Player.ID]
+        for e in self.eventPlayer:
+            e.start_event_list()
 
         self.music_on = 1
 
@@ -137,6 +142,7 @@ class Game:
 
         while True:
             self.actual_player = self.PlayerList[Player.ID]
+            self.event = self.eventPlayer[Player.ID]
             while Menu.status:
                 self.start_menu.run()
             while LoadMenu.status:
@@ -153,7 +159,7 @@ class Game:
             self.map.Draw(SCREEN_WIDTH, SCREEN_HEIGHT)
             self.map.zajmij_pole(self.actual_player)
             self.map.colision_detection_obwodka()
-            self.event.random_event()
+            self.event.random_event(self.actual_player)
             self.map.rysuj_obwodke_i_zajete()
 
 
@@ -181,8 +187,6 @@ class Game:
 
 
             fps()
-
-
 
             pygame.display.flip()
 

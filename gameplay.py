@@ -300,6 +300,7 @@ class Decision:
             player.wyb = False
             camera_stop = False
             player.gold_count += 10 + player.gold_count_bonus
+            player.turn_count += 1
             if Player.ID == Player.MAX_ID-1:
                 Player.ID = 0
             else:
@@ -308,10 +309,12 @@ class Decision:
             player.wyb = False
             camera_stop = False
             player.army_count += 10 + player.army_count_bonus
+            player.turn_count += 1
             if Player.ID == Player.MAX_ID-1:
                 Player.ID = 0
             else:
                 Player.ID += 1
+            
 
         if self.field_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
             player.wyb = False
@@ -486,10 +489,10 @@ class BuildItem:
 
 
 class EventMenagment:
-    def __init__(self, screen):
+    def __init__(self, screen,player):
         self.chance = 0
         self.screen = screen
-        self.turn = Stats.turn_count
+        self.turn = player.turn_count
         self.events = []
 
     def start_event_list(self):
@@ -507,22 +510,22 @@ class EventMenagment:
 
 
 
-    def random_event(self):
+    def random_event(self,player):
 
-        if self.turn < Stats.turn_count:
+        if self.turn < player.turn_count:
             if self.events:
                 if random.randint(0,99) < self.chance:
 
                     x = random.choice(self.events)
                     x.execute()
                     self.events.remove(x)
-                    self.turn = Stats.turn_count
+                    self.turn = player.turn_count
                     self.chance = 0
 
                 else:
                     self.chance += 20
 
-                    self.turn = Stats.turn_count
+                    self.turn = player.turn_count
 
 class Event:
     def __init__(self, ekran, opis, grafika, ilosc_opcji, opisy_opcji,nazwa,managment):
@@ -542,34 +545,34 @@ class Event:
         Choose = EventOptions(self.ilosc_opcji, self.opisy_opcji, self.ekran)
         Choose.draw()
         self.Wybor = Choose.colision_check()
-        getattr(self, self.nazwa)(self.managment)
+        # getattr(self, self.nazwa)(self.managment) Powodowało błąd ale nie wiem co to robiło 
 
-    def najemnicy(self, managment):
+    def najemnicy(self, managment,player):
 
         if self.Wybor == 1:
             x = random.randint(0, 99)
             if x < 60:
-                Stats.gold_count += 100    # Zabij ich
-                Stats.army_count -= 10
+                player.gold_count += 100    # Zabij ich
+                player.army_count -= 10
 
             else:
-                Stats.army_count -= 50
+                player.army_count -= 50
 
         if self.Wybor == 2:
-            Stats.gold_count -= 200     # Zaplać im
-            Stats.army_count += 100
+            player.gold_count -= 200     # Zaplać im
+            player.army_count += 100
 
             x = random.randint(0,99)
             if x < 30:
                 event_text = "Najemnicy których wcześniej zrekrutowałeś za złoto postanowili cię oszukać,\n ukradli twoje złoto i uciekli !"
                 opisy =[" OK "]
-                najemnicy_thief = Event(managment.screen, event_text, "texture/Events/najemnicy_img.png", 1, opisy,"najemnicy_thief", managment)
+                najemnicy_thief = Event(managment.screen, event_text, "texture/Events/najemnicy_img.png", 1, opisy,"najemnicy_thief", player)
                 managment.events.append(najemnicy_thief)
 
-    def najemnicy_thief(self,managment):
+    def najemnicy_thief(self,player):
         if self.Wybor == 0:
-            Stats.army_count -= 100
-            Stats.gold_count -= 50
+            player.army_count -= 100
+            player.gold_count -= 50
 
 class EventRender:
     def __init__(self, screen, opis, grafika):
