@@ -567,7 +567,7 @@ class EventRender:
         self.opis_posx = self.img_posx
 
         # tekst i obrazki
-        self.event_back = pygame.transform.scale(pygame.image.load('texture/Events/back.png'),
+        self.event_back = pygame.transform.smoothscale(pygame.image.load('texture/Events/back.png'),
                                                  (szerokosc_background, wysokosc_background))
 
         self.event_img = pygame.transform.scale(pygame.image.load(grafika),
