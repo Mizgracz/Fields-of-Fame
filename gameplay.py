@@ -532,7 +532,7 @@ class Event:
             Stats.army_count += 100
 
             x = random.randint(0,99)
-            if x < 100:
+            if x < 30:
                 event_text = "Najemnicy których wcześniej zrekrutowałeś za złoto postanowili cię oszukać,\n ukradli twoje złoto i uciekli !"
                 opisy =[" OK "]
                 najemnicy_thief = Event(managment.screen, event_text, "texture/Events/najemnicy_img.png", 1, opisy,"najemnicy_thief", managment)
