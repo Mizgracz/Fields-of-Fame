@@ -3,12 +3,8 @@ import pygame
 import time,os
 import random
 
-
 camera_stop = False
 item_offset = pygame.Vector2(0, 115)
-
-
-
 
 
 class Stats:
@@ -105,7 +101,6 @@ class UpBar:
         FONT_NAME = 'timesnewroman'
         FONT_SIZE = 17
         self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
-
         ########
         self.bar = pygame.Surface((self.SCREEN_WIDTH, 30))
         self.up_bar_surface = pygame.Surface((self.SCREEN_WIDTH, 30))
@@ -242,17 +237,19 @@ class Hourglass:
 
 class Decision:
     def __init__(self, screen):
-
+        #SCREEN#
         self.SCREEN_WIDTH = screen.get_size()[0] - 256
         self.SCREEN_HEIGHT = screen.get_size()[1]
+        ########
         self.background_image = pygame.image.load('texture/ui/turn/tlo_wybor.png').convert_alpha()
         self.army_button = pygame.image.load("texture/ui/turn/wojsko_button.png").convert_alpha()
         self.gold_button = pygame.image.load("texture/ui/turn/zloto_button.png").convert_alpha()
         self.field_button = pygame.image.load("texture/ui/turn/zajmij_button.png").convert_alpha()
 
-
+        ##### CO TU SIĘ DZIEJE
 
         self.bacground_rect = self.background_image.get_rect(center=(self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2))
+        # self.bacground_rect = self.background_image.get_rect(topleft=(775, 350))
         self.gold_rect = self.gold_button.get_rect(midtop=(self.SCREEN_WIDTH/2, 230))
         self.army_rect = self.army_button.get_rect(midtop=(self.SCREEN_WIDTH/2, 330))
         self.field_rect = self.field_button.get_rect(midtop=(self.SCREEN_WIDTH/2, 430))
@@ -263,8 +260,9 @@ class Decision:
         self.background_image.blit(self.gold_button, (self.gold_button.get_size()[0]/4-2,50))
         self.background_image.blit(self.army_button, (self.army_button.get_size()[0]/4-2,150))
         self.background_image.blit(self.field_button, (self.field_button.get_size()[0]/4-2,250))
-
-
+        self.RED = (255,100,0)
+        self.GREEN = (0,255,0)
+        self.BLUE = (0,0,255)
     def draw(self):
         global camera_stop
         if Stats.wyb:
@@ -457,184 +455,3 @@ class BuildItem:
 
 
 
-class EventMenagment:
-    def __init__(self, screen):
-        self.chance = 0
-        self.screen = screen
-        self.turn = Stats.turn_count
-        self.events = []
-
-    def start_event_list(self):
-        # najemnicy
-        opisy = ["Odrzuć ich oferte",
-                 "Na moich ziemiach nie powinno być\nnajemników wyślij wojsko żeby ich zabić",
-                 "Zrekrutuj najemników i zapłać 200 złota"]
-        event_text = " Na granicy Twojego królestwa pojawia się grupa najemników, \n którzy oferują swoje usługi w zamian za złoto.\n " \
-                     "Mają oni reputację twardych wojowników ale są też znani z brutalności i małych rozbojów.\n"
-
-        najemnicy = Event(self.screen, event_text, "texture/Events/najemnicy_img.png", 3, opisy,"najemnicy", self)
-
-        self.events.append(najemnicy)
-
-
-
-
-    def random_event(self):
-
-        if self.turn < Stats.turn_count:
-            if self.events:
-                if random.randint(0,99) < self.chance:
-
-                    x = random.choice(self.events)
-                    x.execute()
-                    self.events.remove(x)
-                    self.turn = Stats.turn_count
-                    self.chance = 0
-
-                else:
-                    self.chance += 20
-
-                    self.turn = Stats.turn_count
-
-class Event:
-    def __init__(self, ekran, opis, grafika, ilosc_opcji, opisy_opcji,nazwa,managment):
-        self.ekran = ekran
-        self.opis = opis
-        self.grafika = grafika
-        self.ilosc_opcji = ilosc_opcji
-        self.opisy_opcji = opisy_opcji
-        self.nazwa = nazwa
-        self.Wybor = None
-        self.managment = managment
-
-    def execute(self):
-
-        Render = EventRender(self.ekran, self.opis, self.grafika)
-        Render.draw()
-        Choose = EventOptions(self.ilosc_opcji, self.opisy_opcji, self.ekran)
-        Choose.draw()
-        self.Wybor = Choose.colision_check()
-        getattr(self, self.nazwa)(self.managment)
-
-    def najemnicy(self, managment):
-
-        if self.Wybor == 1:
-            x = random.randint(0, 99)
-            if x < 60:
-                Stats.gold_count += 100    # Zabij ich
-                Stats.army_count -= 10
-
-            else:
-                Stats.army_count -= 50
-
-        if self.Wybor == 2:
-            Stats.gold_count -= 200     # Zaplać im
-            Stats.army_count += 100
-
-            x = random.randint(0,99)
-            if x < 30:
-                event_text = "Najemnicy których wcześniej zrekrutowałeś za złoto postanowili cię oszukać,\n ukradli twoje złoto i uciekli !"
-                opisy =[" OK "]
-                najemnicy_thief = Event(managment.screen, event_text, "texture/Events/najemnicy_img.png", 1, opisy,"najemnicy_thief", managment)
-                managment.events.append(najemnicy_thief)
-
-    def najemnicy_thief(self,managment):
-        if self.Wybor == 0:
-            Stats.army_count -= 100
-            Stats.gold_count -= 50
-
-
-
-class EventRender:
-    def __init__(self, screen, opis, grafika):
-
-        self.screen = screen
-        screen_x, screen_y = self.screen.get_size()
-        self.font = pygame.font.SysFont("cambria", 20)
-
-        # wizualne rzeczy config
-        wysokosc_background = screen_y * (92/100)
-        szerokosc_background = screen_x * (64/100)
-        wysokosc_img = wysokosc_background * (60/100)
-        szerokosc_img = szerokosc_background * (57/100)
-
-        # pozycja
-        self.x = (screen_x / 2) - (szerokosc_background / 2)
-        self.y = (screen_y / 2) - (wysokosc_background / 2)
-        self.img_posx = self.x - 10
-        self.img_posy = self.y + screen_y * 0.149
-        self.opis_posy = wysokosc_img + self.img_posy + 40
-        self.opis_posx = self.img_posx
-
-        # tekst i obrazki
-        self.event_back = pygame.transform.smoothscale(pygame.image.load('texture/Events/back.png'),
-                                                 (szerokosc_background, wysokosc_background))
-
-        self.event_img = pygame.transform.scale(pygame.image.load(grafika),
-                                                (szerokosc_img, wysokosc_img))
-        self.opis_linie = opis.split('\n')
-
-    def draw(self):
-
-        self.screen.blit(self.event_back, (self.x - 36, self.y + 15))
-        self.screen.blit(self.event_img, (self.img_posx, self.img_posy))
-        odstep = 0
-        for linia in self.opis_linie:
-            tekst = self.font.render(linia, True, 'white')
-            self.screen.blit(tekst, (self.opis_posx, self.opis_posy + odstep))
-            odstep += 20
-
-
-class EventOptions:
-
-    def __init__(self, licz, opisy, screen):
-        self.licz = licz
-        self.x, self.y = screen.get_size()
-        self.screen = screen
-        self.event_options = pygame.transform.scale(pygame.image.load('texture/Events/option.png'), (self.x*0.22, self.y*0.13))
-        self.option_high = self.y*0.82
-        self.font = pygame.font.SysFont("georgia", 14)
-        self.option_detecion = True
-        self.rects = []
-        self.option_selected = False
-        self.opisy = opisy
-        self.mid_text = self.y*0.1
-
-    def draw(self):
-        if not self.option_selected:
-            for i in range(self.licz):
-                event_options_posx = self.x / 1.8
-                event_options_posy = self.y / 5.5
-                self.screen.blit(self.event_options, (event_options_posx, event_options_posy))
-                if i < len(self.opisy):
-                    opis = self.opisy[i]
-                    opis_lines = opis.split('\n')
-                    y_offset = 0
-                    for line in opis_lines:
-                        self.screen.blit(self.font.render(line, True, (255, 255, 255)), (self.x / 2 * 1.13,
-                                                                                         event_options_posy + self.mid_text/2 + y_offset))
-                        y_offset += self.font.get_height()
-                else:
-                    opis = "Brak Opisu"
-                    self.screen.blit(self.font.render(opis, True, (255, 255, 255)),
-                                     (self.x / 2 * 1.13, event_options_posy + 6))
-
-                img_rect = self.event_options.get_rect()
-                img_rect[0] = event_options_posx
-                img_rect[1] = event_options_posy
-                self.rects.append(img_rect)
-                self.y += self.option_high
-
-    def colision_check(self):
-
-        while not self.option_selected:
-            pygame.event.get()
-            collision = pygame.mouse.get_pos()
-            mouse_pressed = pygame.mouse.get_pressed()
-            pygame.display.flip()
-
-            for i in range(len(self.rects)):
-                if self.rects[i].collidepoint(collision) and mouse_pressed[0]:
-                    print("kolizja")
-                    self.option_selected = True
-                    return i

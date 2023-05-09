@@ -1,8 +1,9 @@
 import zipfile
 from graphics import Map
-from gameplay import*
+from gameplay import Camera, UpBar, Hourglass, Decision, Build_Menu, BuildItem, Timer, SideMenu, Stats
 from menu import Menu, LoadMenu, SaveMenu
 import pygame
+from pygame.locals import *
 import sys
 import os
 
@@ -13,9 +14,10 @@ clock = pygame.time.Clock()
 res = (SCREEN_WIDTH, SCREEN_HEIGHT)
 frame_rate = 60
 animation_frame_interval = 5
-flags = pygame.DOUBLEBUF #| pygame.FULLSCREEN
+flags = pygame.DOUBLEBUF | FULLSCREEN
 screen = pygame.display.set_mode(res, flags, 32)
 max_tps = 6000.0
+
 
 folder_path = "save"
 if not os.path.exists(folder_path):
@@ -39,24 +41,22 @@ def fps():
 class Game:
     def __init__(self):
         pygame.init()
-
         self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
         self.size = self.start_menu.MAP_SIZE
+        self.Fog = self.start_menu.Switch_Fog
         self.camera = Camera()
         self.map = Map(self.size, self.size, screen, self.camera)
         self.map.texture()
         self.map.generate()
+        # self.config = Config(screen)
+        # self.Fog = self.config.Switch_Fog
         self.up_bar = UpBar(screen)
         self.klepsydra1 = Hourglass(screen, frame_rate, animation_frame_interval)
         self.dec = Decision(screen)
         self.bm = Build_Menu(screen)
         self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
-        self.event = EventMenagment(screen)
-        self.event.start_event_list()
-
-
-        self.music_on = 1
+        # self.ev = EventRender(screen)
 
 
         self.allItem = [  # Budynki
@@ -66,26 +66,14 @@ class Game:
         self.loadmenu = LoadMenu(screen, self)
         self.savemenu = SaveMenu(screen, self)
 
-
     def handle_events(self):
         global fps_on
-
-
-
+        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F5:
                 fps_on = not fps_on
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
-                if self.music_on == 1:
-                    pygame.mixer.music.set_volume(0.0)
-                    self.music_on = 0
-
-                elif self.music_on == 0:
-                    pygame.mixer.music.set_volume(1.0)
-                    self.music_on = 1
-
         press = pygame.key.get_pressed()
 
         if press[pygame.K_ESCAPE]:
@@ -96,7 +84,7 @@ class Game:
             self.save_game()
         if press[pygame.K_HOME]:
             self.camera.camera_x = 0
-            self.camera.camera_y = -100
+            self.camera.camera_y = 0
 
     def save_game(self):
         folder_path = "save"
@@ -211,14 +199,18 @@ class Game:
             self.camera.mouse(self.size)
             self.camera.keybord()
             self.map.Draw(SCREEN_WIDTH, SCREEN_HEIGHT)
+            # self.map.fog_generator(self.Fog) To raczej nie musi być skoro wykonuje się w graphic.py
+            # self.Fog = self.config.Switching_Fog
+            self.map.fog_draw(self.Fog, SCREEN_WIDTH, SCREEN_HEIGHT)
             self.map.zajmij_pole()
+            self.map.odkryj_pole(self.Fog)
             self.map.colision_detection_obwodka()
-            self.event.random_event()
             self.map.rysuj_obwodke_i_zajete()
 
-
-
             self.up_bar.draw()
+
+
+
             self.sd.draw()
             self.sd.button()
             if Build_Menu.build_stauts:
@@ -236,17 +228,9 @@ class Game:
                 self.dec.draw()
             self.timer.update()
 
-
-
-
-
             fps()
 
-
-
             pygame.display.flip()
-
-
 
             clock.tick(max_tps)
 

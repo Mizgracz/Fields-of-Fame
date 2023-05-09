@@ -1,13 +1,14 @@
-
 import pygame
 
 import random
 from gameplay import Stats
 
 
+
+
 class Hex(pygame.sprite.Sprite):
     allsurowiec = [17 ,18 ,19 ,20 ,21 ,22 ,23 ,24]
-    def __init__(self, x, y, num, group, obw, zaj ,tex_id):
+    def __init__(self, x, y, num, group, obw, zaj , odkryj, tex_id):
         super().__init__(group)
         self.szerokosc = 130
         self.wysokosc = 152
@@ -16,6 +17,7 @@ class Hex(pygame.sprite.Sprite):
         self.number = num
         self.obwodka = obw
         self.zajete = zaj
+        self.odkryte = odkryj
         self.group = group
         self.texture_index = tex_id
         self.texture = self.texturing(self.group)
@@ -82,6 +84,8 @@ class Hex(pygame.sprite.Sprite):
             return group.mine_iron
         elif self.texture_index == 24:
             return group.mine_gold
+        elif self.texture_index == 99:
+            return group.fog_surface
 
     def surowiec(self):
         if self.texture_index in Hex.allsurowiec:
@@ -102,6 +106,7 @@ class Map(pygame.sprite.Group):
 
     def __init__(self, numx, numy, screen, camera):
         super().__init__()
+        self.width = 130
 
         self.colision_surface = pygame.Surface(pygame.display.get_window_size(), pygame.SRCALPHA)
         self.colision_rect = self.colision_surface.get_rect()
@@ -111,6 +116,10 @@ class Map(pygame.sprite.Group):
         self.hex_zajete_surface = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
         self.hex_zajete_surfaceNIE = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
         self.hex_zajete_surface.set_alpha(100)
+
+        # Mgla wojny
+        self.fog_surface = pygame.image.load("texture/hex/fog.png").convert_alpha()
+        self.uncover_surface = pygame.image.load("texture/hex/nic.png").convert_alpha()
 
         # BUDYNKI
         self.willage_surface = pygame.image.load("texture/hex/budynki.png").convert_alpha()
@@ -154,10 +163,12 @@ class Map(pygame.sprite.Group):
                          ((self.castle_surface, 16), 0.7), ((self.clay, 17), 0.3), ((self.mine_diamonds, 18), 0.1),
                          ((self.fish_port, 19), 0.8), ((self.sawmill, 20), 0.5), ((self.grain, 21), 0.65),
                          ((self.mine_rocks, 22), 0.3), ((self.mine_iron, 23), 0.3), ((self.mine_gold, 24), 0.3)]
-
+        self.fog_element = [(self.fog_surface, 99), 100]
         self.num_hex_x = numx
         self.num_hex_y = numy
         self.num_hex_all = numx * numy
+        self.num_hex_side = self.num_hex_y
+        self.num_hex_right_side = self.num_hex_x
         self.allhex = {}
         self.alltex = {}
         self.screen = screen
@@ -197,7 +208,7 @@ class Map(pygame.sprite.Group):
                 # elif self.alltex["hex", licz] == self.castle_surface or self.alltex["hex", licz] == self.willage_surface:
                 #     self.allhex["hex", licz] = Budynek((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz], licz, self, False, False,self.tex_id[licz])
                 # else:
-                self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), licz, self, False, False,
+                self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), licz, self, False, False, False,
                                                self.tex_id[licz])
 
                 self.allrect['hex', licz] = self.allhex["hex", licz].texture.get_rect(
@@ -235,7 +246,43 @@ class Map(pygame.sprite.Group):
                     self.visible_hex['hex', k] = licznik
                     k += 1
 
+    def fog_generator(self, Fog):
+        if Fog:
+            for i in range(self.num_hex_y * self.num_hex_x):
+                self.alltex['hex', i] = self.fog_surface
 
+    def fog_draw(self, Fog, width, height):
+        if Fog:
+            licznik = -1
+            camera_x = self.camera.camera_x
+            camera_y = self.camera.camera_y
+            k = 0
+            j = 0
+            for h in self.sprites():
+                licznik += 1
+                position_x = h.polozenie_hex_x + camera_x
+                if width > position_x > -150:
+                    position_y = h.polozenie_hex_y + camera_y
+                    if height > position_y > -150:
+                        if not h.zajete:
+                            self.screen.blit(self.fog_surface, (position_x, position_y))
+                        else:
+                            self.screen.blit(h.texture, (position_x, position_y))
+                        self.visible_hex['hex', k] = licznik
+                        k += 1
+                    if height > position_y > -150:
+                        if h.odkryte:
+                            self.screen.blit(h.texture, (position_x, position_y))
+                        self.visible_hex['hex', j] = licznik
+                        j += 1
+        else:
+            for h in self.sprites():
+                position_x = h.polozenie_hex_x + self.camera.camera_x
+                if width > position_x > -200:
+                    position_y = h.polozenie_hex_y + self.camera.camera_y
+                    if height > position_y > -200:
+                        if h.odkryte:
+                            self.screen.blit(h.texture, (position_x, position_y))
 
     def rysuj_obwodke_i_zajete(self):
 
@@ -245,6 +292,9 @@ class Map(pygame.sprite.Group):
                                                             i.polozenie_hex_y + self.camera.camera_y])
             if i.zajete:
                 self.screen.blit(self.hex_zajete_surface, (i.polozenie_hex_x + self.camera.camera_x,
+                                                           i.polozenie_hex_y + self.camera.camera_y))
+            if i.odkryte:
+                self.screen.blit(self.uncover_surface, (i.polozenie_hex_x + self.camera.camera_x,
                                                            i.polozenie_hex_y + self.camera.camera_y))
 
     def colision_detection_obwodka(self):
@@ -298,5 +348,40 @@ class Map(pygame.sprite.Group):
                         self.allhex["hex", i].zajete = True
                         Stats.player_hex_status = False
                         Stats.terrain_count += 1
+
+    def odkryj_pole(self, Fog):
+        if Fog:
+            pos1 = pygame.mouse.get_pos()
+            for i in range(self.num_hex_all):
+                pos_in_mask1 = pos1[0] - self.allrect['hex', i].x, pos1[1] - self.allrect['hex', i].y
+                touching = self.allrect['hex', i].collidepoint(*pos1) and self.allmask['hex', i].get_at(pos_in_mask1)
+
+                if touching and self.allhex["hex", i].zajete:
+                    left_neighbor_index = (i - 1) % self.num_hex_all
+                    self.allhex["hex", left_neighbor_index].odkryte = True
+                    right_neighbor_index = (i + 1) % self.num_hex_all
+                    self.allhex["hex", right_neighbor_index].odkryte = True
+
+                    upper_left_neighbor_index = (i - self.num_hex_side) % self.num_hex_all
+                    if (i % self.num_hex_side) == 0:  # case when i is on the left edge of the board
+                        upper_left_neighbor_index += self.num_hex_side
+                    self.allhex["hex", upper_left_neighbor_index].odkryte = True
+
+                    bottom_left_neighbor_index = (i + self.num_hex_side) % self.num_hex_all
+                    if (i % self.num_hex_side) == 0:  # case when i is on the left edge of the board
+                        bottom_left_neighbor_index += self.num_hex_side
+                    self.allhex["hex", bottom_left_neighbor_index].odkryte = True
+
+                    if i // self.num_hex_side % 2 == 1:
+                        upper_right_neighbor_index = (i - self.num_hex_side - 1) % self.num_hex_all
+                        bottom_right_neighbor_index = (i + self.num_hex_side - 1) % self.num_hex_all
+                    else:
+                        upper_right_neighbor_index = (i - self.num_hex_side + 1) % self.num_hex_all
+                        bottom_right_neighbor_index = (i + self.num_hex_side + 1) % self.num_hex_all
+
+                    self.allhex["hex", upper_right_neighbor_index].odkryte = True
+                    self.allhex["hex", bottom_right_neighbor_index].odkryte = True
+
+                    break
 
 
