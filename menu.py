@@ -8,12 +8,14 @@ from gameplay import Stats
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 MAP_SIZE = 30
-
+SWITCH_FOG = False
+PLAYER_COUNT = 1
 
 class Menu:
     status = True
     resume = False
-    def __init__(self, screen, clock, max_tps):
+
+    def __init__(self, screen:pygame.Surface, clock:pygame.time.Clock, max_tps:int):
         pygame.init()
         self.screen = screen
         self.clock = clock
@@ -33,7 +35,6 @@ class Menu:
         self.save_button_texture = pygame.image.load("texture/main_menu/zapisz_button.png").convert_alpha()
         self.gameplay = False
         self.config1 = Config(screen)
-        
         self.MAP_SIZE = 30
         self.run()
 
@@ -42,6 +43,8 @@ class Menu:
         for event in self.event:
             pos = pygame.mouse.get_pos()
             if event.type == pygame.QUIT:
+                Menu.status = False
+                self.config1.Active = False
                 return 'quit'
 
             elif event.type == pygame.MOUSEBUTTONUP:
@@ -51,6 +54,8 @@ class Menu:
                     self.config1.Active = False
                     Menu.status = False
                     self.MAP_SIZE = MAP_SIZE
+                    self.SWITCH_FOG = SWITCH_FOG
+                    self.PLAYER_COUNT = PLAYER_COUNT
                     print(self.MAP_SIZE)
                     pygame.display.update()
 
@@ -125,7 +130,7 @@ class Menu:
 
 class OptionBox():
 
-    def __init__(self, x, y, w, h, color, highlight_color, font, option_list, selected=0):
+    def __init__(self, x:int, y:int, w:int, h:int, color, highlight_color, font, option_list:list, selected=0):
         self.color = color
         self.highlight_color = highlight_color
         self.rect = pygame.Rect(x, y, w, h)
@@ -136,7 +141,7 @@ class OptionBox():
         self.menu_active = False
         self.active_option = -1
 
-    def draw(self, surf):
+    def draw(self, surf:pygame.Surface):
         pygame.draw.rect(surf, self.highlight_color if self.menu_active else self.color, self.rect)
         pygame.draw.rect(surf, (0, 0, 0), self.rect, 2)
         msg = self.font.render(self.option_list[self.selected], 1, (0, 0, 0))
@@ -180,8 +185,8 @@ class OptionBox():
 
 
 class Config:
-    def __init__(self, s1):
-        self.screen = s1
+    def __init__(self, screen:pygame.surface):
+        self.screen = screen
         self.Button_Back = pygame.image.load("texture/main_menu/config/Button_Back.png")
         self.Button_Start = pygame.image.load("texture/main_menu/config/Button_Start.png")
         self.Background = pygame.image.load("texture/main_menu/config/Background.png")
@@ -193,15 +198,21 @@ class Config:
         self.map_size = OptionBox(
             300, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30),
             ["Mała (30x30)", "Średnia (50x50)", "Duża (60x60)"])
-
+        self.text_fog_on_off = self.font.render("Mgła Wojny : ", True, (255, 255, 255))
+        self.fog_on_off = OptionBox(
+            700, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30),
+            ["Wyłącz", "Włącz"])
     def draw(self, event):
         self.screen.blit(self.Background, (0, 0))
         self.screen.blit(self.Button_Back, self.Button_Back_Rect)
         self.screen.blit(self.Button_Start, self.Button_Start_Rect)
         self.screen.blit(self.text_map_size, (60, 240))
+        self.screen.blit(self.text_fog_on_off, (525, 240))
         self.map_size.draw(self.screen)
+        self.fog_on_off.draw(self.screen)
         self.event_list = event
         self.Size()
+        self.Switching_Fog()
 
         pygame.display.update()
 
@@ -215,6 +226,15 @@ class Config:
         elif self.selected_option == 2:
             MAP_SIZE = 60
 
+    def Switching_Fog(self):
+        global SWITCH_FOG
+        self.selected_option = self.fog_on_off.update(self.event_list)
+        if self.selected_option == 0:
+            SWITCH_FOG = False
+        elif self.selected_option == 1:
+            SWITCH_FOG = True
+    def Player_count(self):
+        pass
 
 #################################################################################################################
 
@@ -414,7 +434,7 @@ class LoadMenu(object):
 class LoadItem(object):
     _ID_ = 0
     """docstring for Item"""
-    def __init__(self, name,screen,tmpID):
+    def __init__(self, name,screen:pygame.Surface,tmpID):
         FONT_SIZE = 25
         FONT_NAME = 'timesnewroman'
         font_text = pygame.font.SysFont(FONT_NAME,FONT_SIZE)
@@ -459,7 +479,7 @@ class SaveMenu(object):
     """docstring for SaveMenu"""
     scroll = 0
     status = False
-    def __init__(self, screen,GAME):
+    def __init__(self, screen:pygame.Surface,GAME):
         super(SaveMenu, self).__init__()
         self.game = GAME
 

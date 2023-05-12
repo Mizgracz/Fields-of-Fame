@@ -8,9 +8,6 @@ camera_stop = False
 item_offset = pygame.Vector2(0, 115)
 
 
-
-
-
 class Stats:
     
     gold_count = 0
@@ -27,12 +24,81 @@ class Stats:
     def __init__(self) -> None:
         pass
 
+    def dopisz_surowiec(surowiec):
+        for i in range(len(Stats.surowce_ilosc)):
+            if surowiec == Stats.surowce_ilosc[i][0]:
+                Stats.surowce_ilosc[i][1] += 100
+    def zajmij_pole(self,allrect,allmask,allhex,player=None):
+        if Stats.player_hex_status:
+            mouse_presses = pygame.mouse.get_pressed()
+            if mouse_presses[0]:
+                pos1 = pygame.mouse.get_pos()
+                for i in range(len(allhex)):
+                    pos_in_mask1 = pos1[0] - allrect['hex', i].x, pos1[1] - allrect['hex', i].y
+                    touching = allrect['hex', i].collidepoint(*pos1) and allmask['hex', i].get_at(
+                        pos_in_mask1)
 
-def dopisz_surowiec(surowiec):
-    for i in range(len(Stats.surowce_ilosc)):
-        if surowiec == Stats.surowce_ilosc[i][0]:
-            Stats.surowce_ilosc[i][1] += 100
+                    if touching:
+                        if allhex["hex", i].rodzaj == "surowiec":
+                            print(allhex["hex", i].rodzaj_surowca_var)
+                            Stats.dopisz_surowiec(allhex["hex", i].rodzaj_surowca_var)
+                        if allhex["hex", i].rodzaj == "budynek":
+                            print("budynek")
+                            # dodawanie bonusu do zarabiania
+                            if allhex["hex", i].texture == self.castle_surface:
+                                Stats.army_count_bonus += 10
+                            elif allhex["hex", i].texture == self.willage_surface:
+                                Stats.gold_count_bonus += 10
+                        allhex["hex", i].zajete = True
+                        Stats.player_hex_status = False
+                        Stats.terrain_count += 1
 
+class Player:
+    
+    
+    def __init__(self,name:str) -> None:
+        self.player_name = name
+        self.gold_count = 0
+        self.army_count = 0
+        self.terrain_count = 1
+        self.turn_count = 1
+        self.wyb = False
+        self.camera_stop = False
+        self.item_offset = pygame.Vector2(0, 115)
+        self.player_hex_status = False
+        self.army_count_bonus = 0
+        self.gold_count_bonus = 0
+        self.surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "], ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "ryby: "], ["sawmill", 0, "drewno: "], ["grain", 0, "zboże: "]]
+        
+
+    def dopisz_surowiec(self,surowiec):
+        for i in range(len(self.surowce_ilosc)):
+            if surowiec == self.surowce_ilosc[i][0]:
+                self.surowce_ilosc[i][1] += 100
+    def zajmij_pole(self,allrect:dict,allmask:dict,allhex:dict):
+        if self.player_hex_status:
+            mouse_presses = pygame.mouse.get_pressed()
+            if mouse_presses[0]:
+                pos1 = pygame.mouse.get_pos()
+                for i in range(len(allhex)):
+                    pos_in_mask1 = pos1[0] - allrect['hex', i].x, pos1[1] - allrect['hex', i].y
+                    touching = allrect['hex', i].collidepoint(*pos1) and allmask['hex', i].get_at(
+                        pos_in_mask1)
+
+                    if touching:
+                        if allhex["hex", i].rodzaj == "surowiec":
+                            print(allhex["hex", i].rodzaj_surowca_var)
+                            self.dopisz_surowiec(allhex["hex", i].rodzaj_surowca_var)
+                        if allhex["hex", i].rodzaj == "budynek":
+                            print("budynek")
+                            # dodawanie bonusu do zarabiania
+                            if allhex["hex", i].texture == self.castle_surface:
+                                self.army_count_bonus += 10
+                            elif allhex["hex", i].texture == self.willage_surface:
+                                self.gold_count_bonus += 10
+                        allhex["hex", i].zajete = True
+                        self.player_hex_status = False
+                        self.terrain_count += 1
 
 class Camera:
 
@@ -97,7 +163,7 @@ class Camera:
 
 class UpBar:
 
-    def __init__(self, screen):
+    def __init__(self, screen:pygame.Surface):
         #SCREEN#
         self.SCREEN_WIDTH = screen.get_size()[0]
         self.SCREEN_HEIGHT = screen.get_size()[1]
@@ -133,7 +199,7 @@ class UpBar:
 
 
 class Timer:
-    def __init__(self, screen,game):
+    def __init__(self, screen:pygame.Surface,game):
         #SCREEN#
         self.SCREEN_WIDTH = screen.get_size()[0]
         self.SCREEN_HEIGHT = screen.get_size()[1]
@@ -196,7 +262,7 @@ class Timer:
 
 
 class Hourglass:
-    def __init__(self, screen, frame_rate, animation_frame_interval):
+    def __init__(self, screen:pygame.Surface, frame_rate:int, animation_frame_interval:int):
         self.SCREEN_WIDTH = screen.get_size()[0]
         self.SCREEN_HEIGHT = screen.get_size()[1]
         self.screen = screen
@@ -241,7 +307,7 @@ class Hourglass:
 
 
 class Decision:
-    def __init__(self, screen):
+    def __init__(self, screen:pygame.Surface):
 
         self.SCREEN_WIDTH = screen.get_size()[0] - 256
         self.SCREEN_HEIGHT = screen.get_size()[1]
@@ -295,7 +361,7 @@ class Decision:
 
 class SideMenu:
 
-    def __init__(self, screen):
+    def __init__(self, screen:pygame.Surface):
         #SCREEN#
         self.SCREEN_WIDTH = screen.get_size()[0]
         self.SCREEN_HEIGHT = screen.get_size()[1]
@@ -305,7 +371,6 @@ class SideMenu:
         self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
         ########
         self.texture_main = "texture/ui/side_bar/sideUI.png"
-
         self.texture_button = "texture/ui/side_bar/praweUI_srodek.png"
 
         self.main_surfarce = pygame.image.load(self.texture_main).convert_alpha()
@@ -316,6 +381,35 @@ class SideMenu:
 
         self.screen = screen
 
+        #####
+        self.clay_icon = "texture/surowce/surowce_icons/glina.png"
+        self.diax_icon = "texture/surowce/surowce_icons/diax.png"
+        self.rocks_icon = "texture/surowce/surowce_icons/kamien.png"
+        self.iron_icon = "texture/surowce/surowce_icons/zelazo.png"
+        self.gold_icon = "texture/surowce/surowce_icons/zloto.png"
+        self.fish_icon = "texture/surowce/surowce_icons/ryba.png"
+        self.wood_icon = "texture/surowce/surowce_icons/tartak.png"
+        self.cereal_icon = "texture/surowce/surowce_icons/klos.png"
+
+        self.clay_icon_surface = pygame.image.load(self.clay_icon).convert_alpha()
+        self.diax_icon_surface = pygame.image.load(self.diax_icon).convert_alpha()
+        self.rocks_icon_surface = pygame.image.load(self.rocks_icon).convert_alpha()
+        self.iron_icon_surface = pygame.image.load(self.iron_icon).convert_alpha()
+        self.gold_icon_surface = pygame.image.load(self.gold_icon).convert_alpha()
+        self.fish_icon_surface = pygame.image.load(self.fish_icon).convert_alpha()
+        self.wood_icon_surface = pygame.image.load(self.wood_icon).convert_alpha()
+        self.cereal_icon_surface = pygame.image.load(self.cereal_icon).convert_alpha()
+
+        self.surowce_icons = []
+        self.surowce_icons.append(self.clay_icon_surface)
+        self.surowce_icons.append(self.diax_icon_surface)
+        self.surowce_icons.append(self.rocks_icon_surface)
+        self.surowce_icons.append(self.iron_icon_surface)
+        self.surowce_icons.append(self.gold_icon_surface)
+        self.surowce_icons.append(self.fish_icon_surface)
+        self.surowce_icons.append(self.wood_icon_surface)
+        self.surowce_icons.append(self.cereal_icon_surface)
+
         ####
         self.main_surface = pygame.Surface((256,self.SCREEN_HEIGHT-30),pygame.SRCALPHA)
         self.main_surface.blit(self.main_surfarce,(0,0))
@@ -325,23 +419,27 @@ class SideMenu:
         ####
 
 
-    def surowce_staty(self, x, y, tekst):
+    def surowce_staty(self, x:int, y:int, tekst:str):
         self.tekst = tekst
         
         self.font_opis_s = self.font.render(self.tekst, True, (255, 255, 255))
 
         self.screen.blit(self.font_opis_s, (x,y))
+
+        
     def surowce_staty_blituj(self):
-        x = self.SCREEN_WIDTH-235
-        y = 87
+        x = self.SCREEN_WIDTH-210
+        y = 67
         for i in range(len(Stats.surowce_ilosc)):
-            self.surowce_staty(x,y, f"{Stats.surowce_ilosc[i][2]} {Stats.surowce_ilosc[i][1]}")
-            y += 22
+            self.surowce_staty(x,y, f"{Stats.surowce_ilosc[i][2]} {Stats.surowce_ilosc[i][1]}")    
+            self.surowce_icons[i] = pygame.transform.scale(self.surowce_icons[i],(21,25))
+            self.screen.blit(self.surowce_icons[i],(x-30,y))
+            y += 26
 
     def draw(self):
         
         self.screen.blit(self.main_surface,self.main_rect)
-        self.surowce_staty(self.SCREEN_WIDTH-235, 65, "SUROWCE:")
+        self.surowce_staty(self.SCREEN_WIDTH-190, 47, f"SUROWCE:")
         self.surowce_staty_blituj()
 
     def button(self):
@@ -350,10 +448,11 @@ class SideMenu:
         if self.button_rect.collidepoint(colision) and mouse_pressed[0]:
             Build_Menu.build_stauts = True
 
+# Budowanie
 
 class Build_Menu:
     build_stauts=False
-    def __init__(self, screen):
+    def __init__(self, screen:pygame.Surface):
         
         self.texture = "texture/ui/building/kuptlo.png"
         self.texture_button = "texture/ui/building/CheckBoxFalse.png"
@@ -387,9 +486,8 @@ class Build_Menu:
             if self.exit_button_rect.collidepoint(colision) and mouse_pressed[0]:
                 Build_Menu.build_stauts = False
 
-
 class BuildItem:
-    def __init__(self, menu, koszt, texture, opis, army_bonus, gold_bonus):
+    def __init__(self, menu:Build_Menu, koszt:int, texture, opis:str, army_bonus:int, gold_bonus:int):
         FONT_SIZE = 18
         FONT_NAME = 'timesnewroman'
         self.font_opis = pygame.font.SysFont(FONT_NAME,FONT_SIZE)
@@ -456,9 +554,10 @@ class BuildItem:
         pass
 
 
+# EVENTY
 
 class EventMenagment:
-    def __init__(self, screen):
+    def __init__(self, screen:pygame.Surface):
         self.chance = 0
         self.screen = screen
         self.turn = Stats.turn_count
@@ -497,7 +596,7 @@ class EventMenagment:
                     self.turn = Stats.turn_count
 
 class Event:
-    def __init__(self, ekran, opis, grafika, ilosc_opcji, opisy_opcji,nazwa,managment):
+    def __init__(self, ekran:pygame.Surface, opis:str, grafika, ilosc_opcji:int, opisy_opcji:str,nazwa:str,managment:EventMenagment):
         self.ekran = ekran
         self.opis = opis
         self.grafika = grafika
@@ -543,10 +642,8 @@ class Event:
             Stats.army_count -= 100
             Stats.gold_count -= 50
 
-
-
 class EventRender:
-    def __init__(self, screen, opis, grafika):
+    def __init__(self, screen:pygame.Surface, opis:str, grafika):
 
         self.screen = screen
         screen_x, screen_y = self.screen.get_size()
@@ -583,7 +680,6 @@ class EventRender:
             tekst = self.font.render(linia, True, 'white')
             self.screen.blit(tekst, (self.opis_posx, self.opis_posy + odstep))
             odstep += 20
-
 
 class EventOptions:
 
