@@ -2,7 +2,7 @@
 import pygame
 
 import random
-from gameplay import Player, Stats
+from gameplay import Stats
 
 
 class Hex(pygame.sprite.Sprite):
@@ -273,9 +273,9 @@ class Map(pygame.sprite.Group):
             else:
                 self.allhex[c].obwodka = False
 
-    def zajmij_pole(self,player):
+    def zajmij_pole(self):
         import gameplay
-        if player.player_hex_status:
+        if Stats.player_hex_status:
             mouse_presses = pygame.mouse.get_pressed()
             if mouse_presses[0]:
                 pos1 = pygame.mouse.get_pos()
@@ -287,21 +287,16 @@ class Map(pygame.sprite.Group):
                     if touching:
                         if self.allhex["hex", i].rodzaj == "surowiec":
                             print(self.allhex["hex", i].rodzaj_surowca_var)
-                            gameplay.dopisz_surowiec(self.allhex["hex", i].rodzaj_surowca_var,player)
+                            gameplay.dopisz_surowiec(self.allhex["hex", i].rodzaj_surowca_var)
                         if self.allhex["hex", i].rodzaj == "budynek":
                             print("budynek")
                             # dodawanie bonusu do zarabiania
                             if self.allhex["hex", i].texture == self.castle_surface:
-                                player.army_count_bonus += 10
+                                Stats.army_count_bonus += 10
                             elif self.allhex["hex", i].texture == self.willage_surface:
-                                player.gold_count_bonus += 10
+                                Stats.gold_count_bonus += 10
                         self.allhex["hex", i].zajete = True
-                        player.player_hex_status = False
-                        player.terrain_count += 1
-                        player.turn_count += 1
-                        if Player.ID == Player.MAX_ID-1:
-                            Player.ID = 0
-                        else:
-                            Player.ID += 1
+                        Stats.player_hex_status = False
+                        Stats.terrain_count += 1
 
 

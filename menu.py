@@ -3,12 +3,12 @@ import zipfile
 
 import pygame
 
-from gameplay import Stats
+from gameplay import *
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 MAP_SIZE = 30
-PLAYERS = 2
+
 
 class Menu:
     status = True
@@ -51,7 +51,7 @@ class Menu:
                     self.config1.Active = False
                     Menu.status = False
                     self.MAP_SIZE = MAP_SIZE
-                    self.PLAYERS = PLAYERS
+                    print(self.MAP_SIZE)
                     pygame.display.update()
 
 
@@ -124,7 +124,7 @@ class Menu:
 
 
 class OptionBox():
-    
+
     def __init__(self, x, y, w, h, color, highlight_color, font, option_list, selected=0):
         self.color = color
         self.highlight_color = highlight_color
@@ -156,12 +156,11 @@ class OptionBox():
     def update(self, event_list):
         mpos = pygame.mouse.get_pos()
         self.menu_active = self.rect.collidepoint(mpos)
+
         self.active_option = -1
-        
         for i in range(len(self.option_list)):
             rect = self.rect.copy()
             rect.y += (i + 1) * self.rect.height
-            
             if rect.collidepoint(mpos):
                 self.active_option = i
                 break
@@ -191,19 +190,15 @@ class Config:
         self.Active = False
         self.font = pygame.font.Font(None, 36)
         self.text_map_size = self.font.render("Wielkość mapy : ", True, (255, 255, 255))
-        self.text_player = self.font.render("Ilość graczy : ", True, (255, 255, 255))
         self.map_size = OptionBox(
             300, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30),
             ["Mała (30x30)", "Średnia (50x50)", "Duża (60x60)"])
-        self.player_count = OptionBox(300,223+60+10,180,60,(150, 150, 150), (100, 200, 255),pygame.font.SysFont(None, 30),['2','3','4'])
 
     def draw(self, event):
         self.screen.blit(self.Background, (0, 0))
         self.screen.blit(self.Button_Back, self.Button_Back_Rect)
         self.screen.blit(self.Button_Start, self.Button_Start_Rect)
         self.screen.blit(self.text_map_size, (60, 240))
-        self.screen.blit(self.text_player, (60, 240+60+10))
-        self.player_count.draw(self.screen)
         self.map_size.draw(self.screen)
         self.event_list = event
         self.Size()
@@ -212,22 +207,13 @@ class Config:
 
     def Size(self):
         global MAP_SIZE
-        global PLAYERS
         self.selected_option = self.map_size.update(self.event_list)
-        self.selected_option2 = self.player_count.update(self.event_list)
         if self.selected_option == 0:
             MAP_SIZE = 30
         elif self.selected_option == 1:
             MAP_SIZE = 50
         elif self.selected_option == 2:
             MAP_SIZE = 60
-        
-        if self.selected_option2 == 0:
-            PLAYERS = 2
-        elif self.selected_option2 == 1:
-            PLAYERS = 3
-        elif self.selected_option2 == 2:
-            PLAYERS = 4
 
 
 #################################################################################################################
@@ -696,3 +682,220 @@ class SaveItem(object):
     def update(self):
         self.rect_item.top = 150*self.tmpID+50+SaveMenu.scroll
         self.rect_del.top = 150*self.tmpID+50+SaveMenu.scroll+5
+
+
+class Item:
+    itemId = 0
+    offset_x = 0
+    offset_y = 0
+    def __init__(self, name:str, description:str, image:pygame.Surface, cost:int, gold_buff:int, army_buff):
+        self.available = True
+        Item.itemId += 1
+        self.item_id = Item.itemId
+        self.name = name
+        self.image = pygame.image.load(f'texture/ui/building/{image}').convert_alpha()
+        self.image = pygame.transform.scale(self.image,(90,90))
+
+        
+
+        self.FONT = pygame.font.SysFont(None, 18)
+        self.cost = cost
+        self.font_surface = self.FONT.render(f"{self.name} - {self.cost} $", True, (0, 0, 0))
+        self.background = pygame.Surface((600-2,100-2))
+        self.background.fill((128,128,128))
+        self.itemsurf = pygame.Surface((600,100),pygame.SRCALPHA)
+
+        self.description = description
+
+
+        self.button_rect = pygame.Rect(self.itemsurf.get_width() - 110, self.itemsurf.get_height() // 2 - 15, 100, 30)
+        self.button_text = self.FONT.render("Buy", True, (255, 255, 255))
+
+        self.image_width = self.image.get_width()
+        self.decssurf_width = self.itemsurf.get_width() - self.image_width - self.button_rect.width-25
+
+        self.decssurf = pygame.Surface((self.decssurf_width, 91), pygame.SRCALPHA)
+
+        self.button_image = pygame.Surface((self.button_rect.width,self.button_rect.height),pygame.SRCALPHA)
+        self.button_image.fill('#000000')
+
+
+        self.draw_text(self.decssurf,self.description,self.FONT,(0,0,0),self.decssurf.get_rect())
+    def split_text(self,text:str, font:pygame.font, surface_width:int):
+        words = text.split()
+        lines = []
+        current_line = words[0]
+        for word in words[1:]:
+            test_line = current_line + " " + word
+            if font.size(test_line)[0] <= surface_width:
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word
+        lines.append(current_line)
+        return lines
+
+    def draw_text(self,surface:pygame.Surface, text:str, font, color:pygame.Color, rect:pygame.Rect):
+        lines = self.split_text(text, font, rect.width)
+        rect.y+=8+font.size("Tg")[1] 
+        
+        line_height = font.size("Tg")[1]  # Wysokość jednej linii tekstu
+        
+        max_lines = rect.height // line_height  # Maksymalna liczba linii, która zmieści się w wysokości powierzchni
+        if len(lines) > max_lines:
+            lines = lines[:max_lines-1]
+            lines[-1] += " ..."  # Dodanie elips na końcu ostatniej linii
+    
+        y = rect.y
+        for line in lines:
+            text_surface = font.render(line, True, color)
+            surface.blit(text_surface, (rect.x, y))
+            y += line_height
+
+
+    def draw(self, window, x, y):
+        # Wyświetlanie g
+        # rafiki przedmiotu na określonych współrzędnych
+        self.itemsurf.blit(self.background,(1,1))
+        self.itemsurf.blit(self.image,(5,5))
+        self.itemsurf.blit(self.font_surface, (self.image.get_width()+9, 7))
+        self.itemsurf.blit(self.decssurf,(100,0))
+        
+
+        self.itemsurf.blit(self.button_image,self.button_rect)
+        pygame.draw.rect(window, (255, 192, 192), self.button_rect)
+
+        self.itemsurf.blit(self.button_text, (self.button_rect.x + 10, self.button_rect.y + 8))
+
+
+        window.blit(self.itemsurf, (x, y))
+
+    def button_action(self):
+        self.button_image.fill('#00ff00')
+        self.available = False
+        self.button_text = self.FONT.render("Owned", True, (255, 255, 255))
+        pass
+
+    def print_info(self):
+        print("Item ID:", self.item_id)
+        print("Name:", self.name)
+        print("Cost:", self.cost)
+        print("Description:", self.description)
+        print("------------------------")
+
+
+class MenuB:
+    active = False
+    def __init__(self, window:pygame.Surface, items:list[Item], menu_width:int, menu_height:int, menux:int = 0,menuy:int = 0):
+        
+        Item.offset_x = menux
+        Item.offset_y = menuy
+        
+        self.window = window
+        self.menu_items = items  # Przykładowa lista przedmiotów w menu
+        self.menu_width = menu_width
+        self.menu_height = menu_height
+        self.menu_item_height = 100
+        self.menu_top_item_index = 0
+        self.item_spacing = 20  # Odstęp między przedmiotami
+        
+
+        self.background = pygame.Surface((menu_width,menu_height),pygame.SRCALPHA)
+        self.background.fill('#002200')
+        ALPHA = 0.90
+        self.background.set_alpha(255*ALPHA)
+        
+
+        # Scrollbar settings
+        self.scrollbar_width = 16
+        self.scrollbar_margin = 8
+        self.scrollbar_x = self.window.get_width() - self.scrollbar_width - self.scrollbar_margin
+        self.scrollbar_y = self.scrollbar_margin
+        self.scrollbar_height = self.window.get_height() - self.scrollbar_margin * 2
+
+        self.menu_items_per_page = (self.menu_height - self.scrollbar_margin * 2) // (self.menu_item_height + self.item_spacing)
+        self.menu_x = menux  # Set the desired x-coordinate of the menu
+        self.menu_y = menuy  # Set the desired y-coordinate of the menu
+
+    def draw_menu(self):
+        
+        
+        # Rysowanie menu (inne elementy pominięte dla uproszczenia)
+        self.window.blit(self.background, (self.menu_x-25,self.menu_y-25))
+        for i, item in enumerate(self.menu_items):
+            item_y = 0 + self.scrollbar_margin + (i - self.menu_top_item_index) * (self.menu_item_height + self.item_spacing)
+            item_rect = pygame.Rect(25, item_y, self.background.get_width()-50, self.menu_item_height)
+                     
+            
+            
+            if item_rect.collidepoint(pygame.mouse.get_pos()):
+                # Zaznaczony przedmiot
+                pygame.draw.rect(self.background, (192, 192, 255), item_rect)
+            pygame.draw.rect(self.background, (20, 30, 100), item_rect, 1)
+            
+            item.draw(self.background, 25, item_y)
+            # self.window.blit(font_surface, (self.menu_x + 4, item_y + 2))
+        # Scrollbar
+        pygame.draw.rect(self.window, (128, 128, 128), (self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height))
+        self.scrollbar_rect = pygame.Rect(self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height)
+        # Calculate the position and height of the scrollbar thumb
+        self.thumb_height = self.scrollbar_height / len(self.menu_items) * self.menu_items_per_page
+        self.thumb_y = self.scrollbar_y + (self.menu_top_item_index / len(self.menu_items)) * self.scrollbar_height
+
+        # Draw the scrollbar thumb
+        pygame.draw.rect(self.window, (192, 192, 192), (self.scrollbar_x, self.thumb_y, self.scrollbar_width, self.thumb_height))
+    def handle_event(self, event):
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+            MenuB.active = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:  # Kliknięcie lewym przyciskiem myszy
+                mouse_pos = pygame.mouse.get_pos()
+                for i, item in enumerate(self.menu_items):
+                    item_y = 0 + self.scrollbar_margin + (i - self.menu_top_item_index) * \
+                        (self.menu_item_height + self.item_spacing)
+                    item_rect = pygame.Rect(item.button_rect.x+Item.offset_x, item_y+Item.offset_y, item.button_rect.width, item.button_rect.height)
+        
+                    if item_rect.collidepoint(mouse_pos)and item.available and mouse_pos[1]<Item.offset_y+self.background.get_height() :
+                        item.button_action()
+                        print("Click",item_rect)
+                        print("Button",item.button_rect)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == pygame.BUTTON_WHEELUP:  # Scroll up
+                    if self.menu_top_item_index > 0:
+                        self.menu_top_item_index -= 1
+                elif event.button == pygame.BUTTON_WHEELDOWN:  # Scroll down
+                    if self.menu_top_item_index + self.menu_items_per_page < len(self.menu_items):
+                        self.menu_top_item_index += 1
+
+                
+                if event.button == pygame.BUTTON_LEFT:  # Left mouse button
+                    if self.scrollbar_rect.collidepoint(event.pos):  # Check if the mouse is on the scrollbar
+                        mouse_y = event.pos[1] - self.scrollbar_y
+                        thumb_position = mouse_y - self.thumb_height / 2
+                        max_thumb_position = self.scrollbar_height - self.thumb_height
+
+                        # Limit the thumb position within the scrollbar
+                        if thumb_position < 0:
+                            thumb_position = 0
+                        elif thumb_position > max_thumb_position:
+                            thumb_position = max_thumb_position
+
+                        # Calculate the corresponding menu top item index
+                        self.menu_top_item_index = int((thumb_position / max_thumb_position) * (len(self.menu_items) - self.menu_items_per_page))
+
+                elif event.type == pygame.MOUSEMOTION:
+                    if event.buttons[0]:  # Left mouse button is pressed
+                        if self.scrollbar_rect.collidepoint(event.pos):  # Check if the mouse is on the scrollbar
+                            mouse_y = event.pos[1] - self.scrollbar_y
+                            thumb_position = mouse_y - self.thumb_height / 2
+                            max_thumb_position = self.scrollbar_height - self.thumb_height
+
+                            # Limit the thumb position within the scrollbar
+                            if thumb_position < 0:
+                                thumb_position = 0
+                            elif thumb_position > max_thumb_position:
+                                thumb_position = max_thumb_position
+
+                            # Calculate the corresponding menu top item index
+                            self.menu_top_item_index = int((thumb_position / max_thumb_position) * (len(self.menu_items) - self.menu_items_per_page))
+
