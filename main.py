@@ -1,5 +1,5 @@
 import zipfile
-from graphics import Map
+from graphics import MapGenerator
 from gameplay import*
 from menu import *
 import pygame
@@ -46,7 +46,7 @@ class Game:
             self.start_menu = Menu(screen, clock, max_tps,self.new_game)  # wyświetlanie i obsługa menu
             self.new_game = self.start_menu.new_game
 
-        
+        # budynki
         self.allbuilding = [
             BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
             BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
@@ -67,18 +67,41 @@ class Game:
         self.size = self.start_menu.MAP_SIZE
         self.Fog = self.start_menu.SWITCH_FOG
         self.PlayerCount = self.start_menu.PLAYER_COUNT
+
         self.camera = Camera()
-        self.map = Map(self.size, self.size, screen, self.camera)
-        self.map.texture()
-        self.map.generate()
+        self.map = MapGenerator(self.size, self.size, screen, self.camera)
+        
         self.up_bar = UpBar(screen)
         self.klepsydra1 = Hourglass(screen, frame_rate, animation_frame_interval)
 
-        self.dec = Decision(screen,self.camera,self.map)
+        
         self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
-        self.event = EventMenagment(screen)
-        self.event.start_event_list()
+
+        # gracz
+        self.allplayers = []
+        # for dla stworzenia graczy
+        self.allplayers.append(Player("Lucyferiusz"))
+        self.allplayers.append(Player("Patry"))
+
+
+        self.map.texture()
+        self.map.generate()
+        self.dec = Decision(screen,self.camera,self.map)
+        # definiowanie eventów dla graczy
+        for p in range(len(self.allplayers)):
+            self.dec.fupdate.start(self.allplayers[p])
+        
+        self.allevents = []
+
+        for e in range(len(self.allplayers)):
+            self.allevents.append(EventMenagment(screen,self.allplayers[e]))
+            self.allevents[e].start_event_list()
+            self.allplayers[e].set_menu(self.build_menu)
+
+
+        self.currentplayer = self.allplayers[Player.ID]
+        self.currentevent = self.allevents[Player.ID]
 
 
         self.music_on = 1
@@ -86,7 +109,7 @@ class Game:
         self.loadmenu = LoadMenu(screen, self)
         self.savemenu = SaveMenu(screen, self)
 
-
+        
     def handle_events(self):
         global fps_on
 
@@ -203,7 +226,8 @@ class Game:
             while SaveMenu.status:
                 self.savemenu.draw()
                 self.savemenu.update()
-
+            self.currentplayer = self.allplayers[Player.ID]
+            self.currentevent = self.allevents[Player.ID]
             screen.fill((255, 255, 255))
             self.handle_events()
             self.camera.mouse(self.size)
@@ -211,30 +235,30 @@ class Game:
             self.map.Draw(SCREEN_WIDTH, SCREEN_HEIGHT)
             self.map.fog_draw(self.Fog, SCREEN_WIDTH, SCREEN_HEIGHT)
 
-            if Stats.field_status:
+            if self.currentplayer.field_status:
                 self.dec.fchoice.draw()
-
-            Stats.zajmij_pole(Stats,self.map.allrect,self.map.allmask,self.map.allhex,dec=self.dec) 
+            
+            self.currentplayer.zajmij_pole(self.map.allrect,self.map.allmask,self.map.allhex,self.dec) 
             self.map.odkryj_pole(self.Fog)
             self.map.colision_detection_obwodka()
-            self.event.random_event()
+            self.currentevent.random_event()
             self.map.rysuj_obwodke_i_zajete()
 
 
 
-            self.up_bar.draw()
-            self.sd.draw()
+            self.up_bar.draw(self.currentplayer)
+            self.sd.draw(self.currentplayer)
             if BuildingMenu.active:
                 self.build_menu.draw_menu()
             if not BuildingMenu.active:
-                self.dec.click()
+                self.dec.click(self.currentplayer)
 
             self.klepsydra1.draw()
             if not BuildingMenu.active:
-                if not Stats.wyb:
-                    self.klepsydra1.turn()
-                if Stats.wyb:
-                    self.dec.draw()
+                if not self.currentplayer.wyb:
+                    self.klepsydra1.turn(self.currentplayer)
+                if self.currentplayer.wyb:
+                    self.dec.draw(self.currentplayer)
             self.timer.update()
 
             fps()

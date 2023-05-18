@@ -3,7 +3,7 @@ import zipfile
 
 import pygame
 
-from gameplay import Stats
+from gameplay import *
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
@@ -782,27 +782,31 @@ class BuildingItem:
 
         self.FONT = pygame.font.SysFont(None, 18)
         self.cost = cost
-        self.font_surface = self.FONT.render(f"{self.name} - {self.cost} $", True, (0, 0, 0))
+        self.font_surface = self.FONT.render(f"{self.name} - {self.cost} $", True, (255, 255,255))
         self.background = pygame.Surface((600-2,100-2))
-        self.background.fill((128,128,128))
+        self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/opis.png').convert_alpha(),(600-2,100-2))
+        # self.background.fill((128,128,128))
         self.itemsurf = pygame.Surface((600,100),pygame.SRCALPHA)
 
         self.description = description
 
 
         self.button_rect = pygame.Rect(self.itemsurf.get_width() - 110, self.itemsurf.get_height() // 2 - 15, 100, 30)
-        self.button_text = self.FONT.render("Buy", True, (255, 255, 255))
+        self.button_text = None
 
         self.image_width = self.image.get_width()
         self.decssurf_width = self.itemsurf.get_width() - self.image_width - self.button_rect.width-25
 
         self.decssurf = pygame.Surface((self.decssurf_width, 91), pygame.SRCALPHA)
 
-        self.button_image = pygame.Surface((self.button_rect.width,self.button_rect.height),pygame.SRCALPHA)
-        self.button_image.fill('#000000')
+        # self.button_image = pygame.Surface((self.button_rect.width,self.button_rect.height),pygame.SRCALPHA)
+        # self.button_image = 
+        self.button_image = pygame.transform.scale(pygame.image.load('texture/ui/building/button_kup.png').convert_alpha(),(self.button_rect.width,self.button_rect.height))
+        
 
 
-        self.draw_text(self.decssurf,self.description,self.FONT,(0,0,0),self.decssurf.get_rect())
+        self.draw_text(self.decssurf,self.description,self.FONT,(255,255,255),self.decssurf.get_rect())
+
     def split_text(self,text:str, font:pygame.font, surface_width:int):
         words = text.split()
         lines = []
@@ -845,7 +849,8 @@ class BuildingItem:
         
 
         self.itemsurf.blit(self.button_image,self.button_rect)
-        self.itemsurf.blit(self.button_text, (self.button_rect.x + 10, self.button_rect.y + 8))
+        if not self.button_text is None:
+            self.itemsurf.blit(self.button_text, (self.button_rect.x + 10, self.button_rect.y + 8))
         window.blit(self.itemsurf, (x, y))
 
     def button_action(self):
@@ -870,7 +875,8 @@ class BuildingMenu:
         
 
         self.background = pygame.Surface((menu_width,menu_height-25),pygame.SRCALPHA)
-        self.background.fill('#002200')
+        self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/opis_tlo.png').convert_alpha(), (menu_width,menu_height-25))
+        # self.background.fill('#002200')
         ALPHA = 0.85
         self.background.set_alpha(255*ALPHA)
         

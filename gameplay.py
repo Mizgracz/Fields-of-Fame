@@ -2,24 +2,28 @@ import zipfile
 import pygame
 import time, os
 import random
+from menu import *
 
 
 item_offset = pygame.Vector2(0, 115)
 
 
 class Stats:
+    item_offset = pygame.Vector2(0, 115)
     gold_count = 0
     army_count = 0
+    army_count_bonus = 0
+    gold_count_bonus = 0
+
     terrain_count = 1
     turn_count = 1
+
     wyb = False
     field_status = False
     camera_stop = False
-    item_offset = pygame.Vector2(0, 115)
     player_hex_status = False
-    army_count_bonus = 0
-    gold_count_bonus = 0
     turn_stop = False
+    
     surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "],
                      ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "ryby: "],
                      ["sawmill", 0, "drewno: "], ["grain", 0, "zboże: "]]
@@ -63,29 +67,51 @@ class Stats:
 
 
 class Player:
-
+    MAX = 0
+    ID =0
+    castle_hex = [137,137*2,137*3,137*4,137*5]
+    use_castle = []
     def __init__(self, name: str) -> None:
+        Player.MAX += 1
+
+        self.buildMenu = None 
+        self.home = random.choice(Player.castle_hex)
+        Player.castle_hex.remove(self.home)
+        Player.use_castle.append(self.home)
         self.player_name = name
+        self.nacja =  None #TODO
+        self.wyb = False
+        self.turn_stop = False
+        self.field_status = False
+        self.camera_stop = False
+        self.player_hex_status = False
+        self.item_offset = pygame.Vector2(0, 115)
+        #TODO zmienne od nacji
         self.gold_count = 0
         self.army_count = 0
         self.terrain_count = 1
         self.turn_count = 1
-        self.wyb = False
-        self.camera_stop = False
-        self.item_offset = pygame.Vector2(0, 115)
-        self.player_hex_status = False
         self.army_count_bonus = 0
         self.gold_count_bonus = 0
         self.surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "],
                               ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "ryby: "],
                               ["sawmill", 0, "drewno: "], ["grain", 0, "zboże: "]]
-
+    
+    
+    
+    def next_player():
+        if Player.ID == Player.MAX-1:
+            Player.ID = 0
+        else:
+            Player.ID += 1
+    def set_menu(self,menu: BuildingMenu):
+        self.buildMenu = menu
     def dopisz_surowiec(self, surowiec):
         for i in range(len(self.surowce_ilosc)):
             if surowiec == self.surowce_ilosc[i][0]:
                 self.surowce_ilosc[i][1] += 100
 
-    def zajmij_pole(self, allrect: dict, allmask: dict, allhex: dict):
+    def zajmij_pole(self, allrect, allmask, allhex, dec):
         if self.player_hex_status:
             mouse_presses = pygame.mouse.get_pressed()
             if mouse_presses[0]:
@@ -95,7 +121,7 @@ class Player:
                     touching = allrect['hex', i].collidepoint(*pos1) and allmask['hex', i].get_at(
                         pos_in_mask1)
 
-                    if touching:
+                    if touching and allhex["hex", i].field_add:
                         if allhex["hex", i].rodzaj == "surowiec":
                             print(allhex["hex", i].rodzaj_surowca_var)
                             self.dopisz_surowiec(allhex["hex", i].rodzaj_surowca_var)
@@ -107,8 +133,13 @@ class Player:
                             elif allhex["hex", i].texture == self.willage_surface:
                                 self.gold_count_bonus += 10
                         allhex["hex", i].zajete = True
+                        allhex["hex", i].field_add = False
+                        dec.fupdate.new_hex(i)
+                        self.field_status = False
                         self.player_hex_status = False
                         self.terrain_count += 1
+                        self.turn_stop = False
+                        Player.next_player()
 
 
 class Camera:
@@ -190,16 +221,16 @@ class UpBar:
                                                (self.SCREEN_WIDTH, 30))
         self.screen = screen
 
-    def draw(self):
+    def draw(self,player):
         # Wyświetlenie powierzchni górnej belki na ekranie
         self.screen.blit(self.bar_main, (0, 0))
-        self.update()
+        self.update(player)
 
-    def update(self):
-        money_score = self.font.render("Ilość Złota: " + str(Stats.gold_count), True, "white")
-        army_score = self.font.render("Ilość Wojska: " + str(Stats.army_count), True, "white")
-        tiles_score = self.font.render("Ilość Posiadanych Pól: " + str(Stats.terrain_count), True, "white")
-        turn_score = self.font.render("Tura: " + str(Stats.turn_count), True, "white")
+    def update(self,player):
+        money_score = self.font.render("Ilość Złota: " + str(player.gold_count), True, "white")
+        army_score = self.font.render("Ilość Wojska: " + str(player.army_count), True, "white")
+        tiles_score = self.font.render("Ilość Posiadanych Pól: " + str(player.terrain_count), True, "white")
+        turn_score = self.font.render("Tura: " + str(player.turn_count), True, "white")
 
         self.screen.blit(money_score, (20, 2))
         self.screen.blit(army_score, (210, 2))
@@ -296,13 +327,13 @@ class Hourglass:
         if self.frame_index >= len(self.animation_frames):
             self.frame_index = 0
 
-    def turn(self):
+    def turn(self,player):
         collision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
         if self.hourglass_rect.collidepoint(collision) and mouse_pressed[0]:
-            if Stats.wyb == False and not Stats.turn_stop:
-                Stats.wyb = True
-                Stats.turn_count += 1
+            if player.wyb == False and not player.turn_stop:
+                player.wyb = True
+                player.turn_count += 1
                 self.next_frame()
                 self.last_frame_time = pygame.time.get_ticks()
 
@@ -331,7 +362,7 @@ class Decision:
         self.numhex = self.map.num_hex_right_side
 
         self.fupdate = FieldUpdate(self.map.sprites(), self.numhex)
-        self.fupdate.start()
+        
         self.fchoice = FieldChoice(self.map.sprites(), self.screen, self.camera)
 
         self.bacground_rect = self.background_image.get_rect(center=(self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2))
@@ -343,32 +374,34 @@ class Decision:
         self.background_image.blit(self.army_button, (self.army_button.get_size()[0] / 4 - 2, 150))
         self.background_image.blit(self.field_button, (self.field_button.get_size()[0] / 4 - 2, 250))
 
-    def draw(self):
+    def draw(self,player):
         
-        if Stats.wyb:
-            Stats.camera_stop = True
+        if player.wyb:
+            player.camera_stop = True
             self.screen.blit(self.background_image, self.bacground_rect)
 
-    def click(self):
+    def click(self,player):
         colision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
-        if self.gold_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
-            Stats.wyb = False
-            Stats.camera_stop = False
-            Stats.gold_count += 10 + Stats.gold_count_bonus
+        if self.gold_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+            player.wyb = False
+            player.camera_stop = False
+            player.gold_count += 10 + player.gold_count_bonus
+            Player.next_player()
 
-        if self.army_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
-            Stats.wyb = False
-            Stats.camera_stop = False
-            Stats.army_count += 10 + Stats.army_count_bonus
+        if self.army_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+            player.wyb = False
+            player.camera_stop = False
+            player.army_count += 10 + player.army_count_bonus
+            Player.next_player()
 
-        if self.field_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
-            Stats.wyb = False
-            Stats.camera_stop = False
-            Stats.turn_stop = True
+        if self.field_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+            player.wyb = False
+            player.camera_stop = False
+            player.turn_stop = True
             self.fchoice.check()
-            Stats.field_status = True
-            Stats.player_hex_status = True
+            player.field_status = True
+            player.player_hex_status = True
             pygame.time.Clock().tick(3)
 
 
@@ -379,13 +412,13 @@ class FieldUpdate:
         self.num_sprites = len(sprites)
         self.quantity_hex = num
 
-    def start(self):
-        prev_index = (137 - 1) % self.num_sprites
-        next_index = (137 + 1) % self.num_sprites
-        c = (137 - self.quantity_hex) % self.num_sprites
-        d = (137 + 1 - self.quantity_hex) % self.num_sprites
-        e = (137 + self.quantity_hex) % self.num_sprites
-        f = (137 + self.quantity_hex + 1) % self.num_sprites
+    def start(self,player:Player):
+        prev_index = (player.home - 1) % self.num_sprites
+        next_index = (player.home + 1) % self.num_sprites
+        c = (player.home - self.quantity_hex) % self.num_sprites
+        d = (player.home + 1 - self.quantity_hex) % self.num_sprites
+        e = (player.home + self.quantity_hex) % self.num_sprites
+        f = (player.home + self.quantity_hex + 1) % self.num_sprites
 
         if not self.sprites[prev_index].zajete:
             self.sprites[prev_index].field_add = True
@@ -532,20 +565,20 @@ class SideMenu:
 
         self.screen.blit(self.font_opis_s, (x, y))
 
-    def surowce_staty_blituj(self):
+    def surowce_staty_blituj(self,player):
         x = self.SCREEN_WIDTH - 210
         y = 67
-        for i in range(len(Stats.surowce_ilosc)):
-            self.surowce_staty(x, y, f"{Stats.surowce_ilosc[i][2]} {Stats.surowce_ilosc[i][1]}")
+        for i in range(len(player.surowce_ilosc)):
+            self.surowce_staty(x, y, f"{player.surowce_ilosc[i][2]} {player.surowce_ilosc[i][1]}")
             self.surowce_icons[i] = pygame.transform.scale(self.surowce_icons[i], (21, 25))
             self.screen.blit(self.surowce_icons[i], (x - 30, y))
             y += 26
 
-    def draw(self):
+    def draw(self,player:Player):
 
         self.screen.blit(self.main_surface, self.main_rect)
-        self.surowce_staty(self.SCREEN_WIDTH - 190, 47, f"SUROWCE:")
-        self.surowce_staty_blituj()
+        self.surowce_staty(self.SCREEN_WIDTH - 190, 47, f"{player.player_name}:")
+        self.surowce_staty_blituj(player)
 # TODO : USUNĄĆ
     # def button(self):
     #     colision = pygame.mouse.get_pos()
@@ -558,10 +591,11 @@ class SideMenu:
 # EVENTY
 
 class EventMenagment:
-    def __init__(self, screen: pygame.Surface):
+    def __init__(self, screen: pygame.Surface, player):
         self.chance = 0
         self.screen = screen
-        self.turn = Stats.turn_count
+        self.player = player
+        self.turn = player.turn_count
         self.events = []
 
     def start_event_list(self):
@@ -578,20 +612,20 @@ class EventMenagment:
 
     def random_event(self):
 
-        if self.turn < Stats.turn_count:
+        if self.turn < self.player.turn_count:
             if self.events:
                 if random.randint(0, 99) < self.chance:
 
                     x = random.choice(self.events)
                     x.execute()
                     self.events.remove(x)
-                    self.turn = Stats.turn_count
+                    self.turn = self.player.turn_count
                     self.chance = 0
 
                 else:
                     self.chance += 20
 
-                    self.turn = Stats.turn_count
+                    self.turn = self.player.turn_count
 
 
 class Event:
@@ -620,15 +654,15 @@ class Event:
         if self.Wybor == 1:
             x = random.randint(0, 99)
             if x < 60:
-                Stats.gold_count += 100  # Zabij ich
-                Stats.army_count -= 10
+                self.player.gold_count += 100  # Zabij ich
+                self.player.army_count -= 10
 
             else:
-                Stats.army_count -= 50
+                self.player.army_count -= 50
 
         if self.Wybor == 2:
-            Stats.gold_count -= 200  # Zaplać im
-            Stats.army_count += 100
+            self.player.gold_count -= 200  # Zaplać im
+            self.player.army_count += 100
 
             x = random.randint(0, 99)
             if x < 30:
@@ -640,8 +674,8 @@ class Event:
 
     def najemnicy_thief(self, managment):
         if self.Wybor == 0:
-            Stats.army_count -= 100
-            Stats.gold_count -= 50
+            self.player.army_count -= 100
+            self.player.gold_count -= 50
 
 
 class EventRender:

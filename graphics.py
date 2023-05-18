@@ -1,7 +1,7 @@
 
 import pygame
 import random
-from gameplay import Camera
+from gameplay import Camera, Player
 
 
 
@@ -23,7 +23,7 @@ class Hex(pygame.sprite.Sprite):
         self.texture = self.texturing(self.group)
         self.rodzaj = self.surowiec()  # self.czy_to_surowiec()
         self.rodzaj_surowca_var = None
-        if self.number == 137:
+        if self.number in Player.use_castle:
             self.zajete = True
         if self.rodzaj == 'hex':
             self.rodzaj_surowca_var = None
@@ -34,7 +34,7 @@ class Hex(pygame.sprite.Sprite):
         return self.texture
 
     def texturing(self, group):
-        if self.number == 137:
+        if self.number in Player.use_castle:
             return group.castle_surface
         if self.texture_index == 1:
             return group.grass_surface
@@ -102,8 +102,8 @@ class Hex(pygame.sprite.Sprite):
                 return self.group.surowce_lista[k][1]
 
 
-class Map(pygame.sprite.Group):
-
+class MapGenerator(pygame.sprite.Group):
+    
     def __init__(self, numx:int, numy:int, screen:pygame.Surface, camera:Camera):
         super().__init__()
 
@@ -187,7 +187,7 @@ class Map(pygame.sprite.Group):
     def texture(self):
 
         for i in range(self.num_hex_y * self.num_hex_x):
-            if i == 137:
+            if i in Player.use_castle:
                 self.alltex['hex', i] = self.castle_surface
 
             else:
@@ -204,9 +204,6 @@ class Map(pygame.sprite.Group):
             y = j * 152
             for i in range(self.num_hex_x):
 
-                # elif self.alltex["hex", licz] == self.castle_surface or self.alltex["hex", licz] == self.willage_surface:
-                #     self.allhex["hex", licz] = Budynek((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz], licz, self, False, False,self.tex_id[licz])
-                # else:
                 self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), licz, self, False, False,False,
                                                False,self.tex_id[licz])
 
@@ -214,12 +211,8 @@ class Map(pygame.sprite.Group):
                     midleft=(self.allhex["hex", licz].polozenie_hex_x, self.allhex["hex", licz].polozenie_hex_y + 75))
                 self.allmask['hex', licz] = pygame.mask.from_surface(self.allhex["hex", licz].texture)
                 x += self.allhex["hex", licz].szerokosc
-                # if self.allhex['hex',licz].rodzaj == 'surowiec':
-                #     buff = self.zwroc_liste(licz)
-                #     self.allhex["hex", licz] = Surowiec((x + przesuniecie_x),\
-                #     (y + przesuniecie_y), self.alltex["hex", licz], licz, self, False, False,self.tex_id[licz]    )
-                #     self.allhex["hex", licz].rodzaj_surowca(buff)
-                if licz == 137:
+               
+                if licz in Player.use_castle:
                     self.allhex["hex", licz].zajete = True
                 licz += 1
 
