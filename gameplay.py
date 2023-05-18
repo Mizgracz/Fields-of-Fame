@@ -1,40 +1,114 @@
 import zipfile
 import pygame
-import time,os
+import time, os
 import random
 
-from menu import MenuB
 
-
-camera_stop = False
 item_offset = pygame.Vector2(0, 115)
 
 
-def zmien_rozmiar_surface(surface, width, height):
-    return pygame.transform.scale(surface, (width, height))
-
-
 class Stats:
-    
     gold_count = 0
     army_count = 0
     terrain_count = 1
     turn_count = 1
     wyb = False
+    field_status = False
     camera_stop = False
     item_offset = pygame.Vector2(0, 115)
     player_hex_status = False
     army_count_bonus = 0
     gold_count_bonus = 0
-    surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "], ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "ryby: "], ["sawmill", 0, "drewno: "], ["grain", 0, "zboże: "]]
+    turn_stop = False
+    surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "],
+                     ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "ryby: "],
+                     ["sawmill", 0, "drewno: "], ["grain", 0, "zboże: "]]
+
     def __init__(self) -> None:
         pass
 
+    def dopisz_surowiec(surowiec):
+        for i in range(len(Stats.surowce_ilosc)):
+            if surowiec == Stats.surowce_ilosc[i][0]:
+                Stats.surowce_ilosc[i][1] += 100
 
-def dopisz_surowiec(surowiec):
-    for i in range(len(Stats.surowce_ilosc)):
-        if surowiec == Stats.surowce_ilosc[i][0]:
-            Stats.surowce_ilosc[i][1] += 100
+    def zajmij_pole(self, allrect, allmask, allhex, player=None, dec=None):
+        if Stats.player_hex_status:
+            mouse_presses = pygame.mouse.get_pressed()
+            if mouse_presses[0]:
+                pos1 = pygame.mouse.get_pos()
+                for i in range(len(allhex)):
+                    pos_in_mask1 = pos1[0] - allrect['hex', i].x, pos1[1] - allrect['hex', i].y
+                    touching = allrect['hex', i].collidepoint(*pos1) and allmask['hex', i].get_at(
+                        pos_in_mask1)
+
+                    if touching and allhex["hex", i].field_add:
+                        if allhex["hex", i].rodzaj == "surowiec":
+                            print(allhex["hex", i].rodzaj_surowca_var)
+                            Stats.dopisz_surowiec(allhex["hex", i].rodzaj_surowca_var)
+                        if allhex["hex", i].rodzaj == "budynek":
+                            print("budynek")
+                            # dodawanie bonusu do zarabiania
+                            if allhex["hex", i].texture == self.castle_surface:
+                                Stats.army_count_bonus += 10
+                            elif allhex["hex", i].texture == self.willage_surface:
+                                Stats.gold_count_bonus += 10
+                        allhex["hex", i].zajete = True
+                        allhex["hex", i].field_add = False
+                        dec.fupdate.new_hex(i)
+                        Stats.field_status = False
+                        Stats.player_hex_status = False
+                        Stats.terrain_count += 1
+                        Stats.turn_stop = False
+
+
+class Player:
+
+    def __init__(self, name: str) -> None:
+        self.player_name = name
+        self.gold_count = 0
+        self.army_count = 0
+        self.terrain_count = 1
+        self.turn_count = 1
+        self.wyb = False
+        self.camera_stop = False
+        self.item_offset = pygame.Vector2(0, 115)
+        self.player_hex_status = False
+        self.army_count_bonus = 0
+        self.gold_count_bonus = 0
+        self.surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "],
+                              ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "ryby: "],
+                              ["sawmill", 0, "drewno: "], ["grain", 0, "zboże: "]]
+
+    def dopisz_surowiec(self, surowiec):
+        for i in range(len(self.surowce_ilosc)):
+            if surowiec == self.surowce_ilosc[i][0]:
+                self.surowce_ilosc[i][1] += 100
+
+    def zajmij_pole(self, allrect: dict, allmask: dict, allhex: dict):
+        if self.player_hex_status:
+            mouse_presses = pygame.mouse.get_pressed()
+            if mouse_presses[0]:
+                pos1 = pygame.mouse.get_pos()
+                for i in range(len(allhex)):
+                    pos_in_mask1 = pos1[0] - allrect['hex', i].x, pos1[1] - allrect['hex', i].y
+                    touching = allrect['hex', i].collidepoint(*pos1) and allmask['hex', i].get_at(
+                        pos_in_mask1)
+
+                    if touching:
+                        if allhex["hex", i].rodzaj == "surowiec":
+                            print(allhex["hex", i].rodzaj_surowca_var)
+                            self.dopisz_surowiec(allhex["hex", i].rodzaj_surowca_var)
+                        if allhex["hex", i].rodzaj == "budynek":
+                            print("budynek")
+                            # dodawanie bonusu do zarabiania
+                            if allhex["hex", i].texture == self.castle_surface:
+                                self.army_count_bonus += 10
+                            elif allhex["hex", i].texture == self.willage_surface:
+                                self.gold_count_bonus += 10
+                        allhex["hex", i].zajete = True
+                        self.player_hex_status = False
+                        self.terrain_count += 1
 
 
 class Camera:
@@ -47,13 +121,12 @@ class Camera:
         self.mouse_y = 0
         self.move_mouse_max = 160
 
-
-    def mouse(self,mapsize):
+    def mouse(self, mapsize):
 
         self.mouse_x, self.mouse_y = pygame.mouse.get_pos()
         predkosc = 5
         press = pygame.key.get_pressed()
-        if camera_stop is False:
+        if Stats.camera_stop is False:
             if not press[pygame.K_LCTRL]:
                 if self.camera_x < 1600:
                     if self.mouse_x < 30:
@@ -62,7 +135,7 @@ class Camera:
                         self.camera_x += (predkosc + 5)
                     elif self.mouse_x < self.move_mouse_max:
                         self.camera_x += predkosc
-                if self.camera_x > 1640 - (mapsize * 130)+1110:
+                if self.camera_x > 1640 - (mapsize * 130) + 1110:
                     if self.mouse_x > 1240:
                         self.camera_x -= predkosc + 10
                     elif self.mouse_x > 1190:
@@ -78,7 +151,7 @@ class Camera:
                     elif self.mouse_y < 160:
                         self.camera_y += predkosc
 
-                if self.camera_y > (-152*mapsize/2) - (75*mapsize/2) + 825:
+                if self.camera_y > (-152 * mapsize / 2) - (75 * mapsize / 2) + 825:
                     if self.mouse_y > 670:
                         self.camera_y -= predkosc + 10
                     elif self.mouse_y > 620:
@@ -100,8 +173,8 @@ class Camera:
 
 class UpBar:
 
-    def __init__(self, screen):
-        #SCREEN#
+    def __init__(self, screen: pygame.Surface):
+        # SCREEN#
         self.SCREEN_WIDTH = screen.get_size()[0]
         self.SCREEN_HEIGHT = screen.get_size()[1]
         ########
@@ -113,17 +186,16 @@ class UpBar:
         self.bar = pygame.Surface((self.SCREEN_WIDTH, 30))
         self.up_bar_surface = pygame.Surface((self.SCREEN_WIDTH, 30))
         # grafiki
-        self.bar_main = pygame.transform.scale(pygame.image.load('texture/ui/up_bar/bar.png').convert_alpha(),(self.SCREEN_WIDTH,30))
+        self.bar_main = pygame.transform.scale(pygame.image.load('texture/ui/up_bar/bar.png').convert_alpha(),
+                                               (self.SCREEN_WIDTH, 30))
         self.screen = screen
-
-
 
     def draw(self):
         # Wyświetlenie powierzchni górnej belki na ekranie
         self.screen.blit(self.bar_main, (0, 0))
         self.update()
-    def update(self):
 
+    def update(self):
         money_score = self.font.render("Ilość Złota: " + str(Stats.gold_count), True, "white")
         army_score = self.font.render("Ilość Wojska: " + str(Stats.army_count), True, "white")
         tiles_score = self.font.render("Ilość Posiadanych Pól: " + str(Stats.terrain_count), True, "white")
@@ -136,8 +208,8 @@ class UpBar:
 
 
 class Timer:
-    def __init__(self, screen,game):
-        #SCREEN#
+    def __init__(self, screen: pygame.Surface, game):
+        # SCREEN#
         self.SCREEN_WIDTH = screen.get_size()[0]
         self.SCREEN_HEIGHT = screen.get_size()[1]
         ########
@@ -156,17 +228,16 @@ class Timer:
         hours = int(elapsed_time // 3600)
         minutes = int((elapsed_time % 3600) // 60)
         seconds = int(elapsed_time % 60)
-        if minutes%1==0 and not minutes == 0 and seconds ==0:
+        if minutes % 1 == 0 and not minutes == 0 and seconds == 0:
             self.autosave_game()
-
 
         # Draw the timer text
         timer_text = self.font_timer.render('{:02d}:{:02d}:{:02d}'.format(hours, minutes, seconds), True,
                                             (255, 255, 255))
-        
+
         text_rect = timer_text.get_rect(center=self.timer_box.center)
         self.screen.blit(timer_text, text_rect)
-        
+
     def autosave_game(self):
         import gameplay
         print('SaveGame')
@@ -175,20 +246,20 @@ class Timer:
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        with open('save/map.csv','w') as savefile:
+        with open('save/map.csv', 'w') as savefile:
             savefile.write('x;y;number;texture_index;zajete\n')
             for h in self.game.map.sprites():
                 savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.zajete}')
                 savefile.write('\n')
-        with open('save/stats.txt','w') as savefile:
-            
+        with open('save/stats.txt', 'w') as savefile:
+
             savefile.write(f'gold_count:{Stats.gold_count}\n')
             savefile.write(f'army_count:{Stats.army_count}\n')
             savefile.write(f'player_hex_status:{Stats.player_hex_status}\n')
             savefile.write(f'army_count_bonus:{Stats.army_count_bonus}\n')
             savefile.write(f'gold_count_bonus:{Stats.gold_count_bonus}\n')
             savefile.write(f'turn_count:{Stats.turn_count}\n')
-            
+
         pygame.time.Clock().tick(1)
         with zipfile.ZipFile("save/AutoSave.zip", "w") as zip:
             zip.write("save/stats.txt")
@@ -199,7 +270,7 @@ class Timer:
 
 
 class Hourglass:
-    def __init__(self, screen, frame_rate, animation_frame_interval):
+    def __init__(self, screen: pygame.Surface, frame_rate: int, animation_frame_interval: int):
         self.SCREEN_WIDTH = screen.get_size()[0]
         self.SCREEN_HEIGHT = screen.get_size()[1]
         self.screen = screen
@@ -229,7 +300,7 @@ class Hourglass:
         collision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
         if self.hourglass_rect.collidepoint(collision) and mouse_pressed[0]:
-            if Stats.wyb == False:
+            if Stats.wyb == False and not Stats.turn_stop:
                 Stats.wyb = True
                 Stats.turn_count += 1
                 self.next_frame()
@@ -244,7 +315,7 @@ class Hourglass:
 
 
 class Decision:
-    def __init__(self, screen):
+    def __init__(self, screen: pygame.Surface, camera, map):
 
         self.SCREEN_WIDTH = screen.get_size()[0] - 256
         self.SCREEN_HEIGHT = screen.get_size()[1]
@@ -252,54 +323,153 @@ class Decision:
         self.army_button = pygame.image.load("texture/ui/turn/wojsko_button.png").convert_alpha()
         self.gold_button = pygame.image.load("texture/ui/turn/zloto_button.png").convert_alpha()
         self.field_button = pygame.image.load("texture/ui/turn/zajmij_button.png").convert_alpha()
-
-
-
-        self.bacground_rect = self.background_image.get_rect(center=(self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2))
-        self.gold_rect = self.gold_button.get_rect(midtop=(self.SCREEN_WIDTH/2, 230))
-        self.army_rect = self.army_button.get_rect(midtop=(self.SCREEN_WIDTH/2, 330))
-        self.field_rect = self.field_button.get_rect(midtop=(self.SCREEN_WIDTH/2, 430))
-
+        self.camera = camera
         self.screen = screen
+        self.map = map
 
-        
-        self.background_image.blit(self.gold_button, (self.gold_button.get_size()[0]/4-2,50))
-        self.background_image.blit(self.army_button, (self.army_button.get_size()[0]/4-2,150))
-        self.background_image.blit(self.field_button, (self.field_button.get_size()[0]/4-2,250))
+        # ilośc hexów w rzędzie
+        self.numhex = self.map.num_hex_right_side
 
+        self.fupdate = FieldUpdate(self.map.sprites(), self.numhex)
+        self.fupdate.start()
+        self.fchoice = FieldChoice(self.map.sprites(), self.screen, self.camera)
+
+        self.bacground_rect = self.background_image.get_rect(center=(self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2))
+        self.gold_rect = self.gold_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, 230))
+        self.army_rect = self.army_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, 330))
+        self.field_rect = self.field_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, 430))
+
+        self.background_image.blit(self.gold_button, (self.gold_button.get_size()[0] / 4 - 2, 50))
+        self.background_image.blit(self.army_button, (self.army_button.get_size()[0] / 4 - 2, 150))
+        self.background_image.blit(self.field_button, (self.field_button.get_size()[0] / 4 - 2, 250))
 
     def draw(self):
-        global camera_stop
+        
         if Stats.wyb:
-            camera_stop = True
+            Stats.camera_stop = True
             self.screen.blit(self.background_image, self.bacground_rect)
-            
 
     def click(self):
-        global camera_stop
         colision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
         if self.gold_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
             Stats.wyb = False
-            camera_stop = False
+            Stats.camera_stop = False
             Stats.gold_count += 10 + Stats.gold_count_bonus
 
         if self.army_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
             Stats.wyb = False
-            camera_stop = False
+            Stats.camera_stop = False
             Stats.army_count += 10 + Stats.army_count_bonus
 
         if self.field_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
             Stats.wyb = False
-            camera_stop = False
+            Stats.camera_stop = False
+            Stats.turn_stop = True
+            self.fchoice.check()
+            Stats.field_status = True
             Stats.player_hex_status = True
             pygame.time.Clock().tick(3)
 
 
+class FieldUpdate:
+
+    def __init__(self, sprites, num):
+        self.sprites = sprites
+        self.num_sprites = len(sprites)
+        self.quantity_hex = num
+
+    def start(self):
+        prev_index = (137 - 1) % self.num_sprites
+        next_index = (137 + 1) % self.num_sprites
+        c = (137 - self.quantity_hex) % self.num_sprites
+        d = (137 + 1 - self.quantity_hex) % self.num_sprites
+        e = (137 + self.quantity_hex) % self.num_sprites
+        f = (137 + self.quantity_hex + 1) % self.num_sprites
+
+        if not self.sprites[prev_index].zajete:
+            self.sprites[prev_index].field_add = True
+
+        if not self.sprites[next_index].zajete:
+            self.sprites[next_index].field_add = True
+
+        if not self.sprites[c].zajete:
+            self.sprites[c].field_add = True
+
+        if not self.sprites[d].zajete:
+            self.sprites[d].field_add = True
+
+        if not self.sprites[e].zajete:
+            self.sprites[e].field_add = True
+
+        if not self.sprites[f].zajete:
+            self.sprites[f].field_add = True
+
+    def new_hex(self, hex):
+
+        column = hex // self.quantity_hex
+        if hex % self.quantity_hex == 0:
+            column + 1
+
+        if column % 2 == 0:
+            prev_index = (hex - 1) % self.num_sprites
+            next_index = (hex + 1) % self.num_sprites
+            c = (hex - self.quantity_hex) % self.num_sprites
+            d = (hex + 1 - self.quantity_hex) % self.num_sprites
+            e = (hex + self.quantity_hex) % self.num_sprites
+            f = (hex + self.quantity_hex + 1) % self.num_sprites
+        else:
+            prev_index = (hex - 1) % self.num_sprites
+            next_index = (hex + 1) % self.num_sprites
+            c = (hex - self.quantity_hex) % self.num_sprites
+            d = (hex - 1 - self.quantity_hex) % self.num_sprites
+            e = (hex + self.quantity_hex) % self.num_sprites
+            f = (hex + self.quantity_hex - 1) % self.num_sprites
+
+        if not self.sprites[prev_index].zajete:
+            self.sprites[prev_index].field_add = True
+
+        if not self.sprites[next_index].zajete:
+            self.sprites[next_index].field_add = True
+
+        if not self.sprites[c].zajete:
+            self.sprites[c].field_add = True
+
+        if not self.sprites[d].zajete:
+            self.sprites[d].field_add = True
+
+        if not self.sprites[e].zajete:
+            self.sprites[e].field_add = True
+
+        if not self.sprites[f].zajete:
+            self.sprites[f].field_add = True
+
+
+class FieldChoice:
+
+    def __init__(self, sprites, screen, camera):
+        self.Field_add_surface = pygame.image.load("texture/hex/hex_add.png").convert_alpha()
+        self.sprites = sprites
+        self.screen = screen
+        self.avalible_hex = []
+        self.camera = camera
+
+    def check(self):
+        self.avalible_hex = []
+        for i in self.sprites:
+            if i.field_add:
+                self.avalible_hex.append(i)
+
+    def draw(self):
+        for i in self.avalible_hex:
+            self.screen.blit(self.Field_add_surface, [i.polozenie_hex_x + self.camera.camera_x,
+                                                      i.polozenie_hex_y + self.camera.camera_y])
+
+
 class SideMenu:
 
-    def __init__(self, screen):
-        #SCREEN#
+    def __init__(self, screen: pygame.Surface):
+        # SCREEN#
         self.SCREEN_WIDTH = screen.get_size()[0]
         self.SCREEN_HEIGHT = screen.get_size()[1]
         ########
@@ -313,8 +483,8 @@ class SideMenu:
         self.main_surfarce = pygame.image.load(self.texture_main).convert_alpha()
 
         self.button_surfarce = pygame.image.load(self.texture_button).convert_alpha()
-        self.main_rect = self.main_surfarce.get_rect(topleft=(self.SCREEN_WIDTH-256, 30))
-        self.button_rect = self.button_surfarce.get_rect(topleft=(self.SCREEN_WIDTH-246, 258))
+        self.main_rect = self.main_surfarce.get_rect(topleft=(self.SCREEN_WIDTH - 256, 30))
+        self.button_rect = self.button_surfarce.get_rect(topleft=(self.SCREEN_WIDTH - 246, 258))
 
         self.screen = screen
 
@@ -348,152 +518,47 @@ class SideMenu:
         self.surowce_icons.append(self.cereal_icon_surface)
 
         ####
-        self.main_surface = pygame.Surface((256,self.SCREEN_HEIGHT-30),pygame.SRCALPHA)
-        self.main_surface.blit(self.main_surfarce,(0,0))
+        self.main_surface = pygame.Surface((256, self.SCREEN_HEIGHT - 30), pygame.SRCALPHA)
+        self.main_surface.blit(self.main_surfarce, (0, 0))
 
-        self.main_surface.blit(self.button_surfarce,(10, 258))
+        self.main_surface.blit(self.button_surfarce, (10, 258))
 
         ####
 
-
-    def surowce_staty(self, x, y, tekst):
+    def surowce_staty(self, x: int, y: int, tekst: str):
         self.tekst = tekst
-        
+
         self.font_opis_s = self.font.render(self.tekst, True, (255, 255, 255))
 
-        self.screen.blit(self.font_opis_s, (x,y))
+        self.screen.blit(self.font_opis_s, (x, y))
 
-        
     def surowce_staty_blituj(self):
-        x = self.SCREEN_WIDTH-210
+        x = self.SCREEN_WIDTH - 210
         y = 67
         for i in range(len(Stats.surowce_ilosc)):
-            self.surowce_staty(x,y, f"{Stats.surowce_ilosc[i][2]} {Stats.surowce_ilosc[i][1]}")    
-            self.surowce_icons[i] = zmien_rozmiar_surface(self.surowce_icons[i],21,25)
-            self.screen.blit(self.surowce_icons[i],(x-30,y))
+            self.surowce_staty(x, y, f"{Stats.surowce_ilosc[i][2]} {Stats.surowce_ilosc[i][1]}")
+            self.surowce_icons[i] = pygame.transform.scale(self.surowce_icons[i], (21, 25))
+            self.screen.blit(self.surowce_icons[i], (x - 30, y))
             y += 26
 
     def draw(self):
-        
-        self.screen.blit(self.main_surface,self.main_rect)
-        self.surowce_staty(self.SCREEN_WIDTH-190, 47, f"SUROWCE:")
+
+        self.screen.blit(self.main_surface, self.main_rect)
+        self.surowce_staty(self.SCREEN_WIDTH - 190, 47, f"SUROWCE:")
         self.surowce_staty_blituj()
-
-    def button(self):
-        colision = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()
-        if self.button_rect.collidepoint(colision) and mouse_pressed[0]:
-            MenuB.active = True
-
-
-class Build_Menu:
-    build_stauts=False
-    def __init__(self, screen):
-        
-        self.texture = "texture/ui/building/kuptlo.png"
-        self.texture_button = "texture/ui/building/CheckBoxFalse.png"
-        self.szerokosc = 700
-        self.wysokos = 500
-        self.x = 640
-        self.y = 360
-        self.build_menu_surf = pygame.transform.scale((pygame.image.load(self.texture)).convert_alpha(),
-                                                      (self.szerokosc, self.wysokos))
-
-        self.item_menu_surf = pygame.Surface((self.szerokosc, self.wysokos), pygame.SRCALPHA)
-
-        self.exit_button_surf = pygame.transform.scale(pygame.image.load(self.texture_button).convert_alpha(), (40, 40))
-        self.build_rect = self.build_menu_surf.get_rect(center=(self.x, self.y))
-        self.build_menu_surf.set_alpha(230)
-        self.screen = screen
-        self.exit_button_rect = self.exit_button_surf.get_rect()
-        self.exit_button_rect.topright = self.build_rect.topright
-        # self.build_menu_surf.blit(self.item_menu_surf,(0,0))
-        self.build_menu_surf.blit(self.exit_button_surf, (660,0))
-    def draw(self):
-
-        colision = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()
-        if self.build_stauts:
-            self.screen.blit(self.build_menu_surf, self.build_rect)
-            self.screen.blit(self.item_menu_surf, self.build_rect)
-            
-            
-            
-            if self.exit_button_rect.collidepoint(colision) and mouse_pressed[0]:
-                Build_Menu.build_stauts = False
+# TODO : USUNĄĆ
+    # def button(self):
+    #     colision = pygame.mouse.get_pos()
+    #     mouse_pressed = pygame.mouse.get_pressed()
+    #     if self.button_rect.collidepoint(colision) and mouse_pressed[0]:
+    #         Build_Menu.build_stauts = True
 
 
-class BuildItem:
-    def __init__(self, menu, koszt, texture, opis, army_bonus, gold_bonus):
-        FONT_SIZE = 18
-        FONT_NAME = 'timesnewroman'
-        self.font_opis = pygame.font.SysFont(FONT_NAME,FONT_SIZE)
 
-        self.font_opis_s = self.font_opis.render(opis, True,
-                                                 (255, 255, 255))
-        self.army_bonus = army_bonus
-        self.gold_bonus = gold_bonus
-
-        global item_offset
-        self.text_description = opis
-        self.menu = menu
-        self.wymiary = pygame.Vector2(self.menu.get_size())
-        self.item_w = self.wymiary.x * 0.9
-        self.item_h = 110
-        self.image = pygame.image.load(f'texture/ui/building/{texture}.png')
-        # self.image = pygame.Surface((100, 100))
-        self.button = pygame.Surface((150, 50))
-        self.button_texture = pygame.image.load('texture/ui/building/button_kup.png')
-        self.button.blit(self.button_texture, (0, 0))
-
-        self.koszt = koszt
-        self.posiadanie = False
-        opis_texture = pygame.image.load('texture/ui/building/opis_tlo.png')
-        opis_texture = pygame.transform.scale(opis_texture, (
-            self.item_w - self.image.get_size()[0] - self.button.get_size()[0] - 30, self.item_h - 10))
-        self.description_surf = pygame.Surface(
-            (self.item_w - self.image.get_size()[0] - self.button.get_size()[0] - 30, self.item_h - 10),
-            pygame.SRCALPHA)
-        item_texture = pygame.image.load('texture/ui/building/kuptlo.png')
-        self.item_surf = pygame.Surface((self.item_w, self.item_h), pygame.SRCALPHA)
-
-        self.item_surf.blit(item_texture, (0, 0))
-
-        self.description_surf.blit(opis_texture, (0, 0))
-
-        self._id = item_offset.x
-        self.button_rect = self.button.get_rect(bottomleft=(
-            pygame.display.get_window_size()[0] / 2 - self.menu.get_size()[0] / 2 + self.image.get_size()[0] + 10 + 35,
-            360 / 2 + 10 + item_offset.y * self._id))
-        
-        item_offset.x += 1
-        self.item_surf.blit(self.image, (5, self.item_h / 2 - self.image.get_size()[1] / 2))
-        self.description_surf.blit(self.font_opis_s, (5, 5))
-        self.item_surf.blit(self.button,
-                            (self.image.get_size()[0] + 10, self.item_h / 2 - self.button.get_size()[1] / 2))
-        self.item_surf.blit(self.description_surf, (self.image.get_size()[0] + 20 + self.button.get_size()[0],
-                                                    self.item_h / 2 - self.description_surf.get_size()[1] / 2))
-    def draw(self):       
-        self.menu.blit(self.item_surf, (self.wymiary.x / 2 - self.item_w / 2, 10 + item_offset.y * self._id))
-        
-
-    def buy(self):
-        
-        press = pygame.mouse.get_pressed()
-        pos = pygame.mouse.get_pos()
-        if self.button_rect.collidepoint(pos) and press[0]:
-            if not Stats.gold_count < self.koszt:
-                self.posiadanie = True
-                Stats.gold_count -= self.koszt
-                Stats.army_count_bonus +=  self.army_bonus
-                Stats.gold_count_bonus += self.gold_bonus
-            pygame.time.Clock().tick(5)
-        pass
-
-
+# EVENTY
 
 class EventMenagment:
-    def __init__(self, screen):
+    def __init__(self, screen: pygame.Surface):
         self.chance = 0
         self.screen = screen
         self.turn = Stats.turn_count
@@ -507,18 +572,15 @@ class EventMenagment:
         event_text = " Na granicy Twojego królestwa pojawia się grupa najemników, \n którzy oferują swoje usługi w zamian za złoto.\n " \
                      "Mają oni reputację twardych wojowników ale są też znani z brutalności i małych rozbojów.\n"
 
-        najemnicy = Event(self.screen, event_text, "texture/Events/najemnicy_img.png", 3, opisy,"najemnicy", self)
+        najemnicy = Event(self.screen, event_text, "texture/Events/najemnicy_img.png", 3, opisy, "najemnicy", self)
 
         self.events.append(najemnicy)
-
-
-
 
     def random_event(self):
 
         if self.turn < Stats.turn_count:
             if self.events:
-                if random.randint(0,99) < self.chance:
+                if random.randint(0, 99) < self.chance:
 
                     x = random.choice(self.events)
                     x.execute()
@@ -531,8 +593,10 @@ class EventMenagment:
 
                     self.turn = Stats.turn_count
 
+
 class Event:
-    def __init__(self, ekran, opis, grafika, ilosc_opcji, opisy_opcji,nazwa,managment):
+    def __init__(self, ekran: pygame.Surface, opis: str, grafika, ilosc_opcji: int, opisy_opcji: str, nazwa: str,
+                 managment: EventMenagment):
         self.ekran = ekran
         self.opis = opis
         self.grafika = grafika
@@ -556,42 +620,41 @@ class Event:
         if self.Wybor == 1:
             x = random.randint(0, 99)
             if x < 60:
-                Stats.gold_count += 100    # Zabij ich
+                Stats.gold_count += 100  # Zabij ich
                 Stats.army_count -= 10
 
             else:
                 Stats.army_count -= 50
 
         if self.Wybor == 2:
-            Stats.gold_count -= 200     # Zaplać im
+            Stats.gold_count -= 200  # Zaplać im
             Stats.army_count += 100
 
-            x = random.randint(0,99)
+            x = random.randint(0, 99)
             if x < 30:
                 event_text = "Najemnicy których wcześniej zrekrutowałeś za złoto postanowili cię oszukać,\n ukradli twoje złoto i uciekli !"
-                opisy =[" OK "]
-                najemnicy_thief = Event(managment.screen, event_text, "texture/Events/najemnicy_img.png", 1, opisy,"najemnicy_thief", managment)
+                opisy = [" OK "]
+                najemnicy_thief = Event(managment.screen, event_text, "texture/Events/najemnicy_img.png", 1, opisy,
+                                        "najemnicy_thief", managment)
                 managment.events.append(najemnicy_thief)
 
-    def najemnicy_thief(self,managment):
+    def najemnicy_thief(self, managment):
         if self.Wybor == 0:
             Stats.army_count -= 100
             Stats.gold_count -= 50
 
 
-
 class EventRender:
-    def __init__(self, screen, opis, grafika):
-
+    def __init__(self, screen: pygame.Surface, opis: str, grafika):
         self.screen = screen
         screen_x, screen_y = self.screen.get_size()
         self.font = pygame.font.SysFont("cambria", 20)
 
         # wizualne rzeczy config
-        wysokosc_background = screen_y * (92/100)
-        szerokosc_background = screen_x * (64/100)
-        wysokosc_img = wysokosc_background * (60/100)
-        szerokosc_img = szerokosc_background * (57/100)
+        wysokosc_background = screen_y * (92 / 100)
+        szerokosc_background = screen_x * (64 / 100)
+        wysokosc_img = wysokosc_background * (60 / 100)
+        szerokosc_img = szerokosc_background * (57 / 100)
 
         # pozycja
         self.x = (screen_x / 2) - (szerokosc_background / 2)
@@ -603,14 +666,13 @@ class EventRender:
 
         # tekst i obrazki
         self.event_back = pygame.transform.smoothscale(pygame.image.load('texture/Events/back.png'),
-                                                 (szerokosc_background, wysokosc_background))
+                                                       (szerokosc_background, wysokosc_background))
 
         self.event_img = pygame.transform.scale(pygame.image.load(grafika),
                                                 (szerokosc_img, wysokosc_img))
         self.opis_linie = opis.split('\n')
 
     def draw(self):
-
         self.screen.blit(self.event_back, (self.x - 36, self.y + 15))
         self.screen.blit(self.event_img, (self.img_posx, self.img_posy))
         odstep = 0
@@ -626,14 +688,15 @@ class EventOptions:
         self.licz = licz
         self.x, self.y = screen.get_size()
         self.screen = screen
-        self.event_options = pygame.transform.scale(pygame.image.load('texture/Events/option.png'), (self.x*0.22, self.y*0.13))
-        self.option_high = self.y*0.82
+        self.event_options = pygame.transform.scale(pygame.image.load('texture/Events/option.png'),
+                                                    (self.x * 0.22, self.y * 0.13))
+        self.option_high = self.y * 0.82
         self.font = pygame.font.SysFont("georgia", 14)
         self.option_detecion = True
         self.rects = []
         self.option_selected = False
         self.opisy = opisy
-        self.mid_text = self.y*0.1
+        self.mid_text = self.y * 0.1
 
     def draw(self):
         if not self.option_selected:
@@ -647,7 +710,7 @@ class EventOptions:
                     y_offset = 0
                     for line in opis_lines:
                         self.screen.blit(self.font.render(line, True, (255, 255, 255)), (self.x / 2 * 1.13,
-                                                                                         event_options_posy + self.mid_text/2 + y_offset))
+                                                                                         event_options_posy + self.mid_text / 2 + y_offset))
                         y_offset += self.font.get_height()
                 else:
                     opis = "Brak Opisu"

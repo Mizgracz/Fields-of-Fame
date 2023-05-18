@@ -3,6 +3,7 @@ from graphics import Map
 from gameplay import*
 from menu import *
 import pygame
+from pygame.locals import *
 import sys
 import os
 
@@ -13,9 +14,9 @@ clock = pygame.time.Clock()
 res = (SCREEN_WIDTH, SCREEN_HEIGHT)
 frame_rate = 60
 animation_frame_interval = 5
-flags = pygame.DOUBLEBUF #| pygame.FULLSCREEN
+flags = DOUBLEBUF #| pygame.FULLSCREEN
 screen = pygame.display.set_mode(res, flags, 32)
-max_tps = 6000.0
+max_tps = 6000
 
 folder_path = "save"
 if not os.path.exists(folder_path):
@@ -26,7 +27,6 @@ fps_on = True
 pygame.mixer.music.load("music/main.mp3")
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0)
-
 
 
 def fps():
@@ -40,35 +40,41 @@ def fps():
 # class game
 class Game:
     def __init__(self):
-        pygame.init()     
-        self.buildingList = [
-            Item("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            Item("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            Item("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            Item("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
-            Item("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            Item("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            Item("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            Item("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
-            Item("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            Item("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            Item("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            Item("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10)
+        pygame.init()
+        self.new_game = False
+        while not self.new_game :
+            self.start_menu = Menu(screen, clock, max_tps,self.new_game)  # wyświetlanie i obsługa menu
+            self.new_game = self.start_menu.new_game
+
+        
+        self.allbuilding = [
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10)
         ]
         
+        self.build_menu = BuildingMenu(screen,self.allbuilding,screen.get_width()/2,500,int(0.25*screen.get_width()),int(0.2*screen.get_height()))
         
-
-        self.buildMenu = MenuB(screen,self.buildingList,screen.get_width()/2,500,int(0.25*screen.get_width()),int(0.2*screen.get_height()))
-        self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
         self.size = self.start_menu.MAP_SIZE
+        self.Fog = self.start_menu.SWITCH_FOG
+        self.PlayerCount = self.start_menu.PLAYER_COUNT
         self.camera = Camera()
         self.map = Map(self.size, self.size, screen, self.camera)
         self.map.texture()
         self.map.generate()
         self.up_bar = UpBar(screen)
         self.klepsydra1 = Hourglass(screen, frame_rate, animation_frame_interval)
-        self.dec = Decision(screen)
-        self.bm = Build_Menu(screen)
+
+        self.dec = Decision(screen,self.camera,self.map)
         self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
         self.event = EventMenagment(screen)
@@ -77,8 +83,6 @@ class Game:
 
         self.music_on = 1
 
-
-     
         self.loadmenu = LoadMenu(screen, self)
         self.savemenu = SaveMenu(screen, self)
 
@@ -86,9 +90,11 @@ class Game:
     def handle_events(self):
         global fps_on
 
+
+        POZ = pygame.mouse.get_pos()
         for event in pygame.event.get():
-            if self.buildMenu.active:
-                self.buildMenu.handle_event(event)
+            if self.build_menu.active:
+                self.build_menu.handle_event(event)
             if event.type == pygame.QUIT:
                 sys.exit(0)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F5:
@@ -101,18 +107,23 @@ class Game:
                 elif self.music_on == 0:
                     pygame.mixer.music.set_volume(1.0)
                     self.music_on = 1
+            if self.sd.button_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
+                BuildingMenu.active = not BuildingMenu.active
+                if BuildingMenu.active:
+                    Stats.camera_stop = True
+                else:
+                    Stats.camera_stop = False
+                pygame.time.Clock().tick(3)
 
         press = pygame.key.get_pressed()
 
         if press[pygame.K_ESCAPE]:
             Menu.status = True
-        if press[pygame.K_b]:
-            Build_Menu.build_stauts = True
         if press[pygame.K_s]:
             self.save_game()
         if press[pygame.K_HOME]:
             self.camera.camera_x = 0
-            self.camera.camera_y = -100
+            self.camera.camera_y = 0
 
     def save_game(self):
         folder_path = "save"
@@ -181,35 +192,6 @@ class Game:
         os.remove("save/map.csv")
         pass
 
-    def save_game(self):
-        print('SaveGame')
-
-        folder_path = "save"
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-        print('saved 105 main.py')
-
-        with open('save/map.csv', 'w') as savefile:
-            savefile.write('x;y;number;texture_index;zajete\n')
-            for h in self.map.sprites():
-                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.zajete}')
-                savefile.write('\n')
-        with open('save/stats.txt', 'w') as savefile:
-
-            savefile.write(f'gold_count:{Stats.gold_count}\n')
-            savefile.write(f'army_count:{Stats.army_count}\n')
-            savefile.write(f'terrain_count:{Stats.terrain_count}\n')
-            savefile.write(f'army_count_bonus:{Stats.army_count_bonus}\n')
-            savefile.write(f'gold_count_bonus:{Stats.gold_count_bonus}\n')
-            savefile.write(f'turn_count:{Stats.turn_count}\n')
-        pygame.time.Clock().tick(1)
-        with zipfile.ZipFile("save/QSave.zip", "w") as zip:
-            zip.write("save/stats.txt")
-            zip.write("save/map.csv")
-        os.remove("save/stats.txt")
-        os.remove("save/map.csv")
-        pass
-
     def run(self):
 
         while True:
@@ -227,7 +209,13 @@ class Game:
             self.camera.mouse(self.size)
             self.camera.keybord()
             self.map.Draw(SCREEN_WIDTH, SCREEN_HEIGHT)
-            self.map.zajmij_pole()
+            self.map.fog_draw(self.Fog, SCREEN_WIDTH, SCREEN_HEIGHT)
+
+            if Stats.field_status:
+                self.dec.fchoice.draw()
+
+            Stats.zajmij_pole(Stats,self.map.allrect,self.map.allmask,self.map.allhex,dec=self.dec) 
+            self.map.odkryj_pole(self.Fog)
             self.map.colision_detection_obwodka()
             self.event.random_event()
             self.map.rysuj_obwodke_i_zajete()
@@ -236,35 +224,21 @@ class Game:
 
             self.up_bar.draw()
             self.sd.draw()
-            self.sd.button()
-            if MenuB.active:
-                self.buildMenu.draw_menu()
-                # self.bm.draw()
-                # for item in self.allItem:
-                #     item.draw()
-                #     item.buy()
-            if not MenuB.active:
+            if BuildingMenu.active:
+                self.build_menu.draw_menu()
+            if not BuildingMenu.active:
                 self.dec.click()
 
             self.klepsydra1.draw()
-            if not Stats.wyb:
-                self.klepsydra1.turn()
-            if Stats.wyb:
-                self.dec.draw()
+            if not BuildingMenu.active:
+                if not Stats.wyb:
+                    self.klepsydra1.turn()
+                if Stats.wyb:
+                    self.dec.draw()
             self.timer.update()
 
-
-
-
-
             fps()
-
-
-
             pygame.display.flip()
-
-
-
             clock.tick(max_tps)
 
 
@@ -272,3 +246,4 @@ class Game:
 if __name__ == '__main__':
     game = Game()
     game.run()
+    
