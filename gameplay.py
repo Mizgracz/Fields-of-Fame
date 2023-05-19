@@ -654,15 +654,15 @@ class Event:
         if self.Wybor == 1:
             x = random.randint(0, 99)
             if x < 60:
-                self.player.gold_count += 100  # Zabij ich
-                self.player.army_count -= 10
+                self.managment.player.gold_count += 100  # Zabij ich
+                self.managment.player.army_count -= 10
 
             else:
-                self.player.army_count -= 50
+                self.managment.player.army_count -= 50
 
         if self.Wybor == 2:
-            self.player.gold_count -= 200  # Zaplać im
-            self.player.army_count += 100
+            self.managment.player.gold_count -= 200  # Zaplać im
+            self.managment.player.army_count += 100
 
             x = random.randint(0, 99)
             if x < 30:
@@ -674,8 +674,8 @@ class Event:
 
     def najemnicy_thief(self, managment):
         if self.Wybor == 0:
-            self.player.army_count -= 100
-            self.player.gold_count -= 50
+            self.managment.player.army_count -= 100
+            self.managment.player.gold_count -= 50
 
 
 class EventRender:

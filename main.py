@@ -47,7 +47,7 @@ class Game:
             self.new_game = self.start_menu.new_game
 
         # budynki
-        self.allbuilding = [
+        allbuilding1 = [
             BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
             BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
             BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
@@ -61,8 +61,57 @@ class Game:
             BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
             BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10)
         ]
-        
-        self.build_menu = BuildingMenu(screen,self.allbuilding,screen.get_width()/2,500,int(0.25*screen.get_width()),int(0.2*screen.get_height()))
+
+        allbuilding2 = [
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10)
+        ]
+        allbuilding3 = [
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10)
+        ]
+        allbuilding4 = [
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
+            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10)
+        ]
+
+        self.allbuildingList = [allbuilding1,allbuilding2,allbuilding3,allbuilding4]
+        # self.allbuildingList = []
+        # new_list = [x for x in allbuilding1]
+        # self.allbuildingList += [new_list]
+        # new_list = [x for x in allbuilding1]
+        # self.allbuildingList += [new_list]
+        # self.build_menu = BuildingMenu(screen,self.allbuilding,screen.get_width()/2,500,int(0.25*screen.get_width()),int(0.2*screen.get_height()))
         
         self.size = self.start_menu.MAP_SIZE
         self.Fog = self.start_menu.SWITCH_FOG
@@ -89,19 +138,22 @@ class Game:
         self.map.generate()
         self.dec = Decision(screen,self.camera,self.map)
         # definiowanie eventów dla graczy
+
         for p in range(len(self.allplayers)):
             self.dec.fupdate.start(self.allplayers[p])
         
         self.allevents = []
-
+        self.allbuildingmenu =[]
         for e in range(len(self.allplayers)):
             self.allevents.append(EventMenagment(screen,self.allplayers[e]))
             self.allevents[e].start_event_list()
-            self.allplayers[e].set_menu(self.build_menu)
+            self.allbuildingmenu.append(BuildingMenu(screen,self.allbuildingList[e],screen.get_width()/2,500,int(0.25*screen.get_width()),int(0.2*screen.get_height())))
 
 
         self.currentplayer = self.allplayers[Player.ID]
         self.currentevent = self.allevents[Player.ID]
+        self.currentmenu = self.allbuildingmenu[Player.ID]
+        
 
 
         self.music_on = 1
@@ -116,8 +168,8 @@ class Game:
 
         POZ = pygame.mouse.get_pos()
         for event in pygame.event.get():
-            if self.build_menu.active:
-                self.build_menu.handle_event(event)
+            if BuildingMenu.active:
+                self.currentmenu.handle_event(event,self.currentplayer)
             if event.type == pygame.QUIT:
                 sys.exit(0)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F5:
@@ -226,8 +278,11 @@ class Game:
             while SaveMenu.status:
                 self.savemenu.draw()
                 self.savemenu.update()
+            
             self.currentplayer = self.allplayers[Player.ID]
             self.currentevent = self.allevents[Player.ID]
+            self.currentmenu = self.allbuildingmenu[Player.ID]
+
             screen.fill((255, 255, 255))
             self.handle_events()
             self.camera.mouse(self.size)
@@ -249,7 +304,7 @@ class Game:
             self.up_bar.draw(self.currentplayer)
             self.sd.draw(self.currentplayer)
             if BuildingMenu.active:
-                self.build_menu.draw_menu()
+                self.currentmenu.draw_menu()
             if not BuildingMenu.active:
                 self.dec.click(self.currentplayer)
 

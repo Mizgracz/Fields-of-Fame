@@ -5,6 +5,7 @@ import pygame
 
 from gameplay import *
 
+
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 MAP_SIZE = 30
@@ -777,11 +778,13 @@ class BuildingItem:
         self.name = name
         self.image = pygame.image.load(f'texture/ui/building/{image}').convert_alpha()
         self.image = pygame.transform.scale(self.image,(90,90))
-
-        
-
         self.FONT = pygame.font.SysFont(None, 18)
+        
         self.cost = cost
+        self.army_buff = army_buff
+        self.gold_buff = gold_buff
+
+
         self.font_surface = self.FONT.render(f"{self.name} - {self.cost} $", True, (255, 255,255))
         self.background = pygame.Surface((600-2,100-2))
         self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/opis.png').convert_alpha(),(600-2,100-2))
@@ -853,10 +856,23 @@ class BuildingItem:
             self.itemsurf.blit(self.button_text, (self.button_rect.x + 10, self.button_rect.y + 8))
         window.blit(self.itemsurf, (x, y))
 
-    def button_action(self):
-        self.button_image.fill('#00ff00')
-        self.available = False
-        self.button_text = self.FONT.render("Owned", True, (255, 255, 255))
+    def button_action(self,player,items):
+        if self.cost<= player.gold_count:
+            items.remove(self)
+            self.button_image.fill('#00ff00')
+            self.available = False
+            self.button_text = self.FONT.render("Owned", True, (255, 255, 255))
+            # Może sie kiedyś przyda
+            player.gold_count += self.cost *-1
+            player.army_count += 0
+            #
+            player.army_count_bonus += self.army_buff
+            player.gold_count_bonus += self.gold_buff
+            return True
+        else:
+            print('Brak złota')
+            return False
+        
         pass
 class BuildingMenu:
     active = False
@@ -912,12 +928,17 @@ class BuildingMenu:
         pygame.draw.rect(self.window, (128, 128, 128), (self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height))
         self.scrollbar_rect = pygame.Rect(self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height)
         # Calculate the position and height of the scrollbar thumb
-        self.thumb_height = self.scrollbar_height / len(self.menu_items) * self.menu_items_per_page
-        self.thumb_y = self.scrollbar_y + (self.menu_top_item_index / len(self.menu_items)) * self.scrollbar_height
+        if len(self.menu_items) <4:
+            self.thumb_height = self.scrollbar_height
+            self.thumb_y = self.scrollbar_y + (self.menu_top_item_index / 1) * self.scrollbar_height
+        else:
+            self.thumb_height = self.scrollbar_height / len(self.menu_items) * self.menu_items_per_page
+            self.thumb_y = self.scrollbar_y + (self.menu_top_item_index / len(self.menu_items)) * self.scrollbar_height
+        
 
         # Draw the scrollbar thumb
         pygame.draw.rect(self.window, (192, 192, 192), (self.scrollbar_x, self.thumb_y, self.scrollbar_width, self.thumb_height))
-    def handle_event(self, event):
+    def handle_event(self, event,player):
         if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
             BuildingMenu.active = False
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -929,9 +950,12 @@ class BuildingMenu:
                     item_rect = pygame.Rect(item.button_rect.x+BuildingItem.offset_x, item_y+BuildingItem.offset_y, item.button_rect.width, item.button_rect.height)
         
                     if item_rect.collidepoint(mouse_pos)and item.available and mouse_pos[1]<BuildingItem.offset_y+self.background.get_height() :
-                        item.button_action()
-                        print("Click",item_rect)
-                        print("Button",item.button_rect)
+                        if item.button_action(player,self.menu_items):
+                            self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/opis_tlo.png').convert_alpha(), (self.menu_width,self.menu_height-25))
+                            ALPHA = 0.85
+                            self.background.set_alpha(255*ALPHA)
+                        
+
         if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == pygame.BUTTON_WHEELUP:  # Scroll up
                     if self.menu_top_item_index > 0:
@@ -971,4 +995,7 @@ class BuildingMenu:
 
                             # Calculate the corresponding menu top item index
                             self.menu_top_item_index = int((thumb_position / max_thumb_position) * (len(self.menu_items) - self.menu_items_per_page))
+
+
+
 
