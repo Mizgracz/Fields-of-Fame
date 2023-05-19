@@ -165,7 +165,7 @@ class Menu:
                 LoadMenu.status = True
                 Menu.status = False
             if choice == 'save_game':
-                SaveMenu.status = True
+                SaveMenu.active = True
                 Menu.status = False
             elif choice == 'quit':
                 sys.exit(0)
@@ -533,13 +533,13 @@ class LoadItem(object):
 
 #################################################################################################################
 
-class SaveMenu(object):
+class SaveMenu2(object):
     """docstring for SaveMenu"""
     scroll = 0
     status = False
 
     def __init__(self, screen: pygame.Surface, GAME):
-        super(SaveMenu, self).__init__()
+        super(SaveMenu2, self).__init__()
         self.game = GAME
 
         self.MOUSE_Y = 0
@@ -589,7 +589,7 @@ class SaveMenu(object):
 
     def update(self):
         self.allItem = []
-        SaveItem.ID = 0
+        SaveItem2.ID = 0
 
         self.ILOSC_PLIKOW = len(
             [f for f in os.listdir(self.folder_path) if os.path.isfile(os.path.join(self.folder_path, f))]) + 1
@@ -604,8 +604,8 @@ class SaveMenu(object):
         mypath = 'save/'
         onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
         for i in range(self.ILOSC_PLIKOW - 1):
-            self.allItem += [SaveItem(f'{onlyfiles[i]}', self.window)]
-        self.allItem += [SaveItem(f'Save{SaveItem.ID + 1}', self.screen)]
+            self.allItem += [SaveItem2(f'{onlyfiles[i]}', self.window)]
+        self.allItem += [SaveItem2(f'Save{SaveItem2.ID + 1}', self.screen)]
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -619,7 +619,7 @@ class SaveMenu(object):
                 print('EXIT')
                 if Menu.resume == False:
                     Menu.status = True
-                SaveMenu.status = False
+                SaveMenu2.status = False
                 pygame.time.Clock().tick(3)
             if self.bar_rect.collidepoint(pos):
                 self.mouse_diff = pos[1] - self.bar_rect.y
@@ -642,7 +642,7 @@ class SaveMenu(object):
                 pygame.time.Clock().tick(3)
             if item.rect_item.collidepoint(POS) and PRESS:
                 self.save_game(item.tmpID)
-                SaveMenu.status = False
+                SaveMenu2.status = False
                 pygame.time.Clock().tick(3)
         # if self.RECT.collidepoint(pygame.mouse.get_pos()) :
 
@@ -720,7 +720,7 @@ class SaveMenu(object):
         pygame.display.flip()
 
 
-class SaveItem(object):
+class SaveItem2(object):
     ID = 0
     """docstring for Item"""
 
@@ -728,10 +728,10 @@ class SaveItem(object):
         FONT_SIZE = 25
         FONT_NAME = 'timesnewroman'
         font_text = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
-        super(SaveItem, self).__init__()
+        super(SaveItem2, self).__init__()
         self.screen = screen
         self.name = name
-        self.tmpID = SaveItem.ID
+        self.tmpID = SaveItem2.ID
         self.WIDTH = self.screen.get_size()[0] // 2
         self.HEIGHT = 100
         self.item_surface = pygame.image.load('texture/ui/load_menu/opis.png')
@@ -740,15 +740,15 @@ class SaveItem(object):
         self.del_surface = pygame.image.load('texture/ui/load_menu/CheckBoxFalse.png')
         self.del_surface = pygame.transform.scale(self.del_surface, (90, 90))
 
-        self.rect_item = pygame.Rect(self.WIDTH / 2, 150 * self.tmpID + 50 + SaveMenu.scroll, self.WIDTH, 100)
-        self.rect_del = pygame.Rect(self.WIDTH / 2 - 5, 150 * self.tmpID + 50 + SaveMenu.scroll + 5, 90, 90)
+        self.rect_item = pygame.Rect(self.WIDTH / 2, 150 * self.tmpID + 50 + SaveMenu2.scroll, self.WIDTH, 100)
+        self.rect_del = pygame.Rect(self.WIDTH / 2 - 5, 150 * self.tmpID + 50 + SaveMenu2.scroll + 5, 90, 90)
 
         self.rect_del.right = self.rect_item.right
-        self.rect_item = pygame.Rect(self.WIDTH / 2, 150 * self.tmpID + 50 + SaveMenu.scroll, self.WIDTH - 100, 100)
+        self.rect_item = pygame.Rect(self.WIDTH / 2, 150 * self.tmpID + 50 + SaveMenu2.scroll, self.WIDTH - 100, 100)
 
         self.font_opis = font_text.render((f'{self.tmpID + 1}. {self.name}'), True, (255, 0, 0))
 
-        SaveItem.ID += 1
+        SaveItem2.ID += 1
 
     def remove(self):
         os.remove(f"save/{self.name}")
@@ -763,8 +763,8 @@ class SaveItem(object):
         self.screen.blit(self.del_surface, self.rect_del)
 
     def update(self):
-        self.rect_item.top = 150 * self.tmpID + 50 + SaveMenu.scroll
-        self.rect_del.top = 150 * self.tmpID + 50 + SaveMenu.scroll + 5
+        self.rect_item.top = 150 * self.tmpID + 50 + SaveMenu2.scroll
+        self.rect_del.top = 150 * self.tmpID + 50 + SaveMenu2.scroll + 5
 
 #################################################################################################################
 class BuildingItem:
@@ -996,6 +996,206 @@ class BuildingMenu:
                             # Calculate the corresponding menu top item index
                             self.menu_top_item_index = int((thumb_position / max_thumb_position) * (len(self.menu_items) - self.menu_items_per_page))
 
+
+
+
+
+import pygame
+import random
+from pygame.locals import *
+class Item:
+    itemId = 0
+    
+    def __init__(self, name:str="Item ",description:str="Wylogowywanie się z życia jest Ok :P "*100, image:pygame.Surface=None, cost:int=0):
+        self.available = True
+        Item.itemId += 1
+        self.item_id = Item.itemId
+        self.name = name + str(self.item_id)
+        self.image = pygame.Surface((90, 90))
+        self.image.fill('#ff00ff')
+
+        self.FONT = pygame.font.SysFont(None, 30)
+        self.cost = random.randint(10,100)
+        self.font_surface = self.FONT.render(f"{self.name} - {self.cost} $", True, (0, 0, 0))
+        self.background = pygame.Surface((600-2,100-2))
+        self.background.fill((128,128,128))
+        self.itemsurf = pygame.Surface((600,100),pygame.SRCALPHA)
+
+        self.description = description
+
+
+        self.button_rect = pygame.Rect(self.itemsurf.get_width() - 110, self.itemsurf.get_height() // 2 - 15, 100, 30)
+        self.button_text = self.FONT.render("DELETE", True, (255, 255, 255))
+
+        self.image_width = self.image.get_width()
+        self.decssurf_width = self.itemsurf.get_width() - self.image_width - self.button_rect.width-25
+
+        self.decssurf = pygame.Surface((self.decssurf_width, 91), pygame.SRCALPHA)
+
+        self.button_image = pygame.Surface((self.button_rect.width,self.button_rect.height),SRCALPHA)
+        self.button_image.fill('#000000')
+
+
+        self.draw_text(self.decssurf,self.description,self.FONT,(0,0,0),self.decssurf.get_rect())
+    def split_text(self,text:str, font:pygame.font, surface_width:int):
+        words = text.split()
+        lines = []
+        current_line = words[0]
+        for word in words[1:]:
+            test_line = current_line + " " + word
+            if font.size(test_line)[0] <= surface_width:
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word
+        lines.append(current_line)
+        return lines
+
+    def draw_text(self,surface:pygame.Surface, text:str, font, color:pygame.Color, rect:pygame.Rect):
+        lines = self.split_text(text, font, rect.width)
+        rect.y+=8+font.size("Tg")[1] 
+        
+        line_height = font.size("Tg")[1]  # Wysokość jednej linii tekstu
+        
+        max_lines = rect.height // line_height  # Maksymalna liczba linii, która zmieści się w wysokości powierzchni
+        if len(lines) > max_lines:
+            lines = lines[:max_lines-1]
+            lines[-1] += " ..."  # Dodanie elips na końcu ostatniej linii
+    
+        y = rect.y
+        for line in lines:
+            text_surface = font.render(line, True, color)
+            surface.blit(text_surface, (rect.x, y))
+            y += line_height
+
+
+    def draw(self, window, x, y):
+        # Wyświetlanie g
+        # rafiki przedmiotu na określonych współrzędnych
+        self.itemsurf.blit(self.background,(1,1))
+        self.itemsurf.blit(self.image,(5,5))
+        self.itemsurf.blit(self.font_surface, (self.image.get_width()+9, 7))
+        self.itemsurf.blit(self.decssurf,(100,0))
+        
+
+        self.itemsurf.blit(self.button_image,self.button_rect)
+
+
+        self.itemsurf.blit(self.button_text, (self.button_rect.x + 10, self.button_rect.y + 8))
+
+        window.blit(self.itemsurf, (x, y))
+
+    def button_action(self,items):
+        
+        items.remove(self)
+
+        self.button_image.fill('#00ff00')
+        self.available = False
+        self.button_text = self.FONT.render("Owned", True, (255, 255, 255))
+        pass
+
+    def print_info(self):
+        print("Item ID:", self.item_id)
+        print("Name:", self.name)
+        print("Cost:", self.cost)
+        print("Description:", self.description)
+        print("------------------------")
+
+
+class SaveMenu:
+    active = False
+    def __init__(self, window:pygame.Surface, items:list[Item], menu_width:int, menu_height:int):
+        self.window = window
+        self.menu_items = items  # Przykładowa lista przedmiotów w menu
+        self.menu_width = menu_width
+        self.menu_height = menu_height
+        self.menu_item_height = 100
+        self.menu_top_item_index = 0
+        self.item_spacing = 20  # Odstęp między przedmiotami
+
+        # Scrollbar settings
+        self.scrollbar_width = 16
+        self.scrollbar_margin = 8
+        self.scrollbar_x = self.window.get_width() - self.scrollbar_width - self.scrollbar_margin
+        self.scrollbar_y = self.scrollbar_margin
+        self.scrollbar_height = self.window.get_height() - self.scrollbar_margin * 2
+
+        self.menu_items_per_page = (self.menu_height - self.scrollbar_margin * 2) // (self.menu_item_height + self.item_spacing)
+        self.menu_x = 0  # Set the desired x-coordinate of the menu
+        self.menu_y = 0  # Set the desired y-coordinate of the menu
+
+    def draw_menu(self):
+        # Rysowanie menu (inne elementy pominięte dla uproszczenia)
+
+        for i, item in enumerate(self.menu_items):
+            item_y = self.menu_y + self.scrollbar_margin + (i - self.menu_top_item_index) * (self.menu_item_height + self.item_spacing)
+            item_rect = pygame.Rect(self.menu_x, item_y, self.menu_width, self.menu_item_height)
+            if item_rect.collidepoint(pygame.mouse.get_pos()):
+                # Zaznaczony przedmiot
+                pygame.draw.rect(self.window, (192, 192, 255), item_rect)
+            pygame.draw.rect(self.window, (20, 30, 100), item_rect, 1)
+            
+            item.draw(self.window, self.menu_x, item_y)
+            # self.window.blit(font_surface, (self.menu_x + 4, item_y + 2))
+        # Scrollbar
+        pygame.draw.rect(self.window, (128, 128, 128), (self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height))
+        self.scrollbar_rect = pygame.Rect(self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height)
+        # Calculate the position and height of the scrollbar thumb
+        self.thumb_height = self.scrollbar_height / len(self.menu_items) * self.menu_items_per_page
+        self.thumb_y = self.scrollbar_y + (self.menu_top_item_index / len(self.menu_items)) * self.scrollbar_height
+
+        # Draw the scrollbar thumb
+        pygame.draw.rect(self.window, (192, 192, 192), (self.scrollbar_x, self.thumb_y, self.scrollbar_width, self.thumb_height))
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:  # Kliknięcie lewym przyciskiem myszy
+                mouse_pos = pygame.mouse.get_pos()
+                for i, item in enumerate(self.menu_items):
+                    item_y = item.button_rect.y + self.scrollbar_margin + (i - self.menu_top_item_index) * \
+                        (self.menu_item_height + self.item_spacing)
+                    item_rect = pygame.Rect(item.button_rect.x, item_y, item.button_rect.width, item.button_rect.height)
+                    if item_rect.collidepoint(mouse_pos)and item.available:
+                        item.button_action(self.menu_items)
+                        print('removed')
+        if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == pygame.BUTTON_WHEELUP:  # Scroll up
+                    if self.menu_top_item_index > 0:
+                        self.menu_top_item_index -= 1
+                elif event.button == pygame.BUTTON_WHEELDOWN:  # Scroll down
+                    if self.menu_top_item_index + self.menu_items_per_page < len(self.menu_items):
+                        self.menu_top_item_index += 1
+
+                
+                if event.button == pygame.BUTTON_LEFT:  # Left mouse button
+                    if self.scrollbar_rect.collidepoint(event.pos):  # Check if the mouse is on the scrollbar
+                        mouse_y = event.pos[1] - self.scrollbar_y
+                        thumb_position = mouse_y - self.thumb_height / 2
+                        max_thumb_position = self.scrollbar_height - self.thumb_height
+
+                        # Limit the thumb position within the scrollbar
+                        if thumb_position < 0:
+                            thumb_position = 0
+                        elif thumb_position > max_thumb_position:
+                            thumb_position = max_thumb_position
+
+                        # Calculate the corresponding menu top item index
+                        self.menu_top_item_index = int((thumb_position / max_thumb_position) * (len(self.menu_items) - self.menu_items_per_page))
+
+                elif event.type == pygame.MOUSEMOTION:
+                    if event.buttons[0]:  # Left mouse button is pressed
+                        if self.scrollbar_rect.collidepoint(event.pos):  # Check if the mouse is on the scrollbar
+                            mouse_y = event.pos[1] - self.scrollbar_y
+                            thumb_position = mouse_y - self.thumb_height / 2
+                            max_thumb_position = self.scrollbar_height - self.thumb_height
+
+                            # Limit the thumb position within the scrollbar
+                            if thumb_position < 0:
+                                thumb_position = 0
+                            elif thumb_position > max_thumb_position:
+                                thumb_position = max_thumb_position
+
+                            # Calculate the corresponding menu top item index
+                            self.menu_top_item_index = int((thumb_position / max_thumb_position) * (len(self.menu_items) - self.menu_items_per_page))
 
 
 

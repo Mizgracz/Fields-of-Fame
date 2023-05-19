@@ -61,7 +61,6 @@ class Game:
             BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
             BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10)
         ]
-
         allbuilding2 = [
             BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
             BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
@@ -159,7 +158,13 @@ class Game:
         self.music_on = 1
 
         self.loadmenu = LoadMenu(screen, self)
-        self.savemenu = SaveMenu(screen, self)
+        self.savemenu = SaveMenu2(screen, self)
+
+        Buildings = []
+        for i in range(30):
+            Buildings.append(Item())
+        self.newSaveM = SaveMenu(screen,Buildings,SCREEN_WIDTH,SCREEN_HEIGHT)
+
 
         
     def handle_events(self):
@@ -168,6 +173,8 @@ class Game:
 
         POZ = pygame.mouse.get_pos()
         for event in pygame.event.get():
+            if SaveMenu.active:
+                self.newSaveM.handle_event(event)
             if BuildingMenu.active:
                 self.currentmenu.handle_event(event,self.currentplayer)
             if event.type == pygame.QUIT:
@@ -275,9 +282,14 @@ class Game:
             while LoadMenu.status:
                 self.loadmenu.draw()
                 self.loadmenu.update()
-            while SaveMenu.status:
-                self.savemenu.draw()
-                self.savemenu.update()
+            while SaveMenu.active:
+                screen.fill((128, 0, 0))
+                self.handle_events()
+                self.newSaveM.draw_menu()
+
+                pygame.display.flip()
+                clock.tick(max_tps)
+                
             
             self.currentplayer = self.allplayers[Player.ID]
             self.currentevent = self.allevents[Player.ID]
