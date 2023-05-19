@@ -65,7 +65,6 @@ class Stats:
                         Stats.terrain_count += 1
                         Stats.turn_stop = False
 
-
 class Player:
     MAX = 0
     ID =0

@@ -169,36 +169,32 @@ class Game:
         
     def handle_events(self):
         global fps_on
-
-
         POZ = pygame.mouse.get_pos()
         for event in pygame.event.get():
-            if SaveMenu.active:
-                self.newSaveM.handle_event(event)
-            if BuildingMenu.active:
-                self.currentmenu.handle_event(event,self.currentplayer)
             if event.type == pygame.QUIT:
-                sys.exit(0)
+                    sys.exit(0)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F5:
-                fps_on = not fps_on
+                    fps_on = not fps_on
             if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
                 if self.music_on == 1:
                     pygame.mixer.music.set_volume(0.0)
                     self.music_on = 0
-
                 elif self.music_on == 0:
                     pygame.mixer.music.set_volume(1.0)
                     self.music_on = 1
-            if self.sd.button_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
-                BuildingMenu.active = not BuildingMenu.active
+            if SaveMenu.active:
+                self.newSaveM.handle_event(event,self)
+            else:
                 if BuildingMenu.active:
-                    Stats.camera_stop = True
-                else:
-                    Stats.camera_stop = False
-                pygame.time.Clock().tick(3)
-
+                    self.currentmenu.handle_event(event,self.currentplayer)
+                if self.sd.button_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
+                    BuildingMenu.active = not BuildingMenu.active
+                    if BuildingMenu.active:
+                        Stats.camera_stop = True
+                    else:
+                        Stats.camera_stop = False
+                    pygame.time.Clock().tick(3)
         press = pygame.key.get_pressed()
-
         if press[pygame.K_ESCAPE]:
             Menu.status = True
         if press[pygame.K_s]:

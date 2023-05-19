@@ -1017,9 +1017,9 @@ class Item:
         self.FONT = pygame.font.SysFont(None, 30)
         self.cost = random.randint(10,100)
         self.font_surface = self.FONT.render(f"{self.name} - {self.cost} $", True, (0, 0, 0))
-        self.background = pygame.Surface((600-2,100-2))
+        self.background = pygame.Surface((pygame.display.get_window_size()[0]/2,100-2))
         self.background.fill((128,128,128))
-        self.itemsurf = pygame.Surface((600,100),pygame.SRCALPHA)
+        self.itemsurf = pygame.Surface((pygame.display.get_window_size()[0]/2-2,100),pygame.SRCALPHA)
 
         self.description = description
 
@@ -1070,7 +1070,7 @@ class Item:
 
 
     def draw(self, window, x, y):
-        # Wyświetlanie g
+        # Wyświetlanie g self.menu_width/2
         # rafiki przedmiotu na określonych współrzędnych
         self.itemsurf.blit(self.background,(1,1))
         self.itemsurf.blit(self.image,(5,5))
@@ -1088,9 +1088,66 @@ class Item:
     def button_action(self,items):
         
         items.remove(self)
-
         self.button_image.fill('#00ff00')
         self.available = False
+        self.button_text = self.FONT.render("Owned", True, (255, 255, 255))
+        pass
+    
+    def button_action2(self,game_data):
+        
+        save_game_data = game_data
+        tmp = [game_data.allplayers,
+        game_data.allevents,
+        game_data.allbuildingmenu]
+        # print(tmp)
+
+
+        # Save Map
+        with open('hexmap.csv', 'w',encoding='utf-8') as f:
+            f.write('x;y;number;obwodka;zajete;odkryte;fild_add;textureID;rodzaj;surowiec\n')
+            for hexagon in range(len(save_game_data.map.allhex)):
+                f.write(str(save_game_data.map.allhex['hex',hexagon].polozenie_hex_x)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].polozenie_hex_y)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].number)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].obwodka)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].zajete)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].odkryte)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].field_add)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].texture_index)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].rodzaj)+ ';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].rodzaj_surowca_var)+';')
+                f.write('\n')
+        with open('playerStats.csv', 'w',encoding='utf-8') as f:
+            f.write('player_name;home;nacja;wyb;turn_stop;field_status;camera_stop;player_hex_status;gold_count;army_count;terrain_count;turn_count;army_count_bonus;gold_count_bonus;')
+            for surowiec in save_game_data.allplayers[0].surowce_ilosc:
+                f.write(str(surowiec[0])+';')
+            f.write('\n')
+            for player in save_game_data.allplayers:
+                f.write(str(player.player_name)+';')
+                f.write(str(player.home)+';')
+                f.write(str(player.nacja)+';')
+                f.write(str(player.wyb)+';')
+                f.write(str(player.turn_stop)+';')
+                f.write(str(player.field_status)+';')
+                f.write(str(player.camera_stop)+';')
+                f.write(str(player.player_hex_status)+';')
+                f.write(str(player.gold_count)+';')
+                f.write(str(player.army_count)+';')
+                f.write(str(player.terrain_count)+';')
+                f.write(str(player.turn_count)+';')
+                f.write(str(player.army_count_bonus)+';')
+                f.write(str(player.gold_count_bonus)+';')
+
+                ######
+                for surowiec in player.surowce_ilosc:
+                    f.write(str(surowiec[1])+';')
+
+                f.write('\n')
+                
+    
+    
+        
+        
         self.button_text = self.FONT.render("Owned", True, (255, 255, 255))
         pass
 
@@ -1124,19 +1181,23 @@ class SaveMenu:
         self.menu_x = 0  # Set the desired x-coordinate of the menu
         self.menu_y = 0  # Set the desired y-coordinate of the menu
 
+        self.back_rect = pygame.Rect(self.scrollbar_x-200,50,150,50)
+
     def draw_menu(self):
         # Rysowanie menu (inne elementy pominięte dla uproszczenia)
+        
+        pygame.draw.rect(self.window,(255,255,0),self.back_rect)
 
         for i, item in enumerate(self.menu_items):
             item_y = self.menu_y + self.scrollbar_margin + (i - self.menu_top_item_index) * (self.menu_item_height + self.item_spacing)
-            item_rect = pygame.Rect(self.menu_x, item_y, self.menu_width, self.menu_item_height)
+            item_rect = pygame.Rect(self.menu_width/4, item_y, self.menu_width/2, self.menu_item_height)
             if item_rect.collidepoint(pygame.mouse.get_pos()):
                 # Zaznaczony przedmiot
                 pygame.draw.rect(self.window, (192, 192, 255), item_rect)
             pygame.draw.rect(self.window, (20, 30, 100), item_rect, 1)
             
-            item.draw(self.window, self.menu_x, item_y)
-            # self.window.blit(font_surface, (self.menu_x + 4, item_y + 2))
+            item.draw(self.window, item_rect.x, item_y)
+
         # Scrollbar
         pygame.draw.rect(self.window, (128, 128, 128), (self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height))
         self.scrollbar_rect = pygame.Rect(self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height)
@@ -1146,16 +1207,21 @@ class SaveMenu:
 
         # Draw the scrollbar thumb
         pygame.draw.rect(self.window, (192, 192, 192), (self.scrollbar_x, self.thumb_y, self.scrollbar_width, self.thumb_height))
-    def handle_event(self, event):
+    def handle_event(self, event,game):
+        offset = self.menu_width/4
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Kliknięcie lewym przyciskiem myszy
                 mouse_pos = pygame.mouse.get_pos()
                 for i, item in enumerate(self.menu_items):
                     item_y = item.button_rect.y + self.scrollbar_margin + (i - self.menu_top_item_index) * \
                         (self.menu_item_height + self.item_spacing)
-                    item_rect = pygame.Rect(item.button_rect.x, item_y, item.button_rect.width, item.button_rect.height)
+                    item_rect = pygame.Rect(item.button_rect.x+offset, item_y, item.button_rect.width, item.button_rect.height)
+                    
+                    
+                    if self.back_rect.collidepoint(mouse_pos):
+                        SaveMenu.active = False
                     if item_rect.collidepoint(mouse_pos)and item.available:
-                        item.button_action(self.menu_items)
+                        item.button_action2(game)
                         print('removed')
         if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == pygame.BUTTON_WHEELUP:  # Scroll up
