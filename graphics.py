@@ -1,14 +1,13 @@
+
 import pygame
-
 import random
-from gameplay import Stats
-
+from gameplay import Camera
 
 
 
 class Hex(pygame.sprite.Sprite):
     allsurowiec = [17 ,18 ,19 ,20 ,21 ,22 ,23 ,24]
-    def __init__(self, x, y, num, group, obw, zaj , odkryj, tex_id):
+    def __init__(self, x:int, y:int, num:int, group, obw:bool, zaj:bool ,odkryj:bool,field_add:bool,tex_id:int):
         super().__init__(group)
         self.szerokosc = 130
         self.wysokosc = 152
@@ -18,10 +17,11 @@ class Hex(pygame.sprite.Sprite):
         self.obwodka = obw
         self.zajete = zaj
         self.odkryte = odkryj
+        self.field_add = field_add
         self.group = group
         self.texture_index = tex_id
         self.texture = self.texturing(self.group)
-        self.rodzaj = self.surowiec(  )  # self.czy_to_surowiec()
+        self.rodzaj = self.surowiec()  # self.czy_to_surowiec()
         self.rodzaj_surowca_var = None
         if self.number == 137:
             self.zajete = True
@@ -104,9 +104,8 @@ class Hex(pygame.sprite.Sprite):
 
 class Map(pygame.sprite.Group):
 
-    def __init__(self, numx, numy, screen, camera):
+    def __init__(self, numx:int, numy:int, screen:pygame.Surface, camera:Camera):
         super().__init__()
-        self.width = 130
 
         self.colision_surface = pygame.Surface(pygame.display.get_window_size(), pygame.SRCALPHA)
         self.colision_rect = self.colision_surface.get_rect()
@@ -130,7 +129,7 @@ class Map(pygame.sprite.Group):
         self.mine_diamonds = pygame.image.load("texture/surowce/hex_kopalnia_diax.png").convert_alpha()
         self.mine_rocks = pygame.image.load("texture/surowce/hex_kopalnia_kamien.png").convert_alpha()
         self.mine_iron = pygame.image.load("texture/surowce/hex_kopalnia_zelazo.png").convert_alpha()
-        self.mine_gold = pygame.image.load("texture/surowce/hex_kopalnia_kamien.png").convert_alpha()
+        self.mine_gold = pygame.image.load("texture/surowce/hex_kopalnia_zloto.png").convert_alpha()
         self.fish_port = pygame.image.load("texture/surowce/hex_port_surowiec.png").convert_alpha()
         self.sawmill = pygame.image.load("texture/surowce/hex_tartak_surowiec.png").convert_alpha()
         self.grain = pygame.image.load("texture/surowce/hex_zboze_surowiec_trawa.png").convert_alpha()
@@ -208,8 +207,8 @@ class Map(pygame.sprite.Group):
                 # elif self.alltex["hex", licz] == self.castle_surface or self.alltex["hex", licz] == self.willage_surface:
                 #     self.allhex["hex", licz] = Budynek((x + przesuniecie_x), (y + przesuniecie_y), self.alltex["hex", licz], licz, self, False, False,self.tex_id[licz])
                 # else:
-                self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), licz, self, False, False, False,
-                                               self.tex_id[licz])
+                self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), licz, self, False, False,False,
+                                               False,self.tex_id[licz])
 
                 self.allrect['hex', licz] = self.allhex["hex", licz].texture.get_rect(
                     midleft=(self.allhex["hex", licz].polozenie_hex_x, self.allhex["hex", licz].polozenie_hex_y + 75))
@@ -230,7 +229,7 @@ class Map(pygame.sprite.Group):
                 przesuniecie_x += -65
             przesuniecie_y += -38
 
-    def Draw(self, width, height):  # wyświetlanie mapy na ekranie
+    def Draw(self, width:int, height:int):  # wyświetlanie mapy na ekranie
 
         licznik = -1
         camera_x = self.camera.camera_x
@@ -246,12 +245,7 @@ class Map(pygame.sprite.Group):
                     self.visible_hex['hex', k] = licznik
                     k += 1
 
-    def fog_generator(self, Fog):
-        if Fog:
-            for i in range(self.num_hex_y * self.num_hex_x):
-                self.alltex['hex', i] = self.fog_surface
-
-    def fog_draw(self, Fog, width, height):
+    def fog_draw(self, Fog:bool, width:int, height:int):
         if Fog:
             licznik = -1
             camera_x = self.camera.camera_x
@@ -323,33 +317,7 @@ class Map(pygame.sprite.Group):
             else:
                 self.allhex[c].obwodka = False
 
-    def zajmij_pole(self):
-        import gameplay
-        if Stats.player_hex_status:
-            mouse_presses = pygame.mouse.get_pressed()
-            if mouse_presses[0]:
-                pos1 = pygame.mouse.get_pos()
-                for i in range(self.num_hex_all):
-                    pos_in_mask1 = pos1[0] - self.allrect['hex', i].x, pos1[1] - self.allrect['hex', i].y
-                    touching = self.allrect['hex', i].collidepoint(*pos1) and self.allmask['hex', i].get_at(
-                        pos_in_mask1)
-
-                    if touching:
-                        if self.allhex["hex", i].rodzaj == "surowiec":
-                            print(self.allhex["hex", i].rodzaj_surowca_var)
-                            gameplay.dopisz_surowiec(self.allhex["hex", i].rodzaj_surowca_var)
-                        if self.allhex["hex", i].rodzaj == "budynek":
-                            print("budynek")
-                            # dodawanie bonusu do zarabiania
-                            if self.allhex["hex", i].texture == self.castle_surface:
-                                Stats.army_count_bonus += 10
-                            elif self.allhex["hex", i].texture == self.willage_surface:
-                                Stats.gold_count_bonus += 10
-                        self.allhex["hex", i].zajete = True
-                        Stats.player_hex_status = False
-                        Stats.terrain_count += 1
-
-    def odkryj_pole(self, Fog):
+    def odkryj_pole(self, Fog:bool):
         if Fog:
             pos1 = pygame.mouse.get_pos()
             for i in range(self.num_hex_all):
@@ -383,5 +351,8 @@ class Map(pygame.sprite.Group):
                     self.allhex["hex", bottom_right_neighbor_index].odkryte = True
 
                     break
+
+
+
 
 
