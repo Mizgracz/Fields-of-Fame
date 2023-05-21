@@ -1,10 +1,14 @@
-import zipfile
-import pygame
-import time, os
+import os
 import random
+import time
+import zipfile
+
+import pygame
+import pygame.mixer
 
 camera_stop = False
 item_offset = pygame.Vector2(0, 115)
+pygame.mixer.init()
 
 
 class Stats:
@@ -239,7 +243,6 @@ class Timer:
         self.screen.blit(timer_text, text_rect)
 
     def autosave_game(self):
-        import gameplay
         print('SaveGame')
 
         folder_path = "save"
@@ -270,6 +273,10 @@ class Timer:
 
 
 class Hourglass:
+
+    button_sound_hourglass = pygame.mixer.Sound('music/music_ambient/hourglass.mp3')
+    button_sound_hourglass.set_volume(1.0)
+
     def __init__(self, screen: pygame.Surface, frame_rate: int, animation_frame_interval: int):
         self.SCREEN_WIDTH = screen.get_size()[0]
         self.SCREEN_HEIGHT = screen.get_size()[1]
@@ -300,6 +307,7 @@ class Hourglass:
         collision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
         if self.hourglass_rect.collidepoint(collision) and mouse_pressed[0]:
+            Hourglass.button_sound_hourglass.play()
             if Stats.wyb == False and not Stats.turn_stop:
                 Stats.wyb = True
                 Stats.turn_count += 1
@@ -315,6 +323,13 @@ class Hourglass:
 
 
 class Decision:
+    button_sound_money = pygame.mixer.Sound('music/music_ambient/coins.mp3')
+    button_sound_money.set_volume(1.0)
+    button_sound_army = pygame.mixer.Sound('music/music_ambient/army.mp3')
+    button_sound_army.set_volume(1.0)
+    button_sound_field = pygame.mixer.Sound('music/music_ambient/sand.mp3')
+    button_sound_field.set_volume(1.0)
+
     def __init__(self, screen: pygame.Surface, camera, map):
 
         self.SCREEN_WIDTH = screen.get_size()[0] - 256
@@ -354,16 +369,19 @@ class Decision:
         colision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
         if self.gold_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
+            Decision.button_sound_money.play()
             Stats.wyb = False
             camera_stop = False
             Stats.gold_count += 10 + Stats.gold_count_bonus
 
         if self.army_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
+            Decision.button_sound_army.play()
             Stats.wyb = False
             camera_stop = False
             Stats.army_count += 10 + Stats.army_count_bonus
 
         if self.field_rect.collidepoint(colision) and mouse_pressed[0] and Stats.wyb:
+            Decision.button_sound_field.play()
             Stats.wyb = False
             camera_stop = False
             Stats.turn_stop = True
@@ -374,6 +392,9 @@ class Decision:
 
 
 class FieldUpdate:
+
+    sound_diamond = pygame.mixer.Sound('music/music_ambient/diamond.mp3')
+    sound_diamond.set_volume(1.0)
 
     def __init__(self, sprites, num):
         self.sprites = sprites
@@ -428,9 +449,11 @@ class FieldUpdate:
             f = (hex + self.quantity_hex - 1) % self.num_sprites
 
         if not self.sprites[prev_index].zajete:
+            FieldUpdate.sound_diamond.play()
             self.sprites[prev_index].field_add = True
 
         if not self.sprites[next_index].zajete:
+            FieldUpdate.sound_diamond.play()
             self.sprites[next_index].field_add = True
 
         if not self.sprites[c].zajete:
@@ -450,6 +473,7 @@ class FieldChoice:
 
     def __init__(self, sprites, screen, camera):
         self.Field_add_surface = pygame.image.load("texture/hex/hex_add.png").convert_alpha()
+        self.Field_add_surface.set_alpha(100)
         self.sprites = sprites
         self.screen = screen
         self.avalible_hex = []
@@ -649,7 +673,6 @@ class BuildItem:
         self.menu.blit(self.item_surf, (self.wymiary.x / 2 - self.item_w / 2, 10 + item_offset.y * self._id))
 
     def buy(self):
-
         press = pygame.mouse.get_pressed()
         pos = pygame.mouse.get_pos()
         if self.button_rect.collidepoint(pos) and press[0]:
@@ -702,6 +725,15 @@ class EventMenagment:
 
 
 class Event:
+    sound_horn = pygame.mixer.Sound('music/music_ambient/horn.mp3')
+    sound_horn.set_volume(1.0)
+    sound_sword = pygame.mixer.Sound('music/music_ambient/sword.mp3')
+    sound_horn.set_volume(1.0)
+    sound_coin = pygame.mixer.Sound('music/music_ambient/coin.mp3')
+    sound_horn.set_volume(1.0)
+    sound_slice = pygame.mixer.Sound('music/music_ambient/slice.mp3')
+    sound_horn.set_volume(1.0)
+
     def __init__(self, ekran: pygame.Surface, opis: str, grafika, ilosc_opcji: int, opisy_opcji: str, nazwa: str,
                  managment: EventMenagment):
         self.ekran = ekran
@@ -715,6 +747,7 @@ class Event:
 
     def execute(self):
 
+        Event.sound_horn.play()
         Render = EventRender(self.ekran, self.opis, self.grafika)
         Render.draw()
         Choose = EventOptions(self.ilosc_opcji, self.opisy_opcji, self.ekran)
@@ -724,7 +757,13 @@ class Event:
 
     def najemnicy(self, managment):
 
+        if self.Wybor == 0:  # dodałem 0 bo chyba brakło
+            Event.sound_sword.play()
+            Stats.army_count -= 100
+            Stats.gold_count -= 50
+
         if self.Wybor == 1:
+            Event.sound_slice.play()
             x = random.randint(0, 99)
             if x < 60:
                 Stats.gold_count += 100  # Zabij ich
@@ -734,6 +773,7 @@ class Event:
                 Stats.army_count -= 50
 
         if self.Wybor == 2:
+            Event.sound_coin.play()
             Stats.gold_count -= 200  # Zaplać im
             Stats.army_count += 100
 
@@ -747,6 +787,7 @@ class Event:
 
     def najemnicy_thief(self, managment):
         if self.Wybor == 0:
+            Event.sound_slice.play()
             Stats.army_count -= 100
             Stats.gold_count -= 50
 

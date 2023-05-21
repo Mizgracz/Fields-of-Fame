@@ -2,6 +2,8 @@ import sys, os
 import zipfile
 
 import pygame
+import pygame.mixer
+
 from pygame.locals import * #Potrzebne do klasy Music
 
 from gameplay import Stats
@@ -16,7 +18,10 @@ PLAYER_COUNT = 1
 class Menu:
     status = True
     resume = False
-
+    button_sound_save= pygame.mixer.Sound('music/music_ambient/save.mp3')
+    button_sound_save.set_volume(1.0)
+    button_sound_load = pygame.mixer.Sound('music/music_ambient/load.mp3')
+    button_sound_load.set_volume(1.0)
 
     def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, max_tps: int,new_game):
         pygame.init()
@@ -51,13 +56,18 @@ class Menu:
         self.gameplay = False
         self.config1 = Config(screen)
         music = Music(screen)
+        # ambient = Music_ambient(screen)
         self.game_config = Gameconfig(screen, music)
         self.music = music
+        # self.ambient = ambient
         self.MAP_SIZE = 30
         self.run()
 
 
     def handle_events(self):
+        pygame.mixer.init()
+        button_sound = pygame.mixer.Sound('music/music_ambient/button_sound.mp3')
+        button_sound.set_volume(1.0)
         global SCREEN_WIDTH
         global SCREEN_HEIGHT
         self.event = pygame.event.get()
@@ -72,6 +82,7 @@ class Menu:
 
                 if self.config1.Button_Start_Rect.collidepoint(pos) and self.config1.Active == True:
 
+                    button_sound.play()
                     self.gameplay = True
                     self.config1.Active = False
                     Menu.status = False
@@ -86,11 +97,10 @@ class Menu:
 
                 elif self.new_game_rect.collidepoint(pos):
                     if Menu.resume:
-
-
+                        button_sound.play()
                         return 'resume'
                     else:
-
+                        button_sound.play()
                         Menu.resume = True
 
                         print("new game")
@@ -98,37 +108,47 @@ class Menu:
 
 
                 elif self.config1.Button_Back_Rect.collidepoint(pos):
+                    button_sound.play()
                     self.config1.Active = False
                     Menu.resume = False
                     Menu.status = True
 
                 elif self.quit_rect.collidepoint(pos):
+
+                    button_sound.play()
                     Menu.status = False
                     return 'quit'
 
                 elif self.load_rect.collidepoint(pos):
+
+                    button_sound.play()
                     Menu.status = False
                     print('load')
                     return 'load_game'
                 elif self.save_rect.collidepoint(pos) and Menu.resume:
+
+                    button_sound.play()
                     Menu.status = False
 
                     print('save')
                     return 'save_game'
 
                 elif self.option_rect.collidepoint(pos):
+                    button_sound.play()
                     return 'game_options'
 
                 elif self.game_config.Button_Back_Rect_conf.collidepoint(pos):
                     self.game_config.Active = False
-                    self.game_config.Active = False
+                    button_sound.play()
 
                 elif self.game_config.Button_Fullscreen_Rec.collidepoint(pos) and self.game_config.Active == True:
                     pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+                    button_sound.play()
 
                 elif self.game_config.Button_Window_Rec.collidepoint(pos) and self.game_config.Active == True:
                     self.screen = pygame.display.set_mode((1270, 720))
                     SCREEN_WIDTH,SCREEN_HEIGHT = 1270,720
+                    button_sound.play()
 
 
                 elif self.game_config.Button_res1366x768_Rec.collidepoint(pos) and self.game_config.Active == True:
@@ -138,22 +158,27 @@ class Menu:
                     background_image2 = pygame.image.load("texture/main_menu/gameconf/background.png")
                     background_image2 = pygame.transform.scale(background_image2, (1366, 768))
                     self.screen.blit(background_image2, (0, 0))
+                    button_sound.play()
 
                 elif self.game_config.Button_res1600x900_Rec.collidepoint(pos) and self.game_config.Active == True:
                     self.screen = pygame.display.set_mode((1600, 900), pygame.FULLSCREEN)
                     SCREEN_WIDTH, SCREEN_HEIGHT = 1600,900
+                    button_sound.play()
 
                 elif self.game_config.Button_res1920x1080_Rec.collidepoint(pos) and self.game_config.Active == True:
                     self.screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
                     SCREEN_WIDTH, SCREEN_HEIGHT = 1920,1080
+                    button_sound.play()
 
                 elif self.game_config.Button_res1920x1200_Rec.collidepoint(pos) and self.game_config.Active == True:
                     self.screen = pygame.display.set_mode((1920, 1200), pygame.FULLSCREEN)
                     SCREEN_WIDTH, SCREEN_HEIGHT = 1920, 1200
+                    button_sound.play()
 
 
 
     def draw(self):
+
 
         pos = pygame.mouse.get_pos()
         self.screen.blit(self.background_texture, (0, 0))
@@ -213,6 +238,7 @@ class Menu:
                     self.game_config.draw(self.event)
                     self.handle_events()
                     self.music.run()
+                    # self.ambient.run_ambient()
             elif choice == 'quit':
                 sys.exit(0)
             if choice:
@@ -279,6 +305,7 @@ class OptionBox():
 
 class Config:
     def __init__(self, screen: pygame.surface):
+        FONT_NAME = 'timesnewroman'
         self.screen = screen
         self.Button_Back = pygame.image.load("texture/main_menu/config/Button_Back.png")
         self.Button_Start = pygame.image.load("texture/main_menu/config/Button_Start.png")
@@ -289,11 +316,11 @@ class Config:
         self.font = pygame.font.Font(None, 36)
         self.text_map_size = self.font.render("Wielkość mapy : ", True, (255, 255, 255))
         self.map_size = OptionBox(
-            300, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30),
+            300, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(FONT_NAME, 30),
             ["Mała (30x30)", "Średnia (50x50)", "Duża (60x60)"])
         self.text_fog_on_off = self.font.render("Mgła Wojny : ", True, (255, 255, 255))
         self.fog_on_off = OptionBox(
-            700, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30),
+            700, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(FONT_NAME, 30),
             ["Wyłącz", "Włącz"])
 
     def draw(self, event):
@@ -384,12 +411,13 @@ class Gameconfig:
 class Music:
     def __init__(self, s2):
         pygame.init()
+        FONT_NAME = 'timesnewroman'
         self.screen = s2
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont(None, 48)
-        self.value = 1
+        self.font = pygame.font.SysFont(FONT_NAME, 48)
+        self.value = 3
         self.music_playing = False
-        self.volume = 1.0  # Początkowa głośność muzyki
+        self.volume = 0.5  # Początkowa głośność muzyki
 
     def run(self):
         pygame.mixer.init()
@@ -433,7 +461,7 @@ class Music:
                             slider_button_x = slider_x
                         elif slider_button_x > slider_x + slider_width:
                             slider_button_x = slider_x + slider_width
-                        self.volume = (slider_button_x - slider_x) / slider_width
+                        self.volume = ((slider_button_x - slider_x) / slider_width)
                         pygame.mixer.music.set_volume(self.volume)
 
             # Disable run() if no arrow or slider is clicked
@@ -494,12 +522,82 @@ class Music:
         self.play_music()
 
     def play_music(self):
-        pygame.mixer.music.load('music/' + str(self.value) + '.mp3')
+        pygame.mixer.music.load('music/music_background/' + str(self.value) + '.mp3')
         pygame.mixer.music.set_volume(self.volume)
         pygame.mixer.music.play(-1)
         self.music_playing = True
 
-#################################################################################################################
+# class Music_ambient: Ignorujcie
+#     def __init__(self, s2):
+#         pygame.init()
+#         FONT_NAME = 'timesnewroman'
+#         self.screen = s2
+#         self.clock = pygame.time.Clock()
+#         self.font = pygame.font.SysFont(FONT_NAME, 48)
+#         self.value_ambient = 1
+#         self.music_playing_ambient = False
+#         self.volume_ambient = 1.0  # Initial music volume
+#         self.window_rect_ambient = pygame.Rect(700, 500, 200, 100)  # Declare window rectangle
+#
+#     def run_ambient(self):
+#         pygame.mixer.init()
+#         # Slider variables
+#         slider_width_ambient, slider_height_ambient = 300, 20
+#         slider_x_ambient, slider_y_ambient = 650, 650
+#         slider_ambient = pygame.Rect(slider_x_ambient, slider_y_ambient, slider_width_ambient, slider_height_ambient)
+#         slider_button_radius_ambient = 10
+#         slider_button_x_ambient = slider_x_ambient + int(slider_width_ambient * self.volume_ambient)
+#         slider_button_y_ambient = slider_y_ambient + slider_height_ambient // 2
+#         dragging_ambient = False
+#
+#         running_ambient = True
+#
+#         while running_ambient:
+#             self.clock.tick(30)
+#             for event in pygame.event.get():
+#                 if event.type == QUIT:
+#                     pygame.quit()
+#                     return
+#                 elif event.type == MOUSEBUTTONDOWN:
+#                     if slider_ambient.collidepoint(event.pos):
+#                         dragging_ambient = True
+#                 elif event.type == MOUSEBUTTONUP:
+#                     if dragging_ambient:
+#                         dragging_ambient = False
+#                 elif event.type == MOUSEMOTION:
+#                     if dragging_ambient:
+#                         slider_button_x_ambient = event.pos[0]
+#                         if slider_button_x_ambient < slider_x_ambient:
+#                             slider_button_x_ambient = slider_x_ambient
+#                         elif slider_button_x_ambient > slider_x_ambient + slider_width_ambient:
+#                             slider_button_x_ambient = slider_x_ambient + slider_width_ambient
+#                         self.volume_ambient = (slider_button_x_ambient - slider_x_ambient) / slider_width_ambient
+#                         self.play_music_ambient()
+#
+#             if not dragging_ambient:
+#                 running_ambient = False
+#                 continue
+#
+#             self.draw_window_ambient()
+#             self.draw_slider_ambient(slider_ambient, slider_button_x_ambient, slider_button_y_ambient,
+#                                      slider_button_radius_ambient)
+#             pygame.display.flip()
+#
+#     def draw_window_ambient(self):
+#         pygame.draw.rect(self.screen, (0, 0, 0), self.window_rect_ambient, 2)
+#
+#         text = self.font.render("Kliknij mnie", True, (0, 0, 0))
+#         text_rect = text.get_rect(center=self.window_rect_ambient.center)
+#         self.screen.blit(text, text_rect)
+#
+#     def draw_slider_ambient(self, slider_ambient, button_x_ambient, button_y_ambient, button_radius_ambient):
+#         pygame.draw.rect(self.screen, (128, 128, 128), slider_ambient)
+#         pygame.draw.circle(self.screen, (0, 0, 0), (button_x_ambient, button_y_ambient), button_radius_ambient)
+#
+#     def play_music_ambient(self):
+#         pygame.mixer.Sound('music/music_ambient/falling.mp3').play()
+#         self.music_playing_ambient = True
+
 
 class LoadMenu(object):
     """docstring for LoadMenu"""
@@ -607,6 +705,7 @@ class LoadMenu(object):
                 self.update()
                 pygame.time.Clock().tick(3)
             if item.rect_item.collidepoint(POS) and PRESS:
+                Menu.button_sound_load.play()
                 self.load_game(item.tmpID)
                 LoadMenu.status = False
                 pygame.time.Clock().tick(3)
@@ -852,6 +951,7 @@ class SaveMenu(object):
                 self.update()
                 pygame.time.Clock().tick(3)
             if item.rect_item.collidepoint(POS) and PRESS:
+                Menu.button_sound_save.play()
                 self.save_game(item.tmpID)
                 SaveMenu.status = False
                 pygame.time.Clock().tick(3)
