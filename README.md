@@ -11,7 +11,7 @@ Currently only playing in 1280x720 resolution works correctly, it is possible to
 
 credits
 
- Maciej Bielenichin (Mizgracz) :
+ Maciej Bielenichin (Mizgracz):
 - Idea and concept of the game
 - Event system
 - Map display and generation
@@ -23,29 +23,29 @@ credits
 - Display UI
 - Main Menu
 
-Lucyferiusz  :
+Lucyferiusz:
 - Save and Load
 - Multiplayer gameplay
 - Build Menu
 - Main Menu
 - Autosave
 
-Patry321 :
--Hourglass graphics and animation
--Game Settings Menu
--Graphics of the interface during the game
--Add sound
--Fog of War
+Patry321:
+- Hourglass graphics and animation
+- Game Settings Menu
+- Graphics of the interface during the game
+- Add sound
+- Fog of War
 
 Herukles:
--Graphics of all hexes
--Event graphics
--Graphics of the buttons in the main menu
--Building graphics
--Resource system
+- Graphics of all hexes
+- Event graphics
+- Graphics of the buttons in the main menu
+- Building graphics
+- Resource system
 
-Resources used :
-During the development of this project, we used the following resources
+
+During the development of this project, we used the following resources:
 - Main Menu background graphic genereted by AI Stable Diffusion 
 - Option Box from : https://github.com/Rabbid76/PyGameExamplesAndAnswers/blob/master/documentation/pygame/pygame_ui_elements.md
 
