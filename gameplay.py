@@ -6,7 +6,7 @@ from menu import *
 from event_description import *
 
 item_offset = pygame.Vector2(0, 115)
-
+pygame.mixer.init()
 
 class Stats:
     item_offset = pygame.Vector2(0, 115)
@@ -283,6 +283,8 @@ class Timer:
 
 
 class Hourglass:
+    button_sound_hourglass = pygame.mixer.Sound('music/music_ambient/hourglass.mp3')
+    button_sound_hourglass.set_volume(1.0)
     def __init__(self, screen: pygame.Surface, frame_rate: int, animation_frame_interval: int):
         self.SCREEN_WIDTH = screen.get_size()[0]
         self.SCREEN_HEIGHT = screen.get_size()[1]
@@ -329,6 +331,14 @@ class Hourglass:
 
 
 class Decision:
+    button_sound_money = pygame.mixer.Sound('music/music_ambient/coins.mp3')
+    button_sound_money.set_volume(1.0)
+    button_sound_army = pygame.mixer.Sound('music/music_ambient/army.mp3')
+    button_sound_army.set_volume(1.0)
+    button_sound_field = pygame.mixer.Sound('music/music_ambient/sand.mp3')
+    button_sound_field.set_volume(1.0)
+
+
     def __init__(self, screen: pygame.Surface, map,player):
 
         self.SCREEN_WIDTH = screen.get_size()[0] - 256
@@ -369,18 +379,21 @@ class Decision:
         colision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
         if self.gold_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+            Decision.button_sound_money.play()
             player.wyb = False
             player.camera_stop = False
             player.gold_count += 10 + player.gold_count_bonus
             player.confirm = True
 
         if self.army_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+            Decision.button_sound_army.play()
             player.wyb = False
             player.camera_stop = False
             player.army_count += 10 + player.army_count_bonus
             player.confirm = True
 
         if self.field_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+            Decision.button_sound_field.play()
             player.wyb = False
             player.camera_stop = False
             player.turn_stop = True
@@ -391,6 +404,8 @@ class Decision:
 
 
 class FieldUpdate:
+    sound_diamond = pygame.mixer.Sound('music/music_ambient/diamond.mp3')
+    sound_diamond.set_volume(1.0)
 
     def __init__(self, sprites, num):
         self.sprites = sprites
@@ -523,14 +538,15 @@ class SideMenu:
         self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
         ########
         self.texture_main = "texture/ui/side_bar/sideUI.png"
-        self.texture_button = "texture/ui/side_bar/praweUI_srodek.png"
-
+        self.texture_button_build = "texture/ui/side_bar/sideUIBud.png"
+        self.texture_button_resource = "texture/ui/side_bar/sideUISur.png"
         self.main_surfarce = pygame.image.load(self.texture_main).convert_alpha()
 
-        self.button_surfarce = pygame.image.load(self.texture_button).convert_alpha()
+        self.button_surfarce = pygame.transform.smoothscale(pygame.image.load(self.texture_button_build).convert_alpha(),(236,68))
+        self.button_resource_surfarce = pygame.transform.smoothscale(pygame.image.load(self.texture_button_resource).convert_alpha(),(236,68))
         self.main_rect = self.main_surfarce.get_rect(topleft=(self.SCREEN_WIDTH - 256, 30))
-        self.button_rect = self.button_surfarce.get_rect(topleft=(self.SCREEN_WIDTH - 246, 258))
-
+        self.button_rect = self.button_surfarce.get_rect(topleft=(self.SCREEN_WIDTH - 246, 258 + 100))
+        self.button_resource_rect = self.button_surfarce.get_rect(topleft=(self.SCREEN_WIDTH - 246, 258))
         self.screen = screen
 
         #####
@@ -565,9 +581,8 @@ class SideMenu:
         ####
         self.main_surface = pygame.Surface((256, self.SCREEN_HEIGHT - 30), pygame.SRCALPHA)
         self.main_surface.blit(self.main_surfarce, (0, 0))
-
-        self.main_surface.blit(self.button_surfarce, (10, 258))
-
+        self.main_surface.blit(self.button_surfarce, (10, 335))
+        self.main_surface.blit(self.button_resource_surfarce, (10, 253))
         ####
 
     def surowce_staty(self, x: int, y: int, tekst: str):
@@ -639,6 +654,15 @@ class EventMenagment:
 
 
 class Event:
+    sound_horn = pygame.mixer.Sound('music/music_ambient/horn.mp3')
+    sound_horn.set_volume(1.0)
+    sound_sword = pygame.mixer.Sound('music/music_ambient/sword.mp3')
+    sound_sword.set_volume(1.0)
+    sound_coin = pygame.mixer.Sound('music/music_ambient/coin.mp3')
+    sound_coin.set_volume(1.0)
+    sound_slice = pygame.mixer.Sound('music/music_ambient/slice.mp3')
+    sound_slice.set_volume(1.0)
+
     def __init__(self, ekran: pygame.Surface, opis: str, grafika, ilosc_opcji: int, opisy_opcji: str, nazwa: str,
                  managment: EventMenagment):
         self.ekran = ekran
@@ -651,7 +675,7 @@ class Event:
 
 
     def execute(self):
-
+        Event.sound_horn.play()
         Render = EventRender(self.ekran, self.opis, self.grafika,self.nazwa)
         Render.draw()
         self.Choose = EventOptions(self.ilosc_opcji, self.opisy_opcji, self.ekran)
@@ -665,6 +689,7 @@ class Event:
     def Najemnicy(self, managment):
 
         if self.Wybor == 1:
+            Event.sound_slice.play()
             x = random.randint(0, 99)
             if x < 60:
                 self.managment.player.gold_count += 100  # Zabij ich
@@ -680,6 +705,7 @@ class Event:
 
 
         if self.Wybor == 2:
+            Event.sound_coin.play()
             self.managment.player.gold_count -= 200  # Zaplać im
             self.managment.player.army_count += 100
 
@@ -698,6 +724,7 @@ class Event:
 
     def najemnicy_thief(self, managment):
         if self.Wybor == 0:
+            Event.sound_slice.play()
             self.managment.player.army_count -= 100
             self.managment.player.gold_count -= 50
 
@@ -854,3 +881,66 @@ class EventResults:
         if self.rect.collidepoint(collision) and mouse_pressed[0]:
             self.stop = True
             self.managment.player.turn_stop = False
+
+
+class ResourceSell:
+    active = False
+    def __init__(self, screen):
+        self.screen = screen
+        self.background = pygame.transform.smoothscale(pygame.image.load("texture/ui/Resources/ResourceSell_back.png").convert_alpha(),(1000/1.4,800/1.4))
+        self.button = pygame.transform.smoothscale(pygame.image.load("texture/ui/Resources/button sprzedaj.png").convert_alpha(),
+                                                       (250 , 50 ))
+        self.screen_rect = screen.get_rect()
+        self.font = pygame.font.Font(None, 30)
+        self.down_arrow = pygame.transform.smoothscale(pygame.image.load("texture/ui/Resources/down_arrow.png").convert_alpha(),(80,40))
+        self.up_arrow = pygame.transform.smoothscale(
+            pygame.image.load("texture/ui/Resources/up_arrow.png").convert_alpha(), (80, 40))
+
+    def draw(self):
+        if ResourceSell.active:
+            background_rect = self.background.get_rect()
+            background_rect.center = self.screen_rect.center
+            self.screen.blit(self.background, background_rect)
+            self.res_stats = ResourceSellStats(self.screen,self.font,self.button,self.down_arrow,self.up_arrow)
+
+class ResourceSellStats:
+    def __init__(self,screen,font,button,arrow_down,arrow_up):
+        self.screen = screen
+        self.font = font
+        self.button = button
+        self.up_arrow = arrow_up
+        self.down_arrow = arrow_down
+        prize = ["Cena : 20","Cena : 5","Cena : 7","Cena : 3","Cena : 2","Cena : 1","Cena : 10","Cena : 15"] # diamenty,glina,kamień,zboże,ryba,drewno,żelazo,ryda złota
+        text = "0"
+        text_color = (255, 255, 255)
+
+        text_spacing = 50
+        text_y = 170  # Początkowe położenie Y
+
+        for i in range(8):
+            text_surface = self.font.render(text, True, text_color)
+            prize_surface = self.font.render(prize[i], True, text_color)
+            text_rect = text_surface.get_rect()
+            prize_rect = prize_surface.get_rect()
+            button_rect = self.button.get_rect()
+            down_arrow_rect = self.down_arrow.get_rect()
+            up_arrow_rect = self.up_arrow.get_rect()
+            text_rect.centerx = screen.get_rect().centerx
+            prize_rect.centerx = screen.get_rect().centerx - 110
+            button_rect.centerx = screen.get_rect().centerx + 170
+            down_arrow_rect.centerx = screen.get_rect().centerx + 20
+            up_arrow_rect.centerx = screen.get_rect().centerx - 20
+            text_rect.y = text_y
+            prize_rect.y = text_y
+            button_rect.y = text_y - 15
+            down_arrow_rect.y = text_y - 15
+            up_arrow_rect.y = text_y - 15
+
+            self.screen.blit(text_surface, text_rect)
+            self.screen.blit(self.button, button_rect)
+            self.screen.blit(prize_surface,prize_rect)
+            self.screen.blit(self.up_arrow, up_arrow_rect)
+            self.screen.blit(self.down_arrow, down_arrow_rect)
+            text_y += text_spacing
+
+

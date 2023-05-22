@@ -109,12 +109,13 @@ class Game:
         ]
 
         self.allbuildingList = [allbuilding1,allbuilding2,allbuilding3,allbuilding4]
-        
+
         self.size = self.start_menu.MAP_SIZE
         self.Fog = self.start_menu.SWITCH_FOG
         self.PlayerCount = self.start_menu.PLAYER_COUNT
         self.PlayerName = self.start_menu.PLAYER_NAME
 
+        self.resource = ResourceSell(screen)
         self.camera = Camera()
         
         self.up_bar = UpBar(screen)
@@ -202,6 +203,12 @@ class Game:
                     else:
                         Stats.camera_stop = False
                     pygame.time.Clock().tick(3)
+                if ResourceSell.active == True:
+                    if self.sd.button_resource_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
+                        ResourceSell.active = False
+                else:
+                    if self.sd.button_resource_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
+                        ResourceSell.active = True
         press = pygame.key.get_pressed()
         if press[pygame.K_ESCAPE]:
             Menu.status = True
@@ -210,6 +217,7 @@ class Game:
             print(f"{Camera.camera_x } {Camera.camera_y }")
         if press[pygame.K_HOME]:
             Camera.player_camera_update(self.currentplayer)
+
     def save_game(self):
         folder_path = "save"
         if not os.path.exists(folder_path):
@@ -325,6 +333,9 @@ class Game:
                 self.currentmenu.draw_menu()
             if not BuildingMenu.active:
                 self.currentdec.click(self.currentplayer)
+
+
+            self.resource.draw()
 
             self.klepsydra1.draw()
             if not BuildingMenu.active:
