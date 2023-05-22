@@ -199,6 +199,8 @@ class Game:
         if press[pygame.K_HOME]:
             Camera.camera_x = self.currentplayer.home_x*(-1)+600
             Camera.camera_y = self.currentplayer.home_y*(-1)+300
+            if Camera.camera_x > 1600:
+                Camera.camera_x -= (Camera.camera_x-1600)
             print(f"{Camera.camera_x } {Camera.camera_y }")
     def save_game(self):
         folder_path = "save"

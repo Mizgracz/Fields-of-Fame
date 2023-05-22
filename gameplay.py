@@ -63,7 +63,7 @@ class Player:
     
     
     
-    def next_player(self):
+    def next_player():
         if Player.ID == Player.MAX-1:
             Player.ID = 0
         else:
