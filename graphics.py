@@ -105,9 +105,9 @@ class Hex(pygame.sprite.Sprite):
 
 class MapGenerator(pygame.sprite.Group):
     
-    def __init__(self, numx:int, numy:int, screen:pygame.Surface, camera:Camera):
+    def __init__(self, numx:int, numy:int, screen:pygame.Surface, camera:Camera,players):
         super().__init__()
-
+    
         self.colision_surface = pygame.Surface(pygame.display.get_window_size(), pygame.SRCALPHA)
         self.colision_rect = self.colision_surface.get_rect()
 
@@ -119,6 +119,9 @@ class MapGenerator(pygame.sprite.Group):
         self.hex_zajete_surface4 = pygame.image.load("texture/hex/hex_zajete_pole4.png").convert_alpha()
         # self.hex_zajete_surfaceNIE = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
         self.hex_zajete_surface1.set_alpha(100)
+        self.hex_zajete_surface2.set_alpha(100)
+        self.hex_zajete_surface3.set_alpha(100)
+        self.hex_zajete_surface4.set_alpha(100)
 
         # Mgla wojny
         self.fog_surface = pygame.image.load("texture/hex/fog.png").convert_alpha()
@@ -173,20 +176,24 @@ class MapGenerator(pygame.sprite.Group):
         self.num_hex_side = self.num_hex_y
         self.num_hex_right_side = self.num_hex_x
         self.all_zajete_surface = {}
-        self.all_zajete_surface = {
-            'Lucyferiusz':[self.hex_zajete_surface1],
-            'Patry':[self.hex_zajete_surface2],
-            'None':[self.hex_zajete_surface1]
-
-        }
+        self.players= players
+        zajete = [
+            self.hex_zajete_surface1,
+            self.hex_zajete_surface2,
+            self.hex_zajete_surface3,
+            self.hex_zajete_surface4
+        ]
+        for x in range(Player.MAX):
+            self.all_zajete_surface[f'{self.players[x].player_name}'] = zajete[x] 
+        
         self.allhex = {}
         self.alltex = {}
         self.screen = screen
         self.camera = camera
         self.allmask = {}
         self.allrect = {}
-        self.camerax = self.camera.camera_x
-        self.cameray = self.camera.camera_y
+        self.camerax = Camera.camera_x
+        self.cameray = Camera.camera_y
         self.tex_id = []
         # lista z surowcami, trzecie pole w kazdym rzedzie to "wartosc" tego pola
         self.surowce_lista = [(self.clay, "clay", 10), (self.mine_diamonds, "mine_diamonds", 200),
@@ -223,8 +230,8 @@ class MapGenerator(pygame.sprite.Group):
                 self.allmask['hex', licz] = pygame.mask.from_surface(self.allhex["hex", licz].texture)
                 x += self.allhex["hex", licz].szerokosc
                
-                if licz in Player.use_castle:
-                    self.allhex["hex", licz].zajete = True
+                
+            
                 licz += 1
 
             if j % 2 != 0:
@@ -232,12 +239,18 @@ class MapGenerator(pygame.sprite.Group):
             else:
                 przesuniecie_x += -65
             przesuniecie_y += -38
+        for i in range(Player.MAX):
+            self.allhex["hex", Player.use_castle[i]].zajete = True
+            self.allhex["hex", Player.use_castle[i]].player = self.players[i].player_name
+            self.players[i].home_x = self.allhex["hex", Player.use_castle[i]].polozenie_hex_x
+            self.players[i].home_y = self.allhex["hex", Player.use_castle[i]].polozenie_hex_y
+
 
     def Draw(self, width:int, height:int):  # wyświetlanie mapy na ekranie
 
         licznik = -1
-        camera_x = self.camera.camera_x
-        camera_y = self.camera.camera_y
+        camera_x = Camera.camera_x
+        camera_y = Camera.camera_y
         k = 0
         for h in self.sprites():
             licznik += 1
@@ -252,8 +265,8 @@ class MapGenerator(pygame.sprite.Group):
     def fog_draw(self, Fog:bool, width:int, height:int):
         if Fog:
             licznik = -1
-            camera_x = self.camera.camera_x
-            camera_y = self.camera.camera_y
+            camera_x = Camera.camera_x
+            camera_y = Camera.camera_y
             k = 0
             j = 0
             for h in self.sprites():
@@ -275,9 +288,9 @@ class MapGenerator(pygame.sprite.Group):
                         j += 1
         else:
             for h in self.sprites():
-                position_x = h.polozenie_hex_x + self.camera.camera_x
+                position_x = h.polozenie_hex_x + Camera.camera_x
                 if width > position_x > -200:
-                    position_y = h.polozenie_hex_y + self.camera.camera_y
+                    position_y = h.polozenie_hex_y + Camera.camera_y
                     if height > position_y > -200:
                         if h.odkryte:
                             self.screen.blit(h.texture, (position_x, position_y))
@@ -286,24 +299,24 @@ class MapGenerator(pygame.sprite.Group):
 
         for i in self.sprites():
             if i.obwodka:
-                self.screen.blit(self.hex_obwodka_surface, [i.polozenie_hex_x + self.camera.camera_x,
-                                                            i.polozenie_hex_y + self.camera.camera_y])
+                self.screen.blit(self.hex_obwodka_surface, [i.polozenie_hex_x + Camera.camera_x,
+                                                            i.polozenie_hex_y + Camera.camera_y])
             if i.zajete:
-                self.screen.blit(self.all_zajete_surface[f'{i.player}'][0], (i.polozenie_hex_x + self.camera.camera_x,
-                                                               i.polozenie_hex_y + self.camera.camera_y))
-                # self.screen.blit(self.hex_zajete_surface1, (i.polozenie_hex_x + self.camera.camera_x,
-                #                                            i.polozenie_hex_y + self.camera.camera_y))
+                self.screen.blit(self.all_zajete_surface[f'{i.player}'], (i.polozenie_hex_x + Camera.camera_x,
+                                                               i.polozenie_hex_y + Camera.camera_y))
+                # self.screen.blit(self.hex_zajete_surface1, (i.polozenie_hex_x + Camera.camera_x,
+                #                                            i.polozenie_hex_y + Camera.camera_y))
             if i.odkryte:
-                self.screen.blit(self.uncover_surface, (i.polozenie_hex_x + self.camera.camera_x,
-                                                           i.polozenie_hex_y + self.camera.camera_y))
+                self.screen.blit(self.uncover_surface, (i.polozenie_hex_x + Camera.camera_x,
+                                                           i.polozenie_hex_y + Camera.camera_y))
 
     def colision_detection_obwodka(self):
         pos = pygame.mouse.get_pos()
 
-        if self.camerax != self.camera.camera_x or self.cameray != self.camera.camera_y:
+        if self.camerax != Camera.camera_x or self.cameray != Camera.camera_y:
 
-            dx = self.camera.camera_x - self.camerax
-            dy = self.camera.camera_y - self.cameray
+            dx = Camera.camera_x - self.camerax
+            dy = Camera.camera_y - self.cameray
 
 
             for rect in self.allrect.values():
@@ -311,8 +324,8 @@ class MapGenerator(pygame.sprite.Group):
                 rect.y += dy
 
 
-            self.camerax = self.camera.camera_x
-            self.cameray = self.camera.camera_y
+            self.camerax = Camera.camera_x
+            self.cameray = Camera.camera_y
 
 
         for c, rect in self.allrect.items():

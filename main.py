@@ -105,19 +105,12 @@ class Game:
         ]
 
         self.allbuildingList = [allbuilding1,allbuilding2,allbuilding3,allbuilding4]
-        # self.allbuildingList = []
-        # new_list = [x for x in allbuilding1]
-        # self.allbuildingList += [new_list]
-        # new_list = [x for x in allbuilding1]
-        # self.allbuildingList += [new_list]
-        # self.build_menu = BuildingMenu(screen,self.allbuilding,screen.get_width()/2,500,int(0.25*screen.get_width()),int(0.2*screen.get_height()))
         
         self.size = self.start_menu.MAP_SIZE
         self.Fog = self.start_menu.SWITCH_FOG
         self.PlayerCount = self.start_menu.PLAYER_COUNT
 
         self.camera = Camera()
-        self.map = MapGenerator(self.size, self.size, screen, self.camera)
         
         self.up_bar = UpBar(screen)
         self.klepsydra1 = Hourglass(screen, frame_rate, animation_frame_interval)
@@ -131,7 +124,10 @@ class Game:
         # for dla stworzenia graczy
         self.allplayers.append(Player("Lucyferiusz"))
         self.allplayers.append(Player("Patry"))
+        self.allplayers.append(Player("Kacper"))
+        self.allplayers.append(Player("Maciej"))
 
+        self.map = MapGenerator(self.size, self.size, screen, self.camera,self.allplayers)
 
         self.map.texture()
         self.map.generate()
@@ -198,11 +194,12 @@ class Game:
         if press[pygame.K_ESCAPE]:
             Menu.status = True
         if press[pygame.K_s]:
-            self.save_game()
+            # self.save_game()
+            print(f"{Camera.camera_x } {Camera.camera_y }")
         if press[pygame.K_HOME]:
-            self.camera.camera_x = 0
-            self.camera.camera_y = 0
-
+            Camera.camera_x = self.currentplayer.home_x*(-1)+600
+            Camera.camera_y = self.currentplayer.home_y*(-1)+300
+            print(f"{Camera.camera_x } {Camera.camera_y }")
     def save_game(self):
         folder_path = "save"
         if not os.path.exists(folder_path):
@@ -294,7 +291,7 @@ class Game:
             screen.fill((255, 255, 255))
             self.handle_events()
             self.camera.mouse(self.size)
-            self.camera.keybord()
+            self.camera.keybord(self.size)
             self.map.Draw(SCREEN_WIDTH, SCREEN_HEIGHT)
             self.map.fog_draw(self.Fog, SCREEN_WIDTH, SCREEN_HEIGHT)
 

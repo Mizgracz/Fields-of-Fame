@@ -24,46 +24,8 @@ class Stats:
     player_hex_status = False
     turn_stop = False
     
-    surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "],
-                     ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "ryby: "],
-                     ["sawmill", 0, "drewno: "], ["grain", 0, "zboże: "]]
-
     def __init__(self) -> None:
         pass
-
-    def dopisz_surowiec(surowiec):
-        for i in range(len(Stats.surowce_ilosc)):
-            if surowiec == Stats.surowce_ilosc[i][0]:
-                Stats.surowce_ilosc[i][1] += 100
-
-    def zajmij_pole(self, allrect, allmask, allhex, player=None, dec=None):
-        if Stats.player_hex_status:
-            mouse_presses = pygame.mouse.get_pressed()
-            if mouse_presses[0]:
-                pos1 = pygame.mouse.get_pos()
-                for i in range(len(allhex)):
-                    pos_in_mask1 = pos1[0] - allrect['hex', i].x, pos1[1] - allrect['hex', i].y
-                    touching = allrect['hex', i].collidepoint(*pos1) and allmask['hex', i].get_at(
-                        pos_in_mask1)
-
-                    if touching and allhex["hex", i].field_add:
-                        if allhex["hex", i].rodzaj == "surowiec":
-                            print(allhex["hex", i].rodzaj_surowca_var)
-                            Stats.dopisz_surowiec(allhex["hex", i].rodzaj_surowca_var)
-                        if allhex["hex", i].rodzaj == "budynek":
-                            print("budynek")
-                            # dodawanie bonusu do zarabiania
-                            if allhex["hex", i].texture == self.castle_surface:
-                                Stats.army_count_bonus += 10
-                            elif allhex["hex", i].texture == self.willage_surface:
-                                Stats.gold_count_bonus += 10
-                        allhex["hex", i].zajete = True
-                        allhex["hex", i].field_add = False
-                        dec.fupdate.new_hex(i)
-                        Stats.field_status = False
-                        Stats.player_hex_status = False
-                        Stats.terrain_count += 1
-                        Stats.turn_stop = False
 
 class Player:
     MAX = 0
@@ -75,17 +37,20 @@ class Player:
 
         self.buildMenu = None 
         self.home = random.choice(Player.castle_hex)
+        self.home_x = 0
+        self.home_y = 0
+
         Player.castle_hex.remove(self.home)
         Player.use_castle.append(self.home)
         self.player_name = name
-        self.nacja =  None #TODO
+        self.nacja =  None 
         self.wyb = False
         self.turn_stop = False
         self.field_status = False
         self.camera_stop = False
         self.player_hex_status = False
         self.item_offset = pygame.Vector2(0, 115)
-        #TODO zmienne od nacji
+        
         self.gold_count = 0
         self.army_count = 0
         self.terrain_count = 1
@@ -98,11 +63,12 @@ class Player:
     
     
     
-    def next_player():
+    def next_player(self):
         if Player.ID == Player.MAX-1:
             Player.ID = 0
         else:
             Player.ID += 1
+        
     def dopisz_surowiec(self, surowiec):
         for i in range(len(self.surowce_ilosc)):
             if surowiec == self.surowce_ilosc[i][0]:
@@ -141,10 +107,10 @@ class Player:
 
 
 class Camera:
+    camera_x = 0
+    camera_y = 0
 
     def __init__(self):
-        self.camera_x = 0
-        self.camera_y = 0
 
         self.mouse_x = 0
         self.mouse_y = 0
@@ -157,47 +123,51 @@ class Camera:
         press = pygame.key.get_pressed()
         if Stats.camera_stop is False:
             if not press[pygame.K_LCTRL]:
-                if self.camera_x < 1600:
+                if Camera.camera_x < 1600:
                     if self.mouse_x < 30:
-                        self.camera_x += (predkosc + 10)
+                        Camera.camera_x += (predkosc + 10)
                     elif self.mouse_x < 80:
-                        self.camera_x += (predkosc + 5)
+                        Camera.camera_x += (predkosc + 5)
                     elif self.mouse_x < self.move_mouse_max:
-                        self.camera_x += predkosc
-                if self.camera_x > 1640 - (mapsize * 130) + 1110:
+                        Camera.camera_x += predkosc
+                if Camera.camera_x > 1640 - (mapsize * 130) + 1110:
                     if self.mouse_x > 1240:
-                        self.camera_x -= predkosc + 10
+                        Camera.camera_x -= predkosc + 10
                     elif self.mouse_x > 1190:
-                        self.camera_x -= predkosc + 5
+                        Camera.camera_x -= predkosc + 5
                     elif self.mouse_x > 1110:
-                        self.camera_x -= predkosc
+                        Camera.camera_x -= predkosc
 
-                if self.camera_y < - 20:
+                if Camera.camera_y < - 20:
                     if self.mouse_y < 30:
-                        self.camera_y += predkosc + 10
+                        Camera.camera_y += predkosc + 10
                     elif self.mouse_y < 80:
-                        self.camera_y += predkosc + 5
+                        Camera.camera_y += predkosc + 5
                     elif self.mouse_y < 160:
-                        self.camera_y += predkosc
+                        Camera.camera_y += predkosc
 
-                if self.camera_y > (-152 * mapsize / 2) - (75 * mapsize / 2) + 825:
+                if Camera.camera_y > (-152 * mapsize / 2) - (75 * mapsize / 2) + 825:
                     if self.mouse_y > 670:
-                        self.camera_y -= predkosc + 10
+                        Camera.camera_y -= predkosc + 10
                     elif self.mouse_y > 620:
-                        self.camera_y -= predkosc + 5
+                        Camera.camera_y -= predkosc + 5
                     elif self.mouse_y > 540:
-                        self.camera_y -= predkosc
+                        Camera.camera_y -= predkosc
 
-    def keybord(self):
+    def keybord(self,mapsize):
         press = pygame.key.get_pressed()
         if press[pygame.K_RIGHT]:
-            self.camera_x -= 5
+            if Camera.camera_x > 1640 - (mapsize * 130) + 1110:
+                Camera.camera_x -= 5
         if press[pygame.K_LEFT]:
-            self.camera_x += 5
+            if Camera.camera_x < 1600:
+                Camera.camera_x += 5
         if press[pygame.K_DOWN]:
-            self.camera_y -= 5
+            if Camera.camera_y > (-152 * mapsize / 2) - (75 * mapsize / 2) + 825:
+                Camera.camera_y -= 5
         if press[pygame.K_UP]:
-            self.camera_y += 5
+            if Camera.camera_y < - 20:
+                Camera.camera_y += 5
 
 
 class UpBar:
@@ -493,8 +463,8 @@ class FieldChoice:
 
     def draw(self):
         for i in self.avalible_hex:
-            self.screen.blit(self.Field_add_surface, [i.polozenie_hex_x + self.camera.camera_x,
-                                                      i.polozenie_hex_y + self.camera.camera_y])
+            self.screen.blit(self.Field_add_surface, [i.polozenie_hex_x + Camera.camera_x,
+                                                      i.polozenie_hex_y + Camera.camera_y])
 
 
 class SideMenu:
@@ -577,13 +547,6 @@ class SideMenu:
         self.screen.blit(self.main_surface, self.main_rect)
         self.surowce_staty(self.SCREEN_WIDTH - 190, 47, f"{player.player_name}:")
         self.surowce_staty_blituj(player)
-# TODO : USUNĄĆ
-    # def button(self):
-    #     colision = pygame.mouse.get_pos()
-    #     mouse_pressed = pygame.mouse.get_pressed()
-    #     if self.button_rect.collidepoint(colision) and mouse_pressed[0]:
-    #         Build_Menu.build_stauts = True
-
 
 
 # EVENTY
