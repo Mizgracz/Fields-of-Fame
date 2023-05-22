@@ -1141,7 +1141,6 @@ class Item:
                 ######
                 for surowiec in player.surowce_ilosc:
                     f.write(str(surowiec[1])+';')
-
                 f.write('\n')
                 
     

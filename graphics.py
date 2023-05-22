@@ -23,6 +23,7 @@ class Hex(pygame.sprite.Sprite):
         self.texture = self.texturing(self.group)
         self.rodzaj = self.surowiec()  # self.czy_to_surowiec()
         self.rodzaj_surowca_var = None
+        self.player = 'None'
         if self.number in Player.use_castle:
             self.zajete = True
         if self.rodzaj == 'hex':
@@ -112,9 +113,12 @@ class MapGenerator(pygame.sprite.Group):
 
         # obwodka, zajety hex i alpha
         self.hex_obwodka_surface = pygame.image.load("texture/hex/hex_obwodka.png").convert_alpha()
-        self.hex_zajete_surface = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
-        self.hex_zajete_surfaceNIE = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
-        self.hex_zajete_surface.set_alpha(100)
+        self.hex_zajete_surface1 = pygame.image.load("texture/hex/hex_zajete_pole1.png").convert_alpha()
+        self.hex_zajete_surface2 = pygame.image.load("texture/hex/hex_zajete_pole2.png").convert_alpha()
+        self.hex_zajete_surface3 = pygame.image.load("texture/hex/hex_zajete_pole3.png").convert_alpha()
+        self.hex_zajete_surface4 = pygame.image.load("texture/hex/hex_zajete_pole4.png").convert_alpha()
+        # self.hex_zajete_surfaceNIE = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
+        self.hex_zajete_surface1.set_alpha(100)
 
         # Mgla wojny
         self.fog_surface = pygame.image.load("texture/hex/fog.png").convert_alpha()
@@ -168,6 +172,13 @@ class MapGenerator(pygame.sprite.Group):
         self.num_hex_all = numx * numy
         self.num_hex_side = self.num_hex_y
         self.num_hex_right_side = self.num_hex_x
+        self.all_zajete_surface = {}
+        self.all_zajete_surface = {
+            'Lucyferiusz':[self.hex_zajete_surface1],
+            'Patry':[self.hex_zajete_surface2],
+            'None':[self.hex_zajete_surface1]
+
+        }
         self.allhex = {}
         self.alltex = {}
         self.screen = screen
@@ -278,8 +289,10 @@ class MapGenerator(pygame.sprite.Group):
                 self.screen.blit(self.hex_obwodka_surface, [i.polozenie_hex_x + self.camera.camera_x,
                                                             i.polozenie_hex_y + self.camera.camera_y])
             if i.zajete:
-                self.screen.blit(self.hex_zajete_surface, (i.polozenie_hex_x + self.camera.camera_x,
-                                                           i.polozenie_hex_y + self.camera.camera_y))
+                self.screen.blit(self.all_zajete_surface[f'{i.player}'][0], (i.polozenie_hex_x + self.camera.camera_x,
+                                                               i.polozenie_hex_y + self.camera.camera_y))
+                # self.screen.blit(self.hex_zajete_surface1, (i.polozenie_hex_x + self.camera.camera_x,
+                #                                            i.polozenie_hex_y + self.camera.camera_y))
             if i.odkryte:
                 self.screen.blit(self.uncover_surface, (i.polozenie_hex_x + self.camera.camera_x,
                                                            i.polozenie_hex_y + self.camera.camera_y))

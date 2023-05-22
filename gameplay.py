@@ -103,8 +103,6 @@ class Player:
             Player.ID = 0
         else:
             Player.ID += 1
-    def set_menu(self,menu: BuildingMenu):
-        self.buildMenu = menu
     def dopisz_surowiec(self, surowiec):
         for i in range(len(self.surowce_ilosc)):
             if surowiec == self.surowce_ilosc[i][0]:
@@ -138,6 +136,7 @@ class Player:
                         self.player_hex_status = False
                         self.terrain_count += 1
                         self.turn_stop = False
+                        allhex['hex',i].player = self.player_name
                         Player.next_player()
 
 
