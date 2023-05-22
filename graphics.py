@@ -28,6 +28,7 @@ class Hex(pygame.sprite.Sprite):
         self.rodzaj = self.surowiec()  # self.czy_to_surowiec()
         self.rodzaj_surowca_var = None
         self.player = 'None'
+        self.playerable = []
         
         if self.rodzaj == 'hex':
             self.rodzaj_surowca_var = None

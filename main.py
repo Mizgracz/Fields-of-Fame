@@ -135,11 +135,16 @@ class Game:
 
         self.map.texture()
         self.map.generate()
-        self.dec = Decision(screen,self.map)
+        self.alldec = []
+        
+
+        for i in range(Player.MAX):
+            self.alldec.append(Decision(screen,self.map,self.allplayers[i]))
+        
         # definiowanie eventów dla graczy
 
         for p in range(len(self.allplayers)):
-            self.dec.fupdate.start(self.allplayers[p])
+            self.alldec[p].fupdate.start(self.allplayers[p])
         
         self.allevents = []
         self.allbuildingmenu =[]
@@ -152,7 +157,7 @@ class Game:
         self.currentplayer = self.allplayers[Player.ID]
         self.currentevent = self.allevents[Player.ID]
         self.currentmenu = self.allbuildingmenu[Player.ID]
-        
+        self.currentdec = self.alldec[Player.ID]
 
 
         self.music_on = 1
@@ -291,6 +296,7 @@ class Game:
             self.currentplayer = self.allplayers[Player.ID]
             self.currentevent = self.allevents[Player.ID]
             self.currentmenu = self.allbuildingmenu[Player.ID]
+            self.currentdec = self.alldec[Player.ID]
 
             screen.fill((255, 255, 255))
             self.handle_events()
@@ -300,9 +306,9 @@ class Game:
             self.map.fog_draw(self.Fog, SCREEN_WIDTH, SCREEN_HEIGHT)
 
             if self.currentplayer.field_status:
-                self.dec.fchoice.draw()
+                self.currentdec.fchoice.draw()
             
-            self.currentplayer.zajmij_pole(self.map.allrect,self.map.allmask,self.map.allhex,self.dec) 
+            self.currentplayer.zajmij_pole(self.map.allrect,self.map.allmask,self.map.allhex,self.currentdec) 
             self.map.odkryj_pole(self.Fog)
             self.map.colision_detection_obwodka()
             self.currentevent.random_event()
@@ -315,7 +321,7 @@ class Game:
             if BuildingMenu.active:
                 self.currentmenu.draw_menu()
             if not BuildingMenu.active:
-                self.dec.click(self.currentplayer)
+                self.currentdec.click(self.currentplayer)
 
             self.klepsydra1.draw()
             if not BuildingMenu.active:
@@ -323,7 +329,7 @@ class Game:
                     if not self.currentplayer.wyb:
                         self.klepsydra1.turn(self.currentplayer)
                     if self.currentplayer.wyb and self.currentevent.results == []:
-                        self.dec.draw(self.currentplayer)
+                        self.currentdec.draw(self.currentplayer)
             self.timer.update()
 
             fps()
