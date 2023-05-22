@@ -52,60 +52,32 @@ class Game:
 
         # budynki
         allbuilding1 = [
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10)
+            BuildingItem("Targowisko","Targowisko (+20 złota na turę)",'buddynki_targowisko.png',100,10,10),
+            BuildingItem("Karczma","Karczma (+ 10 złota na ture)",'buddynki_karczma_krita.png',50,10,10),
+            BuildingItem("Koszary","Koszary (+20 wojska na turę)",'buddynki_koszary_krita.png',50,10,10),
+            BuildingItem("Kowal","Kowal  (+10 wojska na turę)",'boddynki_kowal.png',50,10,10),
+            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 50, 10, 10),
         ]
         allbuilding2 = [
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10)
+            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 100, 10, 10),
+            BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 50, 10, 10),
+            BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 50, 10, 10),
+            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 50, 10, 10),
+            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 50, 10, 10),
         ]
         allbuilding3 = [
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10)
+            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 100, 10, 10),
+            BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 50, 10, 10),
+            BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 50, 10, 10),
+            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 50, 10, 10),
+            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 50, 10, 10),
         ]
         allbuilding4 = [
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("mlyn","Stary młyn (+ 10 złota na ture)",'mlyn.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'wieza.png',50,10,10),
-            BuildingItem("wieza","Wieża strażniczą (+10 wojska na turę)",'mlyn.png',50,10,10)
+            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 100, 10, 10),
+            BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 50, 10, 10),
+            BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 50, 10, 10),
+            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 50, 10, 10),
+            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 50, 10, 10),
         ]
 
         self.allbuildingList = [allbuilding1,allbuilding2,allbuilding3,allbuilding4]
