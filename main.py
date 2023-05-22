@@ -23,6 +23,10 @@ if not os.path.exists(folder_path):
     os.makedirs(folder_path)
 
 pygame.init()
+pygame.display.set_caption("Filds of Fame")
+icon_image = pygame.image.load('texture/icon.png')
+pygame.display.set_icon(icon_image)
+
 fps_on = True
 pygame.mixer.music.load("music/main.mp3")
 pygame.mixer.music.play(-1)
@@ -131,7 +135,7 @@ class Game:
 
         self.map.texture()
         self.map.generate()
-        self.dec = Decision(screen,self.camera,self.map)
+        self.dec = Decision(screen,self.map)
         # definiowanie eventów dla graczy
 
         for p in range(len(self.allplayers)):
@@ -197,11 +201,7 @@ class Game:
             # self.save_game()
             print(f"{Camera.camera_x } {Camera.camera_y }")
         if press[pygame.K_HOME]:
-            Camera.camera_x = self.currentplayer.home_x*(-1)+600
-            Camera.camera_y = self.currentplayer.home_y*(-1)+300
-            if Camera.camera_x > 1600:
-                Camera.camera_x -= (Camera.camera_x-1600)
-            print(f"{Camera.camera_x } {Camera.camera_y }")
+            Camera.player_camera_update(self.currentplayer)
     def save_game(self):
         folder_path = "save"
         if not os.path.exists(folder_path):
@@ -284,7 +284,9 @@ class Game:
 
                 pygame.display.flip()
                 clock.tick(max_tps)
-                
+            if not Player.start_turn:
+                Camera.player_camera_update(self.allplayers[Player.ID])
+                Player.start_turn = True
             
             self.currentplayer = self.allplayers[Player.ID]
             self.currentevent = self.allevents[Player.ID]

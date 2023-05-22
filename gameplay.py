@@ -28,9 +28,11 @@ class Stats:
         pass
 
 class Player:
+    start_turn = False
     MAX = 0
     ID =0
     castle_hex = [137,137*2,137*3,137*4,137*5]
+    # castle_hex = [137*2,137*2,137*2,137*2,137*2]
     use_castle = []
     def __init__(self, name: str) -> None:
         Player.MAX += 1
@@ -68,6 +70,7 @@ class Player:
             Player.ID = 0
         else:
             Player.ID += 1
+        Player.start_turn = False
         
     def dopisz_surowiec(self, surowiec):
         for i in range(len(self.surowce_ilosc)):
@@ -91,9 +94,9 @@ class Player:
                         if allhex["hex", i].rodzaj == "budynek":
                             print("budynek")
                             # dodawanie bonusu do zarabiania
-                            if allhex["hex", i].texture == self.castle_surface:
+                            if allhex["hex", i].texture_index == -1: # zamek 
                                 self.army_count_bonus += 10
-                            elif allhex["hex", i].texture == self.willage_surface:
+                            elif allhex["hex", i].texture_index == 10: # wioska 
                                 self.gold_count_bonus += 10
                         allhex["hex", i].zajete = True
                         allhex["hex", i].field_add = False
@@ -104,12 +107,23 @@ class Player:
                         self.turn_stop = False
                         allhex['hex',i].player = self.player_name
                         Player.next_player()
+                        
 
 
 class Camera:
     camera_x = 0
     camera_y = 0
-
+    def player_camera_update(player):
+        """
+        Purpose: 
+        """
+        Camera.camera_x = player.home_x*(-1)+600
+        Camera.camera_y = player.home_y*(-1)+300
+        if Camera.camera_x > 1600:
+            Camera.camera_x -= (Camera.camera_x-1600)
+            print(f"{Camera.camera_x } {Camera.camera_y }")
+        
+    # end def
     def __init__(self):
 
         self.mouse_x = 0
@@ -314,7 +328,7 @@ class Hourglass:
 
 
 class Decision:
-    def __init__(self, screen: pygame.Surface, camera, map):
+    def __init__(self, screen: pygame.Surface, map):
 
         self.SCREEN_WIDTH = screen.get_size()[0] - 256
         self.SCREEN_HEIGHT = screen.get_size()[1]
@@ -322,7 +336,6 @@ class Decision:
         self.army_button = pygame.image.load("texture/ui/turn/wojsko_button.png").convert_alpha()
         self.gold_button = pygame.image.load("texture/ui/turn/zloto_button.png").convert_alpha()
         self.field_button = pygame.image.load("texture/ui/turn/zajmij_button.png").convert_alpha()
-        self.camera = camera
         self.screen = screen
         self.map = map
 
@@ -331,7 +344,7 @@ class Decision:
 
         self.fupdate = FieldUpdate(self.map.sprites(), self.numhex)
         
-        self.fchoice = FieldChoice(self.map.sprites(), self.screen, self.camera)
+        self.fchoice = FieldChoice(self.map.sprites(), self.screen)
 
         self.bacground_rect = self.background_image.get_rect(center=(self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2))
         self.gold_rect = self.gold_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, 230))
@@ -381,29 +394,38 @@ class FieldUpdate:
         self.quantity_hex = num
 
     def start(self,player:Player):
-        prev_index = (player.home - 1) % self.num_sprites
-        next_index = (player.home + 1) % self.num_sprites
-        c = (player.home - self.quantity_hex) % self.num_sprites
-        d = (player.home + 1 - self.quantity_hex) % self.num_sprites
-        e = (player.home + self.quantity_hex) % self.num_sprites
-        f = (player.home + self.quantity_hex + 1) % self.num_sprites
+        if player.home%2==1:
+            prev_index = (player.home - 1) % self.num_sprites
+            next_index = (player.home + 1) % self.num_sprites
+            c = (player.home - self.quantity_hex) % self.num_sprites
+            d = (player.home + 1 - self.quantity_hex) % self.num_sprites
+            e = (player.home + self.quantity_hex) % self.num_sprites
+            f = (player.home + self.quantity_hex + 1) % self.num_sprites
+        elif player.home%2 ==0:
+            prev_index = (player.home - 1) % self.num_sprites
+            next_index = (player.home + 1) % self.num_sprites
+            c = (player.home - self.quantity_hex-1) % self.num_sprites
+            d = (player.home + 1 - self.quantity_hex-1) % self.num_sprites
+            
+            e = (player.home + self.quantity_hex-1) % self.num_sprites
+            f = (player.home + self.quantity_hex ) % self.num_sprites
 
-        if not self.sprites[prev_index].zajete:
+        if not self.sprites[prev_index].zajete and self.sprites[player.home].player == player.player_name :
             self.sprites[prev_index].field_add = True
 
-        if not self.sprites[next_index].zajete:
+        if not self.sprites[next_index].zajete and self.sprites[player.home].player == player.player_name:
             self.sprites[next_index].field_add = True
 
-        if not self.sprites[c].zajete:
+        if not self.sprites[c].zajete and self.sprites[player.home].player == player.player_name:
             self.sprites[c].field_add = True
 
-        if not self.sprites[d].zajete:
+        if not self.sprites[d].zajete and self.sprites[player.home].player == player.player_name:
             self.sprites[d].field_add = True
 
-        if not self.sprites[e].zajete:
+        if not self.sprites[e].zajete and self.sprites[player.home].player == player.player_name:
             self.sprites[e].field_add = True
 
-        if not self.sprites[f].zajete:
+        if not self.sprites[f].zajete and self.sprites[player.home].player == player.player_name:
             self.sprites[f].field_add = True
 
     def new_hex(self, hex):
@@ -427,33 +449,32 @@ class FieldUpdate:
             e = (hex + self.quantity_hex) % self.num_sprites
             f = (hex + self.quantity_hex - 1) % self.num_sprites
 
-        if not self.sprites[prev_index].zajete:
+        if not self.sprites[prev_index].zajete :
             self.sprites[prev_index].field_add = True
 
-        if not self.sprites[next_index].zajete:
+        if not self.sprites[next_index].zajete :
             self.sprites[next_index].field_add = True
 
-        if not self.sprites[c].zajete:
+        if not self.sprites[c].zajete :
             self.sprites[c].field_add = True
 
-        if not self.sprites[d].zajete:
+        if not self.sprites[d].zajete :
             self.sprites[d].field_add = True
 
-        if not self.sprites[e].zajete:
+        if not self.sprites[e].zajete :
             self.sprites[e].field_add = True
 
-        if not self.sprites[f].zajete:
+        if not self.sprites[f].zajete :
             self.sprites[f].field_add = True
 
 
 class FieldChoice:
 
-    def __init__(self, sprites, screen, camera):
+    def __init__(self, sprites, screen):
         self.Field_add_surface = pygame.image.load("texture/hex/hex_add.png").convert_alpha()
         self.sprites = sprites
         self.screen = screen
         self.avalible_hex = []
-        self.camera = camera
 
     def check(self):
         self.avalible_hex = []

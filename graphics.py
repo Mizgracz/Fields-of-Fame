@@ -7,6 +7,7 @@ from gameplay import Camera, Player
 
 class Hex(pygame.sprite.Sprite):
     allsurowiec = [17 ,18 ,19 ,20 ,21 ,22 ,23 ,24]
+    allbuilding = [10,-1]
     def __init__(self, x:int, y:int, num:int, group, obw:bool, zaj:bool ,odkryj:bool,field_add:bool,tex_id:int):
         super().__init__(group)
         self.szerokosc = 130
@@ -20,12 +21,14 @@ class Hex(pygame.sprite.Sprite):
         self.field_add = field_add
         self.group = group
         self.texture_index = tex_id
+        if self.number in Player.use_castle:
+            self.zajete = True
+            self.texture_index =-1
         self.texture = self.texturing(self.group)
         self.rodzaj = self.surowiec()  # self.czy_to_surowiec()
         self.rodzaj_surowca_var = None
         self.player = 'None'
-        if self.number in Player.use_castle:
-            self.zajete = True
+        
         if self.rodzaj == 'hex':
             self.rodzaj_surowca_var = None
         else:
@@ -35,7 +38,7 @@ class Hex(pygame.sprite.Sprite):
         return self.texture
 
     def texturing(self, group):
-        if self.number in Player.use_castle:
+        if self.texture_index ==-1:
             return group.castle_surface
         if self.texture_index == 1:
             return group.grass_surface
@@ -91,6 +94,8 @@ class Hex(pygame.sprite.Sprite):
     def surowiec(self):
         if self.texture_index in Hex.allsurowiec:
             return 'surowiec'
+        elif self.texture_index in Hex.allbuilding:
+            return 'budynek'
         else:
             return 'hex'
 
@@ -156,8 +161,7 @@ class MapGenerator(pygame.sprite.Group):
         self.water_surface = pygame.image.load("texture/hex/woda_hex_1.png", ).convert_alpha()
         self.water2_surface = pygame.image.load("texture/hex/woda_hex_2.png", ).convert_alpha()
         self.water3_surface = pygame.image.load("texture/hex/woda_hex_statek.png", ).convert_alpha()
-        self.water3_surface2 = self.water3_surface
-        print(self.water3_surface == self.water3_surface2)
+        
 
         self.elements = [((self.grass_surface, 1), 20), ((self.grass2_surface, 2), 20), ((self.grass3_surface, 3), 20),
                          ((self.forest_surface, 4), 15), ((self.mountain_surface, 5), 4), ((self.water_surface, 6), 3),

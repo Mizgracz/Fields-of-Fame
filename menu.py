@@ -646,39 +646,6 @@ class SaveMenu2(object):
                 pygame.time.Clock().tick(3)
         # if self.RECT.collidepoint(pygame.mouse.get_pos()) :
 
-    def save_game(self, index):
-        import gameplay
-        print('SaveGame')
-
-        folder_path = "save"
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-
-        with open('save/map.csv', 'w') as savefile:
-            savefile.write('x;y;number;texture_index;zajete\n')
-            for h in self.game.map.sprites():
-                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.zajete}')
-                savefile.write('\n')
-        with open('save/stats.txt', 'w') as savefile:
-
-            savefile.write(f'gold_count:{Stats.gold_count}\n')
-            savefile.write(f'army_count:{Stats.army_count}\n')
-            savefile.write(f'player_hex_status:{Stats.terrain_count}\n')
-            savefile.write(f'army_count_bonus:{Stats.army_count_bonus}\n')
-            savefile.write(f'gold_count_bonus:{Stats.gold_count_bonus}\n')
-            savefile.write(f'turn_count:{Stats.turn_count}\n')
-
-        pygame.time.Clock().tick(1)
-        if self.allItem[index].name[-4:] == '.zip':
-            filename = f"save/{self.allItem[index].name}"
-        else:
-            filename = f"save/{self.allItem[index].name}.zip"
-        with zipfile.ZipFile(filename, "w") as zip:
-            zip.write("save/stats.txt")
-            zip.write("save/map.csv")
-        os.remove("save/stats.txt")
-        os.remove("save/map.csv")
-        pass
 
     def draw(self):
 
