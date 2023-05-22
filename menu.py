@@ -476,9 +476,12 @@ class Music:
 
     def draw_window(self):
         window_rect = pygame.Rect(100, 500, 200, 100)
-        pygame.draw.rect(self.screen, (0, 0, 0), window_rect, 2)
+        pygame.draw.rect(self.screen, (201, 184, 73), window_rect, 2)
 
-        text = self.font.render(str(self.value), True, (0, 0, 0))
+        inner_rect = pygame.Rect(window_rect.left + 2, window_rect.top + 2, window_rect.width - 4, window_rect.height - 4)
+        pygame.draw.rect(self.screen, (0, 0, 0), inner_rect)
+
+        text = self.font.render(str(self.value), True, (201, 184, 73))
         text_rect = text.get_rect(center=window_rect.center)
         self.screen.blit(text, text_rect)
 
@@ -506,7 +509,7 @@ class Music:
                                              arrow_size, arrow_size)
 
     def draw_slider(self, slider, button_x, button_y, button_radius):
-        pygame.draw.rect(self.screen, (128, 128, 128), slider)
+        pygame.draw.rect(self.screen, (201, 184, 73), slider)
         pygame.draw.circle(self.screen, (0, 0, 0), (button_x, button_y + 400), button_radius)
 
     def change_music(self, direction):
