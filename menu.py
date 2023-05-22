@@ -11,19 +11,19 @@ SCREEN_HEIGHT = 720
 MAP_SIZE = 30
 SWITCH_FOG = False
 PLAYER_COUNT = 1
+PLAYER_NAME =[]
 
 
 class Menu:
     status = True
     resume = False
+    new_game = False
 
-
-    def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, max_tps: int,new_game):
+    def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, max_tps: int):
         pygame.init()
         self.screen = screen
         self.clock = clock
         self.max_tps = max_tps
-        self.new_game = new_game
         Menu.status = True
         Menu.resume = False
         self.font = pygame.font.Font(None, 48)
@@ -33,8 +33,6 @@ class Menu:
         self.save_rect = pygame.Rect(SCREEN_WIDTH / 2 - 528, SCREEN_HEIGHT / 2 + 120, 255, 55)
         self.quit_rect = pygame.Rect(SCREEN_WIDTH / 2 - 528, SCREEN_HEIGHT / 2 + 235, 255, 55)
         self.background_texture = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/background.png").convert(), (SCREEN_WIDTH, SCREEN_HEIGHT))
-        self.SWITCH_FOG = SWITCH_FOG
-        self.PLAYER_COUNT = 1
         self.new_game_button_texture = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/graj_button.png").convert_alpha(),(339 * 0.769,81*0.75))
         self.new_game_marked_button_texture = pygame.transform.smoothscale(
             pygame.image.load("texture/main_menu/nowa_gra_button_red.png").convert_alpha(), (339 * 0.769, 81 * 0.75))
@@ -50,7 +48,10 @@ class Menu:
         self.save_button_texture = pygame.image.load("texture/main_menu/zapisz_button.png").convert_alpha()
         self.gameplay = False
         self.config1 = Config(screen)
-        self.MAP_SIZE = 30
+        self.MAP_SIZE = MAP_SIZE
+        self.SWITCH_FOG = SWITCH_FOG
+        self.PLAYER_COUNT = PLAYER_COUNT
+        self.PLAYER_NAME = PLAYER_NAME
         
         
         self.run()
@@ -75,7 +76,9 @@ class Menu:
                     self.MAP_SIZE = MAP_SIZE
                     self.SWITCH_FOG = SWITCH_FOG
                     self.PLAYER_COUNT = PLAYER_COUNT
-                    self.new_game = True
+                    
+                    PlayerConfig(self.screen,self.clock,self.max_tps,self.PLAYER_COUNT)
+                    
 
 
                     pygame.display.update()
@@ -174,6 +177,112 @@ class Menu:
             self.draw()
             self.clock.tick(self.max_tps)
 
+class InputBox:
+
+    def __init__(self, x, y, w, h, text=''):
+        self.text_font = pygame.font.Font(None, 16)
+        color = (233, 248, 215)
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = color
+        self.text = text
+        self.txt_surface = self.text_font.render(text, True, self.color)
+        self.active = False
+        self.score = 1
+        # Cursor declare
+        self.txt_rect = self.txt_surface.get_rect()
+        
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # If the user clicked on the input_box rect.
+            if self.rect.collidepoint(event.pos):
+                # Toggle the active variable.
+                self.active = not self.active
+            else:
+                self.active = False
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                if event.key == pygame.K_RETURN:
+                    print(self.text)
+                    global leftover
+                    leftover += self.score
+                    self.score = 0
+                    self.text = ''
+                    self.active = False
+                elif event.key == pygame.K_BACKSPACE:
+                    self.text = self.text[:-1]
+                else:
+                    self.text += event.unicode
+                    # Cursor
+
+                    
+                    # Limit characters           -20 for border width
+                    if self.txt_surface.get_width() > self.rect.w - 15:
+                        self.text = self.text[:-1]
+
+    def draw(self, screen):
+        # Blit the text.
+        screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 10))
+        # Blit the rect.
+        pygame.draw.rect(screen, self.color, self.rect, 1)
+        
+
+    def update(self):
+        # Re-render the text.
+        self.txt_surface = self.text_font.render(self.text, True, self.color)
+class NumberBox:
+    def __init__(self,screen, x, y):
+
+        self.screen = screen        
+        # Define box dimensions
+        BOX_WIDTH = 100
+        BOX_HEIGHT = 50
+
+        # Define button dimensions
+        BUTTON_WIDTH = 50
+        BUTTON_HEIGHT = 50
+        self.value = 1
+        self.rect = pygame.Rect(x, y, BOX_WIDTH, BOX_HEIGHT)
+        self.font = pygame.font.SysFont(None, 48)
+        self.button_inc = pygame.Rect(x + BOX_WIDTH, y, BUTTON_WIDTH, BUTTON_HEIGHT)
+        self.button_dec = pygame.Rect(x - BUTTON_WIDTH, y, BUTTON_WIDTH, BUTTON_HEIGHT)
+        self.font_buttons = pygame.font.SysFont(None, 32)
+
+    def draw(self):
+        pygame.draw.rect(self.screen, (200, 200, 200), self.rect)
+        text = self.font.render(str(self.value), True, (0, 0, 0))
+        text_rect = text.get_rect(center=self.rect.center)
+        self.screen.blit(text, text_rect)
+
+        pygame.draw.rect(self.screen, (150, 150, 150), self.button_inc)
+        text_plus = self.font_buttons.render("+", True, (0, 0, 0))
+        self.text_plus_rect = text_plus.get_rect(center=self.button_inc.center)
+        self.screen.blit(text_plus, self.text_plus_rect)
+
+        pygame.draw.rect(self.screen, (150, 150, 150), self.button_dec)
+        text_minus = self.font_buttons.render("-", True, (0, 0, 0))
+        self.text_minus_rect = text_minus.get_rect(center=self.button_dec.center)
+        self.screen.blit(text_minus, self.text_minus_rect)
+
+    def increment(self):
+        self.value += 1
+        return self.value
+
+    def decrement(self):
+        self.value -= 1
+        return self.value
+
+    def handle_event(self,eventlist):
+        global PLAYER_COUNT
+        for event in eventlist:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if pygame.Rect.collidepoint(self.button_dec, mouse_pos):
+                    if self.value is not 1:
+                        PLAYER_COUNT = self.decrement()
+                if pygame.Rect.collidepoint(self.button_inc, mouse_pos):
+                    if self.value is not 4:
+                        PLAYER_COUNT = self.increment()
 
 class OptionBox():
 
@@ -230,7 +339,85 @@ class OptionBox():
                     return self.active_option
         return -1
 
+class PlayerConfig:
+    Active = True
+    def __init__(self,screen:pygame.Surface,clock: pygame.time.Clock, max_tps: int,Player_count:int) -> None:
+        self.screen = screen
+        self.clock =clock
+        self.max_tps = max_tps
+        self.allPlayers = []
+        self.Background = pygame.image.load("texture/main_menu/config/Background.png")
+        self.Button_Back = pygame.image.load("texture/main_menu/config/Button_Back.png")
+        self.Button_Start = pygame.image.load("texture/main_menu/config/Button_Start.png")
+        self.Button_Back_Rect = self.Button_Back.get_rect(center=(80, 40))
+        self.Button_Start_Rect = self.Button_Start.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 80))
+        self.Active = False
+        self.font = pygame.font.Font(None, 36)
+        self.Player_count = Player_count
+        self.input_boxes =[]
+        for i in range(1,Player_count+1):
+            self.input_boxes.append(InputBox(300,223+(50*i),250,36))
+        self.run()
+    def draw(self):
+        self.screen.blit(self.Background,(0,0))
+        self.screen.blit(self.Button_Back,self.Button_Back_Rect)
+        self.screen.blit(self.Button_Start,self.Button_Start_Rect)
+        for box in self.input_boxes:
+            box.update()
+        for box in self.input_boxes:
+            box.draw(self.screen)
+        pass
+    def handle_events(self):
+        global PLAYER_NAME
+        self.event = pygame.event.get()
+        for event in self.event:
+            for box in self.input_boxes:
+                box.handle_event(event)
+            pos = pygame.mouse.get_pos()
+            if event.type == pygame.QUIT:
+                sys.exit()
 
+            elif event.type == pygame.MOUSEBUTTONUP:
+
+                if self.Button_Start_Rect.collidepoint(pos) and PlayerConfig.Active == True:
+
+                    self.gameplay = True
+                    PlayerConfig.Active = False
+                    self.MAP_SIZE = MAP_SIZE
+                    self.SWITCH_FOG = SWITCH_FOG
+                    self.PLAYER_COUNT = PLAYER_COUNT
+                    
+                    for box in self.input_boxes:
+                        PLAYER_NAME += [box.text]
+                    self.PLAYER_NAME = PLAYER_NAME
+
+
+                    PlayerConfig(self.screen,self.clock,self.max_tps,self.PLAYER_COUNT)
+                    Menu.new_game = True
+                    pygame.display.update()
+
+                elif self.Button_Back_Rect.collidepoint(pos):
+                    PlayerConfig.Active = False
+                    Menu.resume = False
+                    Menu.status = True
+
+                
+    def run(self):
+        global PLAYER_NAME
+        while PlayerConfig.Active:
+            choice = self.handle_events()
+            pygame.display.update()
+            if choice == 'new_game':
+                PlayerConfig.Active = False
+                PLAYER_NAME = self.allPlayers
+            elif choice == 'quit':
+                sys.exit(0)
+            if choice:
+                return choice
+            self.draw()
+            self.clock.tick(self.max_tps)
+
+        pass
 class Config:
     def __init__(self, screen: pygame.surface):
         self.screen = screen
@@ -242,6 +429,7 @@ class Config:
         self.Active = False
         self.font = pygame.font.Font(None, 36)
         self.text_map_size = self.font.render("Wielkość mapy : ", True, (255, 255, 255))
+        self.text_player = self.font.render("Ilość graczy : ", True, (255, 255, 255))
         self.map_size = OptionBox(
             300, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30),
             ["Mała (30x30)", "Średnia (50x50)", "Duża (60x60)"])
@@ -249,20 +437,23 @@ class Config:
         self.fog_on_off = OptionBox(
             700, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30),
             ["Wyłącz", "Włącz"])
-
+        self.Player_count_box = NumberBox(self.screen,350,350)
     def draw(self, event):
         global MAP_SIZE
 
         self.screen.blit(self.Background, (0, 0))
+        self.Player_count_box.draw()
         self.screen.blit(self.Button_Back, self.Button_Back_Rect)
         self.screen.blit(self.Button_Start, self.Button_Start_Rect)
         self.screen.blit(self.text_map_size, (60, 240))
+        self.screen.blit(self.text_player, (60, 360))
         self.screen.blit(self.text_fog_on_off, (525, 240))
         self.map_size.draw(self.screen)
         self.fog_on_off.draw(self.screen)
         self.event_list = event
         self.Size()
         self.Switching_Fog()
+        self.Player_count_box.handle_event(self.event_list)
 
         pygame.display.update()
 
@@ -284,8 +475,7 @@ class Config:
         elif self.selected_option == 1:
             SWITCH_FOG = True
 
-    def Player_count(self):
-        pass
+    
 
 
 #################################################################################################################

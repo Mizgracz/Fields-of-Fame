@@ -36,7 +36,7 @@ class Player:
     use_castle = []
     def __init__(self, name: str) -> None:
         Player.MAX += 1
-
+        self.confirm = False
         self.buildMenu = None 
         self.home = random.choice(Player.castle_hex)
         self.home_x = 0
@@ -106,7 +106,7 @@ class Player:
                         self.terrain_count += 1
                         self.turn_stop = False
                         allhex['hex',i].player = self.player_name
-                        Player.next_player()
+                        self.confirm = True
                         
 
 
@@ -312,6 +312,7 @@ class Hourglass:
     def turn(self,player):
         collision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
+    
         if self.hourglass_rect.collidepoint(collision) and mouse_pressed[0]:
             if player.wyb == False and not player.turn_stop:
                 player.wyb = True
@@ -356,10 +357,13 @@ class Decision:
         self.background_image.blit(self.field_button, (self.field_button.get_size()[0] / 4 - 2, 250))
 
     def draw(self,player):
-        
-        if player.wyb:
-            player.camera_stop = True
-            self.screen.blit(self.background_image, self.bacground_rect)
+        if player.confirm:
+            player.confirm = False
+            Player.next_player()
+        else:
+            if player.wyb:
+                player.camera_stop = True
+                self.screen.blit(self.background_image, self.bacground_rect)
 
     def click(self,player):
         colision = pygame.mouse.get_pos()
@@ -368,13 +372,13 @@ class Decision:
             player.wyb = False
             player.camera_stop = False
             player.gold_count += 10 + player.gold_count_bonus
-            Player.next_player()
+            player.confirm = True
 
         if self.army_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
             player.wyb = False
             player.camera_stop = False
             player.army_count += 10 + player.army_count_bonus
-            Player.next_player()
+            player.confirm = True
 
         if self.field_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
             player.wyb = False

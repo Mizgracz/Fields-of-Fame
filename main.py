@@ -45,10 +45,10 @@ def fps():
 class Game:
     def __init__(self):
         pygame.init()
-        self.new_game = False
-        while not self.new_game :
-            self.start_menu = Menu(screen, clock, max_tps,self.new_game)  # wyświetlanie i obsługa menu
-            self.new_game = self.start_menu.new_game
+        while not Menu.new_game :
+            self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
+            
+        
 
         # budynki
         allbuilding1 = [
@@ -113,6 +113,7 @@ class Game:
         self.size = self.start_menu.MAP_SIZE
         self.Fog = self.start_menu.SWITCH_FOG
         self.PlayerCount = self.start_menu.PLAYER_COUNT
+        self.PlayerName = self.start_menu.PLAYER_NAME
 
         self.camera = Camera()
         
@@ -125,11 +126,13 @@ class Game:
 
         # gracz
         self.allplayers = []
+        for name in self.PlayerName:
+            self.allplayers.append(Player(name))
         # for dla stworzenia graczy
-        self.allplayers.append(Player("Lucyferiusz"))
-        self.allplayers.append(Player("Patry"))
-        self.allplayers.append(Player("Kacper"))
-        self.allplayers.append(Player("Maciej"))
+        # self.allplayers.append(Player("Lucyferiusz"))
+        # self.allplayers.append(Player("Patry"))
+        # self.allplayers.append(Player("Kacper"))
+        # self.allplayers.append(Player("Maciej"))
 
         self.map = MapGenerator(self.size, self.size, screen, self.camera,self.allplayers)
 
@@ -331,7 +334,7 @@ class Game:
                     if self.currentplayer.wyb and self.currentevent.results == []:
                         self.currentdec.draw(self.currentplayer)
             self.timer.update()
-
+            
             fps()
             pygame.display.flip()
             clock.tick(max_tps)
