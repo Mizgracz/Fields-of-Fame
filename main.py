@@ -144,7 +144,7 @@ class Game:
         self.allevents = []
         self.allbuildingmenu =[]
         for e in range(len(self.allplayers)):
-            self.allevents.append(EventMenagment(screen,self.allplayers[e]))
+            self.allevents.append(EventMenagment(screen, self.allplayers[e]))
             self.allevents[e].start_event_list()
             self.allbuildingmenu.append(BuildingMenu(screen,self.allbuildingList[e],screen.get_width()/2,500,int(0.25*screen.get_width()),int(0.2*screen.get_height())))
 
@@ -307,7 +307,7 @@ class Game:
             self.map.colision_detection_obwodka()
             self.currentevent.random_event()
             self.map.rysuj_obwodke_i_zajete()
-
+            self.currentevent.check_result()
 
 
             self.up_bar.draw(self.currentplayer)
@@ -319,10 +319,11 @@ class Game:
 
             self.klepsydra1.draw()
             if not BuildingMenu.active:
-                if not self.currentplayer.wyb:
-                    self.klepsydra1.turn(self.currentplayer)
-                if self.currentplayer.wyb:
-                    self.dec.draw(self.currentplayer)
+                if not Stats.wyb:
+                    if not self.currentplayer.wyb:
+                        self.klepsydra1.turn(self.currentplayer)
+                    if self.currentplayer.wyb and self.currentevent.results == []:
+                        self.dec.draw(self.currentplayer)
             self.timer.update()
 
             fps()

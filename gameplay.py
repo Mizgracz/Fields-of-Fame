@@ -3,7 +3,7 @@ import pygame
 import time, os
 import random
 from menu import *
-
+from event_description import *
 
 item_offset = pygame.Vector2(0, 115)
 
@@ -64,7 +64,7 @@ class Player:
                               ["sawmill", 0, "drewno: "], ["grain", 0, "zboże: "]]
     
     
-    
+    @staticmethod
     def next_player():
         if Player.ID == Player.MAX-1:
             Player.ID = 0
@@ -570,27 +570,23 @@ class SideMenu:
         self.surowce_staty_blituj(player)
 
 
-# EVENTY
 
+# EVENTY
 class EventMenagment:
     def __init__(self, screen: pygame.Surface, player):
         self.chance = 0
         self.screen = screen
-        self.player = player
         self.turn = player.turn_count
+        self.player = player
         self.events = []
-
+        self.results = []
+        self.placeholder = "texture/Events/placeholder.png"
     def start_event_list(self):
-        # najemnicy
-        opisy = ["Odrzuć ich oferte",
-                 "Na moich ziemiach nie powinno być\nnajemników wyślij wojsko żeby ich zabić",
-                 "Zrekrutuj najemników i zapłać 200 złota"]
-        event_text = " Na granicy Twojego królestwa pojawia się grupa najemników, \n którzy oferują swoje usługi w zamian za złoto.\n " \
-                     "Mają oni reputację twardych wojowników ale są też znani z brutalności i małych rozbojów.\n"
 
-        najemnicy = Event(self.screen, event_text, "texture/Events/najemnicy_img.png", 3, opisy, "najemnicy", self)
-
+        najemnicy = Event(self.screen, opis_najemnicy, "texture/Events/najemnicy_img.png", 3, select_najemnicy, "Najemnicy", self)
         self.events.append(najemnicy)
+        ruiny = Event(self.screen,opis_ruiny,self.placeholder, 2, select_ruiny, "Ruiny", self)
+        self.events.append(ruiny)
 
     def random_event(self):
 
@@ -609,6 +605,15 @@ class EventMenagment:
 
                     self.turn = self.player.turn_count
 
+    def add_result(self, result):
+        self.results.append(result)
+
+    def check_result(self):
+        if not self.results == []:
+            self.results[0].execute()
+            if self.results[0].stop:
+                self.results = []
+
 
 class Event:
     def __init__(self, ekran: pygame.Surface, opis: str, grafika, ilosc_opcji: int, opisy_opcji: str, nazwa: str,
@@ -619,38 +624,52 @@ class Event:
         self.ilosc_opcji = ilosc_opcji
         self.opisy_opcji = opisy_opcji
         self.nazwa = nazwa
-        self.Wybor = None
         self.managment = managment
+
 
     def execute(self):
 
-        Render = EventRender(self.ekran, self.opis, self.grafika)
+        Render = EventRender(self.ekran, self.opis, self.grafika,self.nazwa)
         Render.draw()
-        Choose = EventOptions(self.ilosc_opcji, self.opisy_opcji, self.ekran)
-        Choose.draw()
-        self.Wybor = Choose.colision_check()
+        self.Choose = EventOptions(self.ilosc_opcji, self.opisy_opcji, self.ekran)
+        self.Choose.draw()
+        self.Wybor = self.Choose.colision_check(None)
         getattr(self, self.nazwa)(self.managment)
 
-    def najemnicy(self, managment):
+
+
+
+    def Najemnicy(self, managment):
 
         if self.Wybor == 1:
             x = random.randint(0, 99)
             if x < 60:
                 self.managment.player.gold_count += 100  # Zabij ich
                 self.managment.player.army_count -= 10
-
+                opis = " Udało ci się zabić najemników niewielkim\n nakładem sił ! \n\n Zrabowałeś ich złoto otrzymujesz : \n\n +100 złota!\n\n -10 Wojska"
+                Result = EventResults(opis,self.ekran,self.managment)
+                managment.add_result(Result)
             else:
                 self.managment.player.army_count -= 50
+                opis = " Niestety Najemnicy okazali sie zbyt mocni,\n zdołali stawić opór twoim żołnierzom  \n\n Tracisz : \n\n - 50 Wojska"
+                Result = EventResults(opis, self.ekran,self.managment)
+                managment.add_result(Result)
+
 
         if self.Wybor == 2:
             self.managment.player.gold_count -= 200  # Zaplać im
             self.managment.player.army_count += 100
 
+            opis = " Wynajęci najemnicy zasilają twoje szeregi! \n\n Zyskujesz : \n\n + 100 Wojska!\n\n Tracisz : \n\n - 200 złota"
+            Result = EventResults(opis, self.ekran,self.managment)
+            managment.add_result(Result)
+
+
             x = random.randint(0, 99)
             if x < 30:
-                event_text = "Najemnicy których wcześniej zrekrutowałeś za złoto postanowili cię oszukać,\n ukradli twoje złoto i uciekli !"
+
                 opisy = [" OK "]
-                najemnicy_thief = Event(managment.screen, event_text, "texture/Events/najemnicy_img.png", 1, opisy,
+                najemnicy_thief = Event(managment.screen, opis_najemnicy_thief, "texture/Events/najemnicy_img.png", 1, opisy,
                                         "najemnicy_thief", managment)
                 managment.events.append(najemnicy_thief)
 
@@ -659,19 +678,34 @@ class Event:
             self.managment.player.army_count -= 100
             self.managment.player.gold_count -= 50
 
+    def Ruiny(self, managment):
+        if self.Wybor == 0:
+            x = random.randint(0, 99)
+            if x < 50:
+                self.managment.player.army_count -= 25
+                opis = " Niestety w ruinach chyba czaił sie jakiś \n potwór gdy obserwowałeś sytuacje z \n daleka dosięgły cię jedynie krzyki twoich \n żołnierzy którzy już nie wrócili\n\n\n Tracisz : - 25 wojska "
+                Result = EventResults(opis,self.ekran,self.managment)
+                managment.add_result(Result)
+            if x > 50:
+                self.managment.player.gold_count += 100
+                opis = " Po całym dniu przeszukiwaniu ruin twoi\n żołnierze znaleźli trochę kosztowności \n\n\n Zyskujesz : + 100 złota !"
+                Result = EventResults(opis, self.ekran,self.managment)
+                managment.add_result(Result)
+
+
 
 class EventRender:
-    def __init__(self, screen: pygame.Surface, opis: str, grafika):
+    def __init__(self, screen: pygame.Surface, opis: str, grafika,nazwa):
         self.screen = screen
         screen_x, screen_y = self.screen.get_size()
         self.font = pygame.font.SysFont("cambria", 20)
-
+        self.font2 = pygame.font.SysFont("cambria", 25)
         # wizualne rzeczy config
         wysokosc_background = screen_y * (92 / 100)
         szerokosc_background = screen_x * (64 / 100)
         wysokosc_img = wysokosc_background * (60 / 100)
         szerokosc_img = szerokosc_background * (57 / 100)
-
+        self.nazwa = nazwa
         # pozycja
         self.x = (screen_x / 2) - (szerokosc_background / 2)
         self.y = (screen_y / 2) - (wysokosc_background / 2)
@@ -694,8 +728,13 @@ class EventRender:
         odstep = 0
         for linia in self.opis_linie:
             tekst = self.font.render(linia, True, 'white')
+
             self.screen.blit(tekst, (self.opis_posx, self.opis_posy + odstep))
             odstep += 20
+        title = self.font2.render("Event : ", True, 'white')
+        title2 = self.font2.render(self.nazwa, True, 'white')
+        self.screen.blit(title, (self.x * 2.20, self.y+45 ))
+        self.screen.blit(title2, (self.x * 2.55, self.y + 45))
 
 
 class EventOptions:
@@ -739,7 +778,10 @@ class EventOptions:
                 self.rects.append(img_rect)
                 self.y += self.option_high
 
-    def colision_check(self):
+
+    def colision_check(self,Results):
+
+
 
         while not self.option_selected:
             pygame.event.get()
@@ -749,6 +791,43 @@ class EventOptions:
 
             for i in range(len(self.rects)):
                 if self.rects[i].collidepoint(collision) and mouse_pressed[0]:
-                    print("kolizja")
+
                     self.option_selected = True
                     return i
+
+
+class EventResults:
+
+    def __init__(self, opis, screen, managment):
+        self.background_result = pygame.transform.scale(pygame.image.load("texture/Events/Gui_eventy_wynik_pusty.png"),(1080/2.5,1200/2.5))
+        self.opis = opis
+        self.screen = screen
+        self.font = pygame.font.SysFont("cambria", 20)
+        self.opis_linie = self.opis.split('\n')
+        self.stop = False
+        self.managment = managment
+
+    def execute(self):
+        self.managment.player.turn_stop = True
+        screen_x, screen_y = self.screen.get_size()
+        background_rect = self.background_result.get_rect()
+        background_x = (screen_x - background_rect.width) // 2
+        background_y = (screen_y - background_rect.height) // 2
+        self.rect = pygame.draw.rect(self.screen, "red", (background_x + 30, background_y * 4.23, 369, 50))
+        self.screen.blit(self.background_result, (background_x, background_y))
+
+        odstep = 0
+
+
+        for linia in self.opis_linie:
+            tekst = self.font.render(linia, True, 'white')
+
+            self.screen.blit(tekst, (background_x*1.08, background_y*2 + odstep))
+            odstep += 20
+
+        collision = pygame.mouse.get_pos()
+        mouse_pressed = pygame.mouse.get_pressed()
+
+        if self.rect.collidepoint(collision) and mouse_pressed[0]:
+            self.stop = True
+            self.managment.player.turn_stop = False
