@@ -509,6 +509,7 @@ class FieldChoice:
 
     def __init__(self, sprites, screen,player:Player):
         self.Field_add_surface = pygame.image.load("texture/hex/hex_add.png").convert_alpha()
+        self.Field_add_surface.set_alpha(100)
         self.sprites = sprites
         self.screen = screen
         self.player = player
