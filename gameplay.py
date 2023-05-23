@@ -964,3 +964,113 @@ class ResourceSellStats:
             text_y += text_spacing
 
 
+class ResourceSell:
+    active = False
+    def __init__(self, screen,player:Player):
+        self.screen = screen
+        self.background = pygame.transform.smoothscale(pygame.image.load("texture/ui/Resources/resources_background_no_button.png").convert_alpha(),(1000/1.4,800/1.4))
+        self.button = pygame.transform.smoothscale(pygame.image.load("texture/ui/Resources/button sprzedaj.png").convert_alpha(),
+                                                      (250 , 50 ))
+        self.player = player
+        self.screen_rect = screen.get_rect()
+        self.font = pygame.font.Font(None, 30)
+        self.down_arrow = pygame.transform.smoothscale(pygame.image.load("texture/ui/Resources/down_arrow.png").convert_alpha(),(80,40))
+        self.up_arrow = pygame.transform.smoothscale(
+            pygame.image.load("texture/ui/Resources/up_arrow.png").convert_alpha(), (80, 40))
+        self.Resource_List = []
+        self.clay_texture =  pygame.image.load("texture/ui/Resources/glina.png")
+        self.diax_texture = pygame.image.load("texture/ui/Resources/diax.png")
+        self.iron_texture = pygame.image.load("texture/ui/Resources/zelazo.png")
+        self.gold_texture = pygame.image.load("texture/ui/Resources/zloto.png")
+        self.fish_texture = pygame.image.load("texture/ui/Resources/rybba.png")
+        self.wood_texture = pygame.image.load("texture/ui/Resources/rybba.png")
+        self.grain_texture = pygame.image.load("texture/ui/Resources/zboze.png")
+
+        self.resource_start()
+
+    def resource_start(self):
+        clay = Resource( 3,self.clay_texture,self.up_arrow,self.down_arrow,self.button,self.player)
+        self.Resource_List.append(clay)
+        diax = Resource(30, self.diax_texture, self.up_arrow, self.down_arrow, self.button,self.player)
+        self.Resource_List.append(diax)
+        rocks = Resource(6, self.rocks_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        self.Resource_List.append(rocks)
+        iron = Resource(10, self.iron_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        self.Resource_List.append(iron)
+        gold = Resource(20, self.gold_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        self.Resource_List.append(gold)
+        # fish = Resource(20, self.fish_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        # self.Resource_List.append(fish)
+        # wood = Resource(20, self.wood_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        # self.Resource_List.append(wood)
+        # grain = Resource(20, self.grain_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        # self.Resource_List.append(grain)
+
+    def draw(self):
+        if ResourceSell.active:
+            background_rect = self.background.get_rect()
+            background_rect.center = self.screen_rect.center
+            self.screen.blit(self.background, background_rect)
+            for i in range(len(self.Resource_List)):
+                self.Resource_List[i].draw(self.screen,300,150+ 60*i)
+                self.Resource_List[i].check()
+
+class Resource:
+    ID = 0
+    def __init__(self, prize, graphics, up_arrow, down_arrow, sell_button,player):
+        Resource.ID += 1
+        self.ID = Resource.ID-1
+        self.prize = prize
+        self.font = pygame.font.Font(None, 30)
+        self.prize_text = self.font.render("Cena : " + str(prize), True, "white")
+        self.count = 0
+        self.player = player
+        self.graphics = graphics
+        self.up_arrow = up_arrow
+        self.down_arrow = down_arrow
+        self.sell_button = sell_button
+        self.x = 0
+        self.y_add = 0
+        self.up_rect = self.up_arrow.get_rect()
+        self.down_rect = self.down_arrow.get_rect()
+        self.sell_rect = self.sell_button.get_rect()
+
+    def draw(self, screen, x, y):
+        self.y = y
+        self.x = x
+        screen.blit(self.graphics, (self.x, self.y))
+        screen.blit(self.prize_text, (self.x+175, self.y+15))
+        self.up_rect = self.up_arrow.get_rect()  # Zaktualizowanie wartości self.up_rect
+        self.up_rect.topleft = (self.x + 270, self.y )  # Przesunięcie prostokąta na odpowiednie współrzędne
+        screen.blit(self.up_arrow, self.up_rect.topleft)  # Rysowanie self.up_arrow zaktualizowanym prostokątem
+        self.count_text = self.font.render(str(self.count), True, "white")
+        screen.blit(self.count_text, (self.x + 330, self.y + 15))
+        self.down_rect = self.down_arrow.get_rect()
+        self.down_rect.topleft = (self.x + 320, self.y )
+        screen.blit(self.down_arrow, self.down_rect.topleft)
+
+        self.sell_rect = self.sell_button.get_rect()
+        self.sell_rect.topleft = (self.x +410, self.y)
+        screen.blit(self.sell_button, self.sell_rect)
+
+
+    def check(self):
+
+        collision = pygame.mouse.get_pos()
+
+
+
+        mouse_pressed = pygame.mouse.get_pressed()
+        if self.up_rect.collidepoint(collision) and mouse_pressed[0]:
+            if self.count < self.player.surowce_ilosc[self.ID][1]:
+                self.count += 1
+            pygame.time.Clock().tick(10)
+        if self.down_rect.collidepoint(collision) and mouse_pressed[0]:
+            if self.count > 0:
+                self.count -=1
+                pygame.time.Clock().tick(10)
+        if self.sell_rect.collidepoint(collision) and mouse_pressed[0]:
+            if self.count > 0 :
+                self.player.surowce_ilosc[self.ID][1] -= self.count
+                self.player.gold_count += self.count * self.prize
+                self.count = 0

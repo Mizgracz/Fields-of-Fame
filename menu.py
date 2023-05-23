@@ -104,6 +104,7 @@ class Menu:
 
                         print("new game")
                         return 'new_game'
+                    
 
 
                 elif self.config1.Button_Back_Rect.collidepoint(pos):
@@ -127,6 +128,10 @@ class Menu:
 
                     print('save')
                     return 'save_game'
+                elif self.option_rect.collidepoint(pos):
+                    button_sound.play()
+                    print("OPCJE")
+                    return 'game_options'
 
     def draw(self):
 
@@ -183,12 +188,60 @@ class Menu:
             if choice == 'save_game':
                 SaveMenu.active = True
                 Menu.status = False
+            if choice == 'game_options':
+                Gameconfig.Active = True
+                Menu.status = False
+
             elif choice == 'quit':
                 sys.exit(0)
             if choice:
                 return choice
             self.draw()
             self.clock.tick(self.max_tps)
+class Gameconfig:
+    Active = False
+    def __init__(self, s2, music):
+        self.screen = s2
+        self.music_config = music
+        self.Button_Back_conf = pygame.image.load("texture/main_menu/gameconf/button_back.png")
+        self.Button_Fullscreen = pygame.image.load("texture/main_menu/gameconf/button_fullscreen.png")
+        self.background_image = pygame.image.load("texture/main_menu/gameconf/background.png")
+        self.Button_Window = pygame.image.load("texture/main_menu/gameconf/button_window.png")
+        self.Button_res1366x768= pygame.image.load("texture/main_menu/gameconf/button_res_1366x768.png")
+        self.Button_res1600x900= pygame.image.load("texture/main_menu/gameconf/button_res_1600x900.png")
+        self.Button_res1920x1080= pygame.image.load("texture/main_menu/gameconf/button_res_1920x1080.png")
+        self.Button_res1920x1200= pygame.image.load("texture/main_menu/gameconf/button_res_1920x1200.png")
+        self.scale_background = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.Background = self.scale_background
+        self.Button_Back_Rect_conf = self.Button_Back_conf.get_rect(center=(170, 60))
+        self.Button_Fullscreen_Rec = self.Button_Fullscreen.get_rect(center=(170, 180))
+        self.Button_Window_Rec = self.Button_Window.get_rect(center=(480, 180))
+        self.Button_res1366x768_Rec = self.Button_res1366x768.get_rect(center=(170, 300))
+        self.Button_res1600x900_Rec = self.Button_res1600x900.get_rect(center=(480, 300))
+        self.Button_res1920x1080_Rec = self.Button_res1920x1080.get_rect(center=(790, 300))
+        self.Button_res1920x1200_Rec = self.Button_res1920x1200.get_rect(center=(1100, 300))
+        
+        self.font = pygame.font.Font(None, 36)
+
+
+    def draw(self,event):
+        self.screen.blit(self.Background, (0, 0))
+        self.screen.blit(self.Button_Back_conf, self.Button_Back_Rect_conf)
+        self.screen.blit(self.Button_Fullscreen, self.Button_Fullscreen_Rec)
+        self.screen.blit(self.Button_Window, self.Button_Window_Rec)
+        self.screen.blit(self.Button_res1366x768, self.Button_res1366x768_Rec)
+        self.screen.blit(self.Button_res1600x900, self.Button_res1600x900_Rec)
+        self.screen.blit(self.Button_res1920x1080, self.Button_res1920x1080_Rec)
+        self.screen.blit(self.Button_res1920x1200, self.Button_res1920x1200_Rec)
+        self.music_config.draw_window()
+        self.music_config.draw_arrows()
+        slider = pygame.Rect(50, 650, 300, 20)
+        slider_button_x = 50 + int(300 * self.music_config.volume)
+        slider_button_y = 250 + 20 // 2
+        slider_button_radius = 10
+        self.music_config.draw_slider(slider, slider_button_x, slider_button_y, slider_button_radius)
+
+        pygame.display.update()
 
 class InputBox:
     ID = 0

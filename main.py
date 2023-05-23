@@ -87,7 +87,7 @@ class Game:
         self.PlayerCount = self.start_menu.PLAYER_COUNT
         self.PlayerName = self.start_menu.PLAYER_NAME
 
-        self.resource = ResourceSell(screen)
+        
         self.camera = Camera()
         
         self.up_bar = UpBar(screen)
@@ -137,7 +137,7 @@ class Game:
 
 
         self.music_on = 1
-
+        self.resource = ResourceSell(screen,self.currentplayer)
         self.loadmenu = LoadMenu(screen, self)
         self.savemenu = SaveMenu2(screen, self)
 
