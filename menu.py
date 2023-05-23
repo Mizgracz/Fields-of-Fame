@@ -13,11 +13,16 @@ SWITCH_FOG = False
 PLAYER_COUNT = 1
 PLAYER_NAME =[]
 
-
+pygame.mixer.init()
 class Menu:
     status = True
     resume = False
     new_game = False
+
+    button_sound_save= pygame.mixer.Sound('music/music_ambient/save.mp3')
+    button_sound_save.set_volume(1.0)
+    button_sound_load = pygame.mixer.Sound('music/music_ambient/load.mp3')
+    button_sound_load.set_volume(1.0)
 
     def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, max_tps: int):
         pygame.init()
@@ -58,6 +63,10 @@ class Menu:
 
 
     def handle_events(self):
+        pygame.mixer.init()
+        button_sound = pygame.mixer.Sound('music/music_ambient/button_sound.mp3')
+        button_sound.set_volume(1.0)
+
         self.event = pygame.event.get()
         for event in self.event:
             pos = pygame.mouse.get_pos()
@@ -67,7 +76,7 @@ class Menu:
                 return 'quit'
 
             elif event.type == pygame.MOUSEBUTTONUP:
-
+                button_sound.play()
                 if self.config1.Button_Start_Rect.collidepoint(pos) and self.config1.Active == True:
                     PlayerConfig.Active = True
                     self.gameplay = True
@@ -86,11 +95,11 @@ class Menu:
 
                 elif self.new_game_rect.collidepoint(pos):
                     if Menu.resume:
-
+                        button_sound.play()
 
                         return 'resume'
                     else:
-
+                        button_sound.play()
                         Menu.resume = True
 
                         print("new game")
@@ -98,15 +107,18 @@ class Menu:
 
 
                 elif self.config1.Button_Back_Rect.collidepoint(pos):
+                    button_sound.play()
                     self.config1.Active = False
                     Menu.resume = False
                     Menu.status = True
 
                 elif self.quit_rect.collidepoint(pos):
+                    button_sound.play()
                     Menu.status = False
                     return 'quit'
 
                 elif self.load_rect.collidepoint(pos):
+                    button_sound.play()
                     Menu.status = False
                     print('load')
                     return 'load_game'
@@ -179,6 +191,8 @@ class Menu:
 
 class InputBox:
     ID = 0
+    button_sound = pygame.mixer.Sound('music/music_ambient/button_sound.mp3')
+    button_sound.set_volume(1.0)
     def __init__(self, x, y, w, h, text=''):
         InputBox.ID += 1
         self.ID = InputBox.ID
@@ -198,6 +212,7 @@ class InputBox:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             # If the user clicked on the input_box rect.
+            InputBox.button_sound.play()
             if self.rect.collidepoint(event.pos):
                 # Toggle the active variable.
                 self.active = not self.active
@@ -207,10 +222,7 @@ class InputBox:
             if self.active:
                 if event.key == pygame.K_RETURN:
                     print(self.text)
-                    global leftover
-                    leftover += self.score
-                    self.score = 0
-                    self.text = ''
+
                     self.active = False
                 elif event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]
@@ -218,7 +230,7 @@ class InputBox:
                     self.text += event.unicode
                     # Cursor
 
-                    
+                    InputBox.button_sound.play()
                     # Limit characters           -20 for border width
                     if self.txt_surface.get_width() > self.rect.w - 15:
                         self.text = self.text[:-1]

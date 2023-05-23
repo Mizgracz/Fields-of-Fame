@@ -30,7 +30,7 @@ pygame.display.set_icon(icon_image)
 fps_on = True
 pygame.mixer.music.load("music/main.mp3")
 pygame.mixer.music.play(-1)
-pygame.mixer.music.set_volume(1)
+pygame.mixer.music.set_volume(0.5)
 
 
 def fps():

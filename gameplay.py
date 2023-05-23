@@ -330,8 +330,9 @@ class Hourglass:
     def turn(self,player):
         collision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
-    
+
         if self.hourglass_rect.collidepoint(collision) and mouse_pressed[0]:
+            Hourglass.button_sound_hourglass.play()
             if player.wyb == False and not player.turn_stop:
                 player.wyb = True
                 player.turn_count += 1
@@ -446,10 +447,12 @@ class FieldUpdate:
             f = (player.home + self.quantity_hex ) % self.num_sprites
 
         if not self.sprites[prev_index].zajete and self.sprites[player.home].player == player.player_name:
+            FieldUpdate.sound_diamond.play()
             self.sprites[prev_index].field_add = True
             self.sprites[prev_index].playerable += [player.player_name]
 
         if not self.sprites[next_index].zajete and self.sprites[player.home].player == player.player_name:
+            FieldUpdate.sound_diamond.play()
             self.sprites[next_index].field_add = True
             self.sprites[next_index].playerable += [player.player_name]
         
