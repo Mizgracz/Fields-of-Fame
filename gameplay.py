@@ -31,7 +31,7 @@ class Player:
     start_turn = False
     MAX = 0
     ID =0
-    castle_hex = [137,137*2,137*3,137*4,137*5]
+    castle_hex = [137,137*2,137*5,137*6]
     # castle_hex = [137*2,137*2,137*2,137*2,137*2]
     use_castle = []
     def __init__(self, name: str) -> None:
@@ -54,7 +54,7 @@ class Player:
         self.item_offset = pygame.Vector2(0, 115)
         
         self.gold_count = 0
-        self.army_count = 0
+        self.army_count = 100
         self.terrain_count = 1
         self.turn_count = 1
         self.army_count_bonus = 0
@@ -94,7 +94,23 @@ class Player:
                         if allhex["hex", i].rodzaj == "budynek":
                             print("budynek")
                             # dodawanie bonusu do zarabiania
-                            if allhex["hex", i].texture_index == -1: # zamek 
+                            if allhex["hex", i].texture_index == -2: # ruiny 
+                                enemy = random.randint(10,50)
+                                self.army_count += (self.army_count-enemy if enemy > self.army_count else self.army_count-enemy )
+                                if self.army_count > enemy:
+                                    self.gold_count += 10*random.randint(1,25)
+                                self.army_count_bonus += 10
+                            if allhex["hex", i].texture_index == -3: # oboz 
+                                enemy = random.randint(10,50)
+                                self.army_count += (self.army_count-enemy if enemy > self.army_count else self.army_count-enemy )
+                                if self.army_count > enemy:
+                                    self.gold_count += 10*random.randint(1,3)
+                                    allhex["hex", i].texture_index = 10
+                                    allhex["hex", i].update_texture()
+                                    self.gold_count_bonus +=10
+                                    self.surowce_ilosc[1][1] = random.randint(0,5)
+                                    self.surowce_ilosc[7][1] = random.randint(50,200)
+                                    
                                 self.army_count_bonus += 10
                             elif allhex["hex", i].texture_index == 10: # wioska 
                                 self.gold_count_bonus += 10

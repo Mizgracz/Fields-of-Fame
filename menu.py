@@ -181,6 +181,7 @@ class InputBox:
     ID = 0
     def __init__(self, x, y, w, h, text=''):
         InputBox.ID += 1
+        self.ID = InputBox.ID
         self.text_font = pygame.font.Font(None, 16)
         color = (233, 248, 215)
         self.rect = pygame.Rect(x, y, w, h)
@@ -394,7 +395,7 @@ class PlayerConfig:
                     self.PLAYER_COUNT = PLAYER_COUNT
                     
                     for box in self.input_boxes:
-                        PLAYER_NAME += [box.text]
+                        PLAYER_NAME += [box.text if box.text != '' else f'Player {box.ID}' ] 
                     self.PLAYER_NAME = PLAYER_NAME
 
 
