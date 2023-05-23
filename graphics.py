@@ -46,11 +46,25 @@ class Hex(pygame.sprite.Sprite):
         elif self.texture_index == -3:
             return group.oboz_chuliganuw
         elif self.texture_index == 1:
-            return group.grass_surface
+            if self.number % 2 ==0:
+                tmp = pygame.transform.rotate(group.grass_surface,180)
+            else:
+                tmp = group.grass_surface
+            return tmp
         elif self.texture_index == 2:
-            return group.grass2_surface
+            
+            if self.number % 2 ==0:
+                tmp = pygame.transform.rotate(group.grass2_surface,180)
+            else:
+                tmp = group.grass2_surface
+            return tmp
         elif self.texture_index == 3:
-            return group.grass3_surface
+            if self.number % 2 ==0:
+                tmp = pygame.transform.rotate(group.grass3_surface,180)
+            else:
+                tmp = group.grass3_surface
+            return tmp
+            
         elif self.texture_index == 4:
             return group.forest_surface
         elif self.texture_index == 5:
