@@ -96,13 +96,13 @@ class Player:
                             # dodawanie bonusu do zarabiania
                             if allhex["hex", i].texture_index == -2: # ruiny 
                                 enemy = random.randint(10,50)
-                                self.army_count += (self.army_count-enemy if enemy > self.army_count else self.army_count-enemy )
+                                self.army_count += (self.army_count-enemy if enemy > self.army_count else self.army_count-enemy*-1 )
                                 if self.army_count > enemy:
                                     self.gold_count += 10*random.randint(1,25)
                                 self.army_count_bonus += 10
                             if allhex["hex", i].texture_index == -3: # oboz 
                                 enemy = random.randint(10,50)
-                                self.army_count += (self.army_count-enemy if enemy > self.army_count else self.army_count-enemy )
+                                self.army_count += (self.army_count-enemy if enemy > self.army_count else self.army_count-enemy*-1 )
                                 if self.army_count > enemy:
                                     self.gold_count += 10*random.randint(1,3)
                                     allhex["hex", i].texture_index = 10
@@ -638,7 +638,7 @@ class EventMenagment:
         self.player = player
         self.events = []
         self.results = []
-        self.placeholder = "texture/Events/placeholder.png"
+        self.placeholder = "texture/Events/ruiny_event.png"
     def start_event_list(self):
 
         najemnicy = Event(self.screen, opis_najemnicy, "texture/Events/najemnicy_img.png", 3, select_najemnicy, "Najemnicy", self)
@@ -980,6 +980,7 @@ class ResourceSell:
         self.Resource_List = []
         self.clay_texture =  pygame.image.load("texture/ui/Resources/glina.png")
         self.diax_texture = pygame.image.load("texture/ui/Resources/diax.png")
+        self.rocks_texture = pygame.image.load("texture/ui/Resources/kamien.png")
         self.iron_texture = pygame.image.load("texture/ui/Resources/zelazo.png")
         self.gold_texture = pygame.image.load("texture/ui/Resources/zloto.png")
         self.fish_texture = pygame.image.load("texture/ui/Resources/rybba.png")
@@ -987,7 +988,8 @@ class ResourceSell:
         self.grain_texture = pygame.image.load("texture/ui/Resources/zboze.png")
 
         self.resource_start()
-
+    def update_player(self,player):
+        self.player = player
     def resource_start(self):
         clay = Resource( 3,self.clay_texture,self.up_arrow,self.down_arrow,self.button,self.player)
         self.Resource_List.append(clay)
