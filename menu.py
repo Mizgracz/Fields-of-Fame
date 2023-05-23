@@ -69,7 +69,7 @@ class Menu:
             elif event.type == pygame.MOUSEBUTTONUP:
 
                 if self.config1.Button_Start_Rect.collidepoint(pos) and self.config1.Active == True:
-
+                    PlayerConfig.Active = True
                     self.gameplay = True
                     self.config1.Active = False
                     Menu.status = False
@@ -178,14 +178,16 @@ class Menu:
             self.clock.tick(self.max_tps)
 
 class InputBox:
-
+    ID = 0
     def __init__(self, x, y, w, h, text=''):
+        InputBox.ID += 1
         self.text_font = pygame.font.Font(None, 16)
         color = (233, 248, 215)
         self.rect = pygame.Rect(x, y, w, h)
         self.color = color
         self.text = text
         self.txt_surface = self.text_font.render(text, True, self.color)
+        self.player_txt = self.text_font.render(f'Player {InputBox.ID}', True, self.color)
         self.active = False
         self.score = 1
         # Cursor declare
@@ -224,7 +226,11 @@ class InputBox:
         # Blit the text.
         screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 10))
         # Blit the rect.
-        pygame.draw.rect(screen, self.color, self.rect, 1)
+        screen.blit(self.player_txt,(self.rect.x -self.player_txt.get_width()-5, self.rect.y + 10))
+        if self.active:
+            pygame.draw.rect(screen, (255,0,0), self.rect, 1)
+        else:
+            pygame.draw.rect(screen, self.color, self.rect, 1)
         
 
     def update(self):
@@ -400,6 +406,9 @@ class PlayerConfig:
                     PlayerConfig.Active = False
                     Menu.resume = False
                     Menu.status = True
+                    self.input_boxes = []
+                    InputBox.ID =0
+                    return 0
 
                 
     def run(self):
