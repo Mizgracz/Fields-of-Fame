@@ -31,7 +31,7 @@ class Player:
     start_turn = False
     MAX = 0
     ID =0
-    castle_hex = [137,137*2,137*5,137*6]
+    castle_hex = [137,137*2,137*5,137*4]
     # castle_hex = [137*2,137*2,137*2,137*2,137*2]
     use_castle = []
     def __init__(self, name: str) -> None:
