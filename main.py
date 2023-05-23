@@ -280,7 +280,7 @@ class Game:
             self.currentevent = self.allevents[Player.ID]
             self.currentmenu = self.allbuildingmenu[Player.ID]
             self.currentdec = self.alldec[Player.ID]
-
+            self.resource.update_player(self.currentplayer)
             screen.fill((255, 255, 255))
             self.handle_events()
             self.camera.mouse(self.size)
