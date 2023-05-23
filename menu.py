@@ -144,11 +144,12 @@ class Menu:
 
         if self.new_game_rect.collidepoint(pos):
             button_texture = self.new_game_marked_button_texture
+            
 
         else:
             if Menu.resume:
-                button_texture = self.resume_game_button_texture
-                self.screen.blit(self.save_button_texture, self.save_rect)
+                button_texture = pygame.transform.scale(self.resume_game_button_texture,self.new_game_button_texture.get_size())
+                # self.screen.blit(self.save_button_texture, self.save_rect)
             else:
                 button_texture = self.new_game_button_texture
 
