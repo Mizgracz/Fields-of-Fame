@@ -984,14 +984,14 @@ class ResourceSell:
         self.iron_texture = pygame.image.load("texture/ui/Resources/zelazo.png")
         self.gold_texture = pygame.image.load("texture/ui/Resources/zloto.png")
         self.fish_texture = pygame.image.load("texture/ui/Resources/rybba.png")
-        self.wood_texture = pygame.image.load("texture/ui/Resources/rybba.png")
+        self.wood_texture = pygame.image.load("texture/ui/Resources/drewno.png")
         self.grain_texture = pygame.image.load("texture/ui/Resources/zboze.png")
 
         self.resource_start()
     def update_player(self,player):
         self.player = player
     def resource_start(self):
-        clay = Resource( 3,self.clay_texture,self.up_arrow,self.down_arrow,self.button,self.player)
+        clay = Resource( 5,self.clay_texture,self.up_arrow,self.down_arrow,self.button,self.player)
         self.Resource_List.append(clay)
         diax = Resource(30, self.diax_texture, self.up_arrow, self.down_arrow, self.button,self.player)
         self.Resource_List.append(diax)
@@ -1001,10 +1001,10 @@ class ResourceSell:
         self.Resource_List.append(iron)
         gold = Resource(20, self.gold_texture, self.up_arrow, self.down_arrow, self.button, self.player)
         self.Resource_List.append(gold)
-        # fish = Resource(20, self.fish_texture, self.up_arrow, self.down_arrow, self.button, self.player)
-        # self.Resource_List.append(fish)
-        # wood = Resource(20, self.wood_texture, self.up_arrow, self.down_arrow, self.button, self.player)
-        # self.Resource_List.append(wood)
+        fish = Resource(2, self.fish_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        self.Resource_List.append(fish)
+        wood = Resource(3, self.wood_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        self.Resource_List.append(wood)
         # grain = Resource(20, self.grain_texture, self.up_arrow, self.down_arrow, self.button, self.player)
         # self.Resource_List.append(grain)
 

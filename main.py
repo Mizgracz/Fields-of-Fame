@@ -101,11 +101,7 @@ class Game:
         self.allplayers = []
         for name in self.PlayerName:
             self.allplayers.append(Player(name))
-        # for dla stworzenia graczy
-        # self.allplayers.append(Player("Lucyferiusz"))
-        # self.allplayers.append(Player("Patry"))
-        # self.allplayers.append(Player("Kacper"))
-        # self.allplayers.append(Player("Maciej"))
+
 
         self.map = MapGenerator(self.size, self.size, screen, self.camera,self.allplayers)
 
