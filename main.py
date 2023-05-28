@@ -30,7 +30,7 @@ pygame.display.set_icon(icon_image)
 fps_on = True
 pygame.mixer.music.load("music/main.mp3")
 pygame.mixer.music.play(-1)
-pygame.mixer.music.set_volume(0)
+pygame.mixer.music.set_volume(0.5)
 
 
 def fps():
@@ -87,7 +87,7 @@ class Game:
         self.PlayerCount = self.start_menu.PLAYER_COUNT
         self.PlayerName = self.start_menu.PLAYER_NAME
 
-        self.resource = ResourceSell(screen)
+        
         self.camera = Camera()
         
         self.up_bar = UpBar(screen)
@@ -101,11 +101,7 @@ class Game:
         self.allplayers = []
         for name in self.PlayerName:
             self.allplayers.append(Player(name))
-        # for dla stworzenia graczy
-        # self.allplayers.append(Player("Lucyferiusz"))
-        # self.allplayers.append(Player("Patry"))
-        # self.allplayers.append(Player("Kacper"))
-        # self.allplayers.append(Player("Maciej"))
+
 
         self.map = MapGenerator(self.size, self.size, screen, self.camera,self.allplayers)
 
@@ -137,7 +133,7 @@ class Game:
 
 
         self.music_on = 1
-
+        self.resource = ResourceSell(screen,self.currentplayer)
         self.loadmenu = LoadMenu(screen, self)
         self.savemenu = SaveMenu2(screen, self)
 
@@ -280,7 +276,6 @@ class Game:
             self.currentevent = self.allevents[Player.ID]
             self.currentmenu = self.allbuildingmenu[Player.ID]
             self.currentdec = self.alldec[Player.ID]
-
             screen.fill((255, 255, 255))
             self.handle_events()
             self.camera.mouse(self.size)
@@ -306,7 +301,7 @@ class Game:
             if not BuildingMenu.active:
                 self.currentdec.click(self.currentplayer)
 
-
+            self.resource.update_player(self.currentplayer)
             self.resource.draw()
 
             self.klepsydra1.draw()

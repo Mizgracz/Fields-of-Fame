@@ -1,6 +1,7 @@
 import sys, os
 import zipfile
-
+import random
+from pygame.locals import *
 import pygame
 
 from gameplay import *
@@ -13,11 +14,16 @@ SWITCH_FOG = False
 PLAYER_COUNT = 1
 PLAYER_NAME =[]
 
-
+pygame.mixer.init()
 class Menu:
     status = True
     resume = False
     new_game = False
+
+    button_sound_save= pygame.mixer.Sound('music/music_ambient/save.mp3')
+    button_sound_save.set_volume(1.0)
+    button_sound_load = pygame.mixer.Sound('music/music_ambient/load.mp3')
+    button_sound_load.set_volume(1.0)
 
     def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, max_tps: int):
         pygame.init()
@@ -58,6 +64,10 @@ class Menu:
 
 
     def handle_events(self):
+        pygame.mixer.init()
+        button_sound = pygame.mixer.Sound('music/music_ambient/button_sound.mp3')
+        button_sound.set_volume(1.0)
+
         self.event = pygame.event.get()
         for event in self.event:
             pos = pygame.mouse.get_pos()
@@ -67,9 +77,9 @@ class Menu:
                 return 'quit'
 
             elif event.type == pygame.MOUSEBUTTONUP:
-
+                button_sound.play()
                 if self.config1.Button_Start_Rect.collidepoint(pos) and self.config1.Active == True:
-
+                    PlayerConfig.Active = True
                     self.gameplay = True
                     self.config1.Active = False
                     Menu.status = False
@@ -86,27 +96,31 @@ class Menu:
 
                 elif self.new_game_rect.collidepoint(pos):
                     if Menu.resume:
-
+                        button_sound.play()
 
                         return 'resume'
                     else:
-
+                        button_sound.play()
                         Menu.resume = True
 
                         print("new game")
                         return 'new_game'
+                    
 
 
                 elif self.config1.Button_Back_Rect.collidepoint(pos):
+                    button_sound.play()
                     self.config1.Active = False
                     Menu.resume = False
                     Menu.status = True
 
                 elif self.quit_rect.collidepoint(pos):
+                    button_sound.play()
                     Menu.status = False
                     return 'quit'
 
                 elif self.load_rect.collidepoint(pos):
+                    button_sound.play()
                     Menu.status = False
                     print('load')
                     return 'load_game'
@@ -115,6 +129,10 @@ class Menu:
 
                     print('save')
                     return 'save_game'
+                elif self.option_rect.collidepoint(pos):
+                    button_sound.play()
+                    print("OPCJE")
+                    return 'game_options'
 
     def draw(self):
 
@@ -132,11 +150,12 @@ class Menu:
 
         if self.new_game_rect.collidepoint(pos):
             button_texture = self.new_game_marked_button_texture
+            
 
         else:
             if Menu.resume:
-                button_texture = self.resume_game_button_texture
-                self.screen.blit(self.save_button_texture, self.save_rect)
+                button_texture = pygame.transform.scale(self.resume_game_button_texture,self.new_game_button_texture.get_size())
+                # self.screen.blit(self.save_button_texture, self.save_rect)
             else:
                 button_texture = self.new_game_button_texture
 
@@ -170,22 +189,75 @@ class Menu:
             if choice == 'save_game':
                 SaveMenu.active = True
                 Menu.status = False
+            if choice == 'game_options':
+                Gameconfig.Active = True
+                Menu.status = False
+
             elif choice == 'quit':
                 sys.exit(0)
             if choice:
                 return choice
             self.draw()
             self.clock.tick(self.max_tps)
+class Gameconfig:
+    Active = False
+    def __init__(self, s2, music):
+        self.screen = s2
+        self.music_config = music
+        self.Button_Back_conf = pygame.image.load("texture/main_menu/gameconf/button_back.png")
+        self.Button_Fullscreen = pygame.image.load("texture/main_menu/gameconf/button_fullscreen.png")
+        self.background_image = pygame.image.load("texture/main_menu/gameconf/background.png")
+        self.Button_Window = pygame.image.load("texture/main_menu/gameconf/button_window.png")
+        self.Button_res1366x768= pygame.image.load("texture/main_menu/gameconf/button_res_1366x768.png")
+        self.Button_res1600x900= pygame.image.load("texture/main_menu/gameconf/button_res_1600x900.png")
+        self.Button_res1920x1080= pygame.image.load("texture/main_menu/gameconf/button_res_1920x1080.png")
+        self.Button_res1920x1200= pygame.image.load("texture/main_menu/gameconf/button_res_1920x1200.png")
+        self.scale_background = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.Background = self.scale_background
+        self.Button_Back_Rect_conf = self.Button_Back_conf.get_rect(center=(170, 60))
+        self.Button_Fullscreen_Rec = self.Button_Fullscreen.get_rect(center=(170, 180))
+        self.Button_Window_Rec = self.Button_Window.get_rect(center=(480, 180))
+        self.Button_res1366x768_Rec = self.Button_res1366x768.get_rect(center=(170, 300))
+        self.Button_res1600x900_Rec = self.Button_res1600x900.get_rect(center=(480, 300))
+        self.Button_res1920x1080_Rec = self.Button_res1920x1080.get_rect(center=(790, 300))
+        self.Button_res1920x1200_Rec = self.Button_res1920x1200.get_rect(center=(1100, 300))
+        
+        self.font = pygame.font.Font(None, 36)
+
+
+    def draw(self,event):
+        self.screen.blit(self.Background, (0, 0))
+        self.screen.blit(self.Button_Back_conf, self.Button_Back_Rect_conf)
+        self.screen.blit(self.Button_Fullscreen, self.Button_Fullscreen_Rec)
+        self.screen.blit(self.Button_Window, self.Button_Window_Rec)
+        self.screen.blit(self.Button_res1366x768, self.Button_res1366x768_Rec)
+        self.screen.blit(self.Button_res1600x900, self.Button_res1600x900_Rec)
+        self.screen.blit(self.Button_res1920x1080, self.Button_res1920x1080_Rec)
+        self.screen.blit(self.Button_res1920x1200, self.Button_res1920x1200_Rec)
+        self.music_config.draw_window()
+        self.music_config.draw_arrows()
+        slider = pygame.Rect(50, 650, 300, 20)
+        slider_button_x = 50 + int(300 * self.music_config.volume)
+        slider_button_y = 250 + 20 // 2
+        slider_button_radius = 10
+        self.music_config.draw_slider(slider, slider_button_x, slider_button_y, slider_button_radius)
+
+        pygame.display.update()
 
 class InputBox:
-
+    ID = 0
+    button_sound = pygame.mixer.Sound('music/music_ambient/button_sound.mp3')
+    button_sound.set_volume(1.0)
     def __init__(self, x, y, w, h, text=''):
+        InputBox.ID += 1
+        self.ID = InputBox.ID
         self.text_font = pygame.font.Font(None, 16)
         color = (233, 248, 215)
         self.rect = pygame.Rect(x, y, w, h)
         self.color = color
         self.text = text
         self.txt_surface = self.text_font.render(text, True, self.color)
+        self.player_txt = self.text_font.render(f'Player {InputBox.ID}', True, self.color)
         self.active = False
         self.score = 1
         # Cursor declare
@@ -195,6 +267,7 @@ class InputBox:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             # If the user clicked on the input_box rect.
+            InputBox.button_sound.play()
             if self.rect.collidepoint(event.pos):
                 # Toggle the active variable.
                 self.active = not self.active
@@ -204,10 +277,7 @@ class InputBox:
             if self.active:
                 if event.key == pygame.K_RETURN:
                     print(self.text)
-                    global leftover
-                    leftover += self.score
-                    self.score = 0
-                    self.text = ''
+
                     self.active = False
                 elif event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]
@@ -215,7 +285,7 @@ class InputBox:
                     self.text += event.unicode
                     # Cursor
 
-                    
+                    InputBox.button_sound.play()
                     # Limit characters           -20 for border width
                     if self.txt_surface.get_width() > self.rect.w - 15:
                         self.text = self.text[:-1]
@@ -224,7 +294,11 @@ class InputBox:
         # Blit the text.
         screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 10))
         # Blit the rect.
-        pygame.draw.rect(screen, self.color, self.rect, 1)
+        screen.blit(self.player_txt,(self.rect.x -self.player_txt.get_width()-5, self.rect.y + 10))
+        if self.active:
+            pygame.draw.rect(screen, (255,0,0), self.rect, 1)
+        else:
+            pygame.draw.rect(screen, self.color, self.rect, 1)
         
 
     def update(self):
@@ -388,7 +462,7 @@ class PlayerConfig:
                     self.PLAYER_COUNT = PLAYER_COUNT
                     
                     for box in self.input_boxes:
-                        PLAYER_NAME += [box.text]
+                        PLAYER_NAME += [box.text if box.text != '' else f'Player {box.ID}' ] 
                     self.PLAYER_NAME = PLAYER_NAME
 
 
@@ -400,6 +474,9 @@ class PlayerConfig:
                     PlayerConfig.Active = False
                     Menu.resume = False
                     Menu.status = True
+                    self.input_boxes = []
+                    InputBox.ID =0
+                    return 0
 
                 
     def run(self):
@@ -1157,9 +1234,6 @@ class BuildingMenu:
 
 
 
-import pygame
-import random
-from pygame.locals import *
 class Item:
     itemId = 0
     

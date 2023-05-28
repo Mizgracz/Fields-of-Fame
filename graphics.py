@@ -7,7 +7,7 @@ from gameplay import Camera, Player
 
 class Hex(pygame.sprite.Sprite):
     allsurowiec = [17 ,18 ,19 ,20 ,21 ,22 ,23 ,24]
-    allbuilding = [10,-1]
+    allbuilding = [10,-2,-3]
     def __init__(self, x:int, y:int, num:int, group, obw:bool, zaj:bool ,odkryj:bool,field_add:bool,tex_id:int):
         super().__init__(group)
         self.szerokosc = 130
@@ -41,12 +41,30 @@ class Hex(pygame.sprite.Sprite):
     def texturing(self, group):
         if self.texture_index ==-1:
             return group.castle_surface
-        if self.texture_index == 1:
-            return group.grass_surface
+        elif self.texture_index == -2:
+            return group.ruin
+        elif self.texture_index == -3:
+            return group.oboz_chuliganuw
+        elif self.texture_index == 1:
+            if self.number % 2 ==0:
+                tmp = pygame.transform.rotate(group.grass_surface,180)
+            else:
+                tmp = group.grass_surface
+            return tmp
         elif self.texture_index == 2:
-            return group.grass2_surface
+            
+            if self.number % 2 ==0:
+                tmp = pygame.transform.rotate(group.grass2_surface,180)
+            else:
+                tmp = group.grass2_surface
+            return tmp
         elif self.texture_index == 3:
-            return group.grass3_surface
+            if self.number % 2 ==0:
+                tmp = pygame.transform.rotate(group.grass3_surface,180)
+            else:
+                tmp = group.grass3_surface
+            return tmp
+            
         elif self.texture_index == 4:
             return group.forest_surface
         elif self.texture_index == 5:
@@ -135,8 +153,9 @@ class MapGenerator(pygame.sprite.Group):
 
         # BUDYNKI
         self.willage_surface = pygame.image.load("texture/hex/budynki.png").convert_alpha()
+        self.ruin = pygame.image.load("texture/hex/krypta_walka.png").convert_alpha()
         self.castle_surface = pygame.image.load("texture/hex/zamek.png", ).convert_alpha()
-
+        self.oboz_chuliganuw = pygame.image.load("texture/hex/oboz_chuliganuw.png", ).convert_alpha()
         # SUROWCE
         self.clay = pygame.image.load("texture/surowce/hex_glina_surowiec.png").convert_alpha()
         self.mine_diamonds = pygame.image.load("texture/surowce/hex_kopalnia_diax.png").convert_alpha()
@@ -173,7 +192,8 @@ class MapGenerator(pygame.sprite.Group):
                          ((self.forest4_surface, 15), 8),
                          ((self.castle_surface, 16), 0.7), ((self.clay, 17), 0.3), ((self.mine_diamonds, 18), 0.1),
                          ((self.fish_port, 19), 0.8), ((self.sawmill, 20), 0.5), ((self.grain, 21), 0.65),
-                         ((self.mine_rocks, 22), 0.3), ((self.mine_iron, 23), 0.3), ((self.mine_gold, 24), 0.3)]
+                         ((self.mine_rocks, 22), 0.3), ((self.mine_iron, 23), 0.3), ((self.mine_gold, 24), 0.3),
+                         ((self.ruin,-2),0.9),((self.oboz_chuliganuw,-3),1)]
         self.fog_element = [(self.fog_surface, 99), 100]
         self.num_hex_x = numx
         self.num_hex_y = numy

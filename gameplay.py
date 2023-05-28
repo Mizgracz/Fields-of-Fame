@@ -31,7 +31,7 @@ class Player:
     start_turn = False
     MAX = 0
     ID =0
-    castle_hex = [137,137*2,137*3,137*4,137*5]
+    castle_hex = [137,137*2,137*5,137*4]
     # castle_hex = [137*2,137*2,137*2,137*2,137*2]
     use_castle = []
     def __init__(self, name: str) -> None:
@@ -52,9 +52,10 @@ class Player:
         self.camera_stop = False
         self.player_hex_status = False
         self.item_offset = pygame.Vector2(0, 115)
-        
+
+        self.attack_fail = False
         self.gold_count = 0
-        self.army_count = 0
+        self.army_count = 100
         self.terrain_count = 1
         self.turn_count = 1
         self.army_count_bonus = 0
@@ -94,20 +95,53 @@ class Player:
                         if allhex["hex", i].rodzaj == "budynek":
                             print("budynek")
                             # dodawanie bonusu do zarabiania
-                            if allhex["hex", i].texture_index == -1: # zamek 
-                                self.army_count_bonus += 10
+
+                            if allhex["hex", i].texture_index == -2: # ruiny
+                                enemy = random.randint(50,150)
+                                self.army_count -= enemy
+                                if self.army_count > enemy:
+                                    self.gold_count += int(10*random.randint(1, enemy*2))
+                                else:
+                                    self.attack_fail = True
+
+                            if allhex["hex", i].texture_index == -3: # oboz 
+                                enemy = random.randint(10,50)
+                                print(enemy)
+
+                                if self.army_count > enemy:
+                                    gold = int(3*enemy/random.randint(1, 6))
+                                    self.gold_count += gold
+
+                                    allhex["hex", i].texture_index = 1
+                                    allhex["hex", i].update_texture()
+
+                                    self.surowce_ilosc[1][1] = random.randint(0,5)
+                                    self.surowce_ilosc[7][1] = random.randint(50,200)
+                                    self.army_count -= enemy
+                                else:
+                                    self.army_count = 0
+                                    self.attack_fail = True
+
                             elif allhex["hex", i].texture_index == 10: # wioska 
                                 self.gold_count_bonus += 10
-                        allhex["hex", i].zajete = True
-                        allhex["hex", i].field_add = False
-                        dec.fupdate.new_hex(i,self)
-                        self.field_status = False
-                        self.player_hex_status = False
-                        self.terrain_count += 1
-                        self.turn_stop = False
-                        allhex['hex',i].player = self.player_name
-                        self.confirm = True
-                        
+
+                        if self.attack_fail:
+                            self.attack_fail = False
+                            self.field_status = False
+                            self.player_hex_status = False
+                            self.turn_stop = False
+                            self.confirm = True
+                        else:
+                            allhex["hex", i].zajete = True
+                            allhex["hex", i].field_add = False
+                            dec.fupdate.new_hex(i,self)
+                            self.field_status = False
+                            self.player_hex_status = False
+                            self.terrain_count += 1
+                            self.turn_stop = False
+                            allhex['hex',i].player = self.player_name
+                            self.confirm = True
+
 
 
 class Camera:
@@ -314,8 +348,9 @@ class Hourglass:
     def turn(self,player):
         collision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
-    
+
         if self.hourglass_rect.collidepoint(collision) and mouse_pressed[0]:
+            Hourglass.button_sound_hourglass.play()
             if player.wyb == False and not player.turn_stop:
                 player.wyb = True
                 player.turn_count += 1
@@ -430,10 +465,12 @@ class FieldUpdate:
             f = (player.home + self.quantity_hex ) % self.num_sprites
 
         if not self.sprites[prev_index].zajete and self.sprites[player.home].player == player.player_name:
+            FieldUpdate.sound_diamond.play()
             self.sprites[prev_index].field_add = True
             self.sprites[prev_index].playerable += [player.player_name]
 
         if not self.sprites[next_index].zajete and self.sprites[player.home].player == player.player_name:
+            FieldUpdate.sound_diamond.play()
             self.sprites[next_index].field_add = True
             self.sprites[next_index].playerable += [player.player_name]
         
@@ -619,7 +656,7 @@ class EventMenagment:
         self.player = player
         self.events = []
         self.results = []
-        self.placeholder = "texture/Events/placeholder.png"
+        self.placeholder = "texture/Events/ruiny_event.png"
     def start_event_list(self):
 
         najemnicy = Event(self.screen, opis_najemnicy, "texture/Events/najemnicy_img.png", 3, select_najemnicy, "Najemnicy", self)
@@ -884,64 +921,125 @@ class EventResults:
             self.managment.player.turn_stop = False
 
 
+# Surowce
+
+
 class ResourceSell:
     active = False
-    def __init__(self, screen):
+    def __init__(self, screen,player:Player):
         self.screen = screen
-        self.background = pygame.transform.smoothscale(pygame.image.load("texture/ui/Resources/ResourceSell_back.png").convert_alpha(),(1000/1.4,800/1.4))
+        self.background = pygame.transform.smoothscale(pygame.image.load("texture/ui/Resources/resources_background_no_button.png").convert_alpha(),(1000/1.4,800/1.4))
         self.button = pygame.transform.smoothscale(pygame.image.load("texture/ui/Resources/button sprzedaj.png").convert_alpha(),
-                                                       (250 , 50 ))
+                                                      (250 , 50 ))
+        self.player = player
         self.screen_rect = screen.get_rect()
         self.font = pygame.font.Font(None, 30)
         self.down_arrow = pygame.transform.smoothscale(pygame.image.load("texture/ui/Resources/down_arrow.png").convert_alpha(),(80,40))
         self.up_arrow = pygame.transform.smoothscale(
             pygame.image.load("texture/ui/Resources/up_arrow.png").convert_alpha(), (80, 40))
+        self.Resource_List = []
+        self.clay_texture =  pygame.image.load("texture/ui/Resources/glina.png")
+        self.diax_texture = pygame.image.load("texture/ui/Resources/diax.png")
+        self.rocks_texture = pygame.image.load("texture/ui/Resources/kamien.png")
+        self.iron_texture = pygame.image.load("texture/ui/Resources/zelazo.png")
+        self.gold_texture = pygame.image.load("texture/ui/Resources/zloto.png")
+        self.fish_texture = pygame.image.load("texture/ui/Resources/rybba.png")
+        self.wood_texture = pygame.image.load("texture/ui/Resources/drewno.png")
+        self.grain_texture = pygame.image.load("texture/ui/Resources/zboze.png")
+
+        self.resource_start()
+
+    def update_player(self, player):
+        self.player = player
+
+    def resource_start(self):
+        clay = Resource( 5,self.clay_texture,self.up_arrow,self.down_arrow,self.button,self.player)
+        self.Resource_List.append(clay)
+        diax = Resource(30, self.diax_texture, self.up_arrow, self.down_arrow, self.button,self.player)
+        self.Resource_List.append(diax)
+        rocks = Resource(6, self.rocks_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        self.Resource_List.append(rocks)
+        iron = Resource(10, self.iron_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        self.Resource_List.append(iron)
+        gold = Resource(20, self.gold_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        self.Resource_List.append(gold)
+        fish = Resource(2, self.fish_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        self.Resource_List.append(fish)
+        wood = Resource(3, self.wood_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        self.Resource_List.append(wood)
+        # grain = Resource(20, self.grain_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        # self.Resource_List.append(grain)
 
     def draw(self):
         if ResourceSell.active:
             background_rect = self.background.get_rect()
             background_rect.center = self.screen_rect.center
             self.screen.blit(self.background, background_rect)
-            self.res_stats = ResourceSellStats(self.screen,self.font,self.button,self.down_arrow,self.up_arrow)
+            for i in range(len(self.Resource_List)):
+                self.Resource_List[i].player = self.player
 
-class ResourceSellStats:
-    def __init__(self,screen,font,button,arrow_down,arrow_up):
-        self.screen = screen
-        self.font = font
-        self.button = button
-        self.up_arrow = arrow_up
-        self.down_arrow = arrow_down
-        prize = ["Cena : 20","Cena : 5","Cena : 7","Cena : 3","Cena : 2","Cena : 1","Cena : 10","Cena : 15"] # diamenty,glina,kamień,zboże,ryba,drewno,żelazo,ryda złota
-        text = "0"
-        text_color = (255, 255, 255)
+            for i in range(len(self.Resource_List)):
+                self.Resource_List[i].draw(self.screen,300,150+ 60*i)
+                self.Resource_List[i].check()
 
-        text_spacing = 50
-        text_y = 170  # Początkowe położenie Y
+class Resource:
+    ID = 0
+    def __init__(self, prize, graphics, up_arrow, down_arrow, sell_button,player):
+        Resource.ID += 1
+        self.ID = Resource.ID-1
+        self.prize = prize
+        self.font = pygame.font.Font(None, 30)
+        self.prize_text = self.font.render("Cena : " + str(prize), True, "white")
+        self.count = 0
+        self.player = player
+        self.graphics = graphics
+        self.up_arrow = up_arrow
+        self.down_arrow = down_arrow
+        self.sell_button = sell_button
+        self.x = 0
+        self.y_add = 0
+        self.up_rect = self.up_arrow.get_rect()
+        self.down_rect = self.down_arrow.get_rect()
+        self.sell_rect = self.sell_button.get_rect()
 
-        for i in range(8):
-            text_surface = self.font.render(text, True, text_color)
-            prize_surface = self.font.render(prize[i], True, text_color)
-            text_rect = text_surface.get_rect()
-            prize_rect = prize_surface.get_rect()
-            button_rect = self.button.get_rect()
-            down_arrow_rect = self.down_arrow.get_rect()
-            up_arrow_rect = self.up_arrow.get_rect()
-            text_rect.centerx = screen.get_rect().centerx
-            prize_rect.centerx = screen.get_rect().centerx - 110
-            button_rect.centerx = screen.get_rect().centerx + 170
-            down_arrow_rect.centerx = screen.get_rect().centerx + 20
-            up_arrow_rect.centerx = screen.get_rect().centerx - 20
-            text_rect.y = text_y
-            prize_rect.y = text_y
-            button_rect.y = text_y - 15
-            down_arrow_rect.y = text_y - 15
-            up_arrow_rect.y = text_y - 15
+    def draw(self, screen, x, y):
+        self.y = y
+        self.x = x
+        screen.blit(self.graphics, (self.x, self.y))
+        screen.blit(self.prize_text, (self.x+175, self.y+15))
+        self.up_rect = self.up_arrow.get_rect()  # Zaktualizowanie wartości self.up_rect
+        self.up_rect.topleft = (self.x + 270, self.y )  # Przesunięcie prostokąta na odpowiednie współrzędne
+        screen.blit(self.up_arrow, self.up_rect.topleft)  # Rysowanie self.up_arrow zaktualizowanym prostokątem
+        self.count_text = self.font.render(str(self.count), True, "white")
+        screen.blit(self.count_text, (self.x + 330, self.y + 15))
+        self.down_rect = self.down_arrow.get_rect()
+        self.down_rect.topleft = (self.x + 320, self.y )
+        screen.blit(self.down_arrow, self.down_rect.topleft)
 
-            self.screen.blit(text_surface, text_rect)
-            self.screen.blit(self.button, button_rect)
-            self.screen.blit(prize_surface,prize_rect)
-            self.screen.blit(self.up_arrow, up_arrow_rect)
-            self.screen.blit(self.down_arrow, down_arrow_rect)
-            text_y += text_spacing
+        self.sell_rect = self.sell_button.get_rect()
+        self.sell_rect.topleft = (self.x +410, self.y)
+        screen.blit(self.sell_button, self.sell_rect)
 
 
+
+
+    def check(self):
+
+        collision = pygame.mouse.get_pos()
+
+
+
+        mouse_pressed = pygame.mouse.get_pressed()
+        if self.up_rect.collidepoint(collision) and mouse_pressed[0]:
+            if self.count < self.player.surowce_ilosc[self.ID][1]:
+                self.count += 1
+            pygame.time.Clock().tick(10)
+        if self.down_rect.collidepoint(collision) and mouse_pressed[0]:
+            if self.count > 0:
+                self.count -=1
+                pygame.time.Clock().tick(10)
+        if self.sell_rect.collidepoint(collision) and mouse_pressed[0]:
+            if self.count > 0 :
+                self.player.surowce_ilosc[self.ID][1] -= self.count
+                self.player.gold_count += self.count * self.prize
+                self.count = 0
