@@ -1,6 +1,7 @@
 import sys, os
 import zipfile
-
+import random
+from pygame.locals import *
 import pygame
 
 from gameplay import *
@@ -1233,9 +1234,6 @@ class BuildingMenu:
 
 
 
-import pygame
-import random
-from pygame.locals import *
 class Item:
     itemId = 0
     
