@@ -1,34 +1,35 @@
 import sys, os
 import zipfile
-
+import random
+from pygame.locals import *
 import pygame
-import pygame.mixer
 
-from pygame.locals import * #Potrzebne do klasy Music
+from gameplay import *
 
-from gameplay import Stats
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 MAP_SIZE = 30
 SWITCH_FOG = False
 PLAYER_COUNT = 1
+PLAYER_NAME =[]
 
-
+pygame.mixer.init()
 class Menu:
     status = True
     resume = False
+    new_game = False
+
     button_sound_save= pygame.mixer.Sound('music/music_ambient/save.mp3')
     button_sound_save.set_volume(1.0)
     button_sound_load = pygame.mixer.Sound('music/music_ambient/load.mp3')
     button_sound_load.set_volume(1.0)
 
-    def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, max_tps: int,new_game):
+    def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, max_tps: int):
         pygame.init()
         self.screen = screen
         self.clock = clock
         self.max_tps = max_tps
-        self.new_game = new_game
         Menu.status = True
         Menu.resume = False
         self.font = pygame.font.Font(None, 48)
@@ -38,8 +39,6 @@ class Menu:
         self.save_rect = pygame.Rect(SCREEN_WIDTH / 2 - 528, SCREEN_HEIGHT / 2 + 120, 255, 55)
         self.quit_rect = pygame.Rect(SCREEN_WIDTH / 2 - 528, SCREEN_HEIGHT / 2 + 235, 255, 55)
         self.background_texture = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/background.png").convert(), (SCREEN_WIDTH, SCREEN_HEIGHT))
-        self.SWITCH_FOG = SWITCH_FOG
-        self.PLAYER_COUNT = 1
         self.new_game_button_texture = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/graj_button.png").convert_alpha(),(339 * 0.769,81*0.75))
         self.new_game_marked_button_texture = pygame.transform.smoothscale(
             pygame.image.load("texture/main_menu/nowa_gra_button_red.png").convert_alpha(), (339 * 0.769, 81 * 0.75))
@@ -55,12 +54,12 @@ class Menu:
         self.save_button_texture = pygame.image.load("texture/main_menu/zapisz_button.png").convert_alpha()
         self.gameplay = False
         self.config1 = Config(screen)
-        music = Music(screen)
-        # ambient = Music_ambient(screen)
-        self.game_config = Gameconfig(screen, music)
-        self.music = music
-        # self.ambient = ambient
-        self.MAP_SIZE = 30
+        self.MAP_SIZE = MAP_SIZE
+        self.SWITCH_FOG = SWITCH_FOG
+        self.PLAYER_COUNT = PLAYER_COUNT
+        self.PLAYER_NAME = PLAYER_NAME
+        
+        
         self.run()
 
 
@@ -68,8 +67,7 @@ class Menu:
         pygame.mixer.init()
         button_sound = pygame.mixer.Sound('music/music_ambient/button_sound.mp3')
         button_sound.set_volume(1.0)
-        global SCREEN_WIDTH
-        global SCREEN_HEIGHT
+
         self.event = pygame.event.get()
         for event in self.event:
             pos = pygame.mouse.get_pos()
@@ -79,17 +77,18 @@ class Menu:
                 return 'quit'
 
             elif event.type == pygame.MOUSEBUTTONUP:
-
+                button_sound.play()
                 if self.config1.Button_Start_Rect.collidepoint(pos) and self.config1.Active == True:
-
-                    button_sound.play()
+                    PlayerConfig.Active = True
                     self.gameplay = True
                     self.config1.Active = False
                     Menu.status = False
                     self.MAP_SIZE = MAP_SIZE
                     self.SWITCH_FOG = SWITCH_FOG
                     self.PLAYER_COUNT = PLAYER_COUNT
-                    self.new_game = True
+                    
+                    PlayerConfig(self.screen,self.clock,self.max_tps,self.PLAYER_COUNT)
+                    
 
 
                     pygame.display.update()
@@ -98,6 +97,7 @@ class Menu:
                 elif self.new_game_rect.collidepoint(pos):
                     if Menu.resume:
                         button_sound.play()
+
                         return 'resume'
                     else:
                         button_sound.play()
@@ -105,6 +105,7 @@ class Menu:
 
                         print("new game")
                         return 'new_game'
+                    
 
 
                 elif self.config1.Button_Back_Rect.collidepoint(pos):
@@ -114,71 +115,26 @@ class Menu:
                     Menu.status = True
 
                 elif self.quit_rect.collidepoint(pos):
-
                     button_sound.play()
                     Menu.status = False
                     return 'quit'
 
                 elif self.load_rect.collidepoint(pos):
-
                     button_sound.play()
                     Menu.status = False
                     print('load')
                     return 'load_game'
                 elif self.save_rect.collidepoint(pos) and Menu.resume:
-
-                    button_sound.play()
                     Menu.status = False
 
                     print('save')
                     return 'save_game'
-
                 elif self.option_rect.collidepoint(pos):
                     button_sound.play()
+                    print("OPCJE")
                     return 'game_options'
 
-                elif self.game_config.Button_Back_Rect_conf.collidepoint(pos):
-                    self.game_config.Active = False
-                    button_sound.play()
-
-                elif self.game_config.Button_Fullscreen_Rec.collidepoint(pos) and self.game_config.Active == True:
-                    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
-                    button_sound.play()
-
-                elif self.game_config.Button_Window_Rec.collidepoint(pos) and self.game_config.Active == True:
-                    self.screen = pygame.display.set_mode((1270, 720))
-                    SCREEN_WIDTH,SCREEN_HEIGHT = 1270,720
-                    button_sound.play()
-
-
-                elif self.game_config.Button_res1366x768_Rec.collidepoint(pos) and self.game_config.Active == True:
-                    self.screen = pygame.display.set_mode((1366, 768))
-                    SCREEN_WIDTH, SCREEN_HEIGHT = 1270, 720
-                    self.screen.fill('#000000')
-                    background_image2 = pygame.image.load("texture/main_menu/gameconf/background.png")
-                    background_image2 = pygame.transform.scale(background_image2, (1366, 768))
-                    self.screen.blit(background_image2, (0, 0))
-                    button_sound.play()
-
-                elif self.game_config.Button_res1600x900_Rec.collidepoint(pos) and self.game_config.Active == True:
-                    self.screen = pygame.display.set_mode((1600, 900), pygame.FULLSCREEN)
-                    SCREEN_WIDTH, SCREEN_HEIGHT = 1600,900
-                    button_sound.play()
-
-                elif self.game_config.Button_res1920x1080_Rec.collidepoint(pos) and self.game_config.Active == True:
-                    self.screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
-                    SCREEN_WIDTH, SCREEN_HEIGHT = 1920,1080
-                    button_sound.play()
-
-                elif self.game_config.Button_res1920x1200_Rec.collidepoint(pos) and self.game_config.Active == True:
-                    self.screen = pygame.display.set_mode((1920, 1200), pygame.FULLSCREEN)
-                    SCREEN_WIDTH, SCREEN_HEIGHT = 1920, 1200
-                    button_sound.play()
-
-
-
     def draw(self):
-
 
         pos = pygame.mouse.get_pos()
         self.screen.blit(self.background_texture, (0, 0))
@@ -194,11 +150,12 @@ class Menu:
 
         if self.new_game_rect.collidepoint(pos):
             button_texture = self.new_game_marked_button_texture
+            
 
         else:
             if Menu.resume:
-                button_texture = self.resume_game_button_texture
-                self.screen.blit(self.save_button_texture, self.save_rect)
+                button_texture = pygame.transform.scale(self.resume_game_button_texture,self.new_game_button_texture.get_size())
+                # self.screen.blit(self.save_button_texture, self.save_rect)
             else:
                 button_texture = self.new_game_button_texture
 
@@ -230,22 +187,176 @@ class Menu:
                 LoadMenu.status = True
                 Menu.status = False
             if choice == 'save_game':
-                SaveMenu.status = True
+                SaveMenu.active = True
                 Menu.status = False
             if choice == 'game_options':
-                self.game_config.Active = True
-                while self.game_config.Active:
-                    self.game_config.draw(self.event)
-                    self.handle_events()
-                    self.music.run()
-                    # self.ambient.run_ambient()
+                Gameconfig.Active = True
+                Menu.status = False
+
             elif choice == 'quit':
                 sys.exit(0)
             if choice:
                 return choice
             self.draw()
             self.clock.tick(self.max_tps)
+class Gameconfig:
+    Active = False
+    def __init__(self, s2, music):
+        self.screen = s2
+        self.music_config = music
+        self.Button_Back_conf = pygame.image.load("texture/main_menu/gameconf/button_back.png")
+        self.Button_Fullscreen = pygame.image.load("texture/main_menu/gameconf/button_fullscreen.png")
+        self.background_image = pygame.image.load("texture/main_menu/gameconf/background.png")
+        self.Button_Window = pygame.image.load("texture/main_menu/gameconf/button_window.png")
+        self.Button_res1366x768= pygame.image.load("texture/main_menu/gameconf/button_res_1366x768.png")
+        self.Button_res1600x900= pygame.image.load("texture/main_menu/gameconf/button_res_1600x900.png")
+        self.Button_res1920x1080= pygame.image.load("texture/main_menu/gameconf/button_res_1920x1080.png")
+        self.Button_res1920x1200= pygame.image.load("texture/main_menu/gameconf/button_res_1920x1200.png")
+        self.scale_background = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.Background = self.scale_background
+        self.Button_Back_Rect_conf = self.Button_Back_conf.get_rect(center=(170, 60))
+        self.Button_Fullscreen_Rec = self.Button_Fullscreen.get_rect(center=(170, 180))
+        self.Button_Window_Rec = self.Button_Window.get_rect(center=(480, 180))
+        self.Button_res1366x768_Rec = self.Button_res1366x768.get_rect(center=(170, 300))
+        self.Button_res1600x900_Rec = self.Button_res1600x900.get_rect(center=(480, 300))
+        self.Button_res1920x1080_Rec = self.Button_res1920x1080.get_rect(center=(790, 300))
+        self.Button_res1920x1200_Rec = self.Button_res1920x1200.get_rect(center=(1100, 300))
+        
+        self.font = pygame.font.Font(None, 36)
 
+
+    def draw(self,event):
+        self.screen.blit(self.Background, (0, 0))
+        self.screen.blit(self.Button_Back_conf, self.Button_Back_Rect_conf)
+        self.screen.blit(self.Button_Fullscreen, self.Button_Fullscreen_Rec)
+        self.screen.blit(self.Button_Window, self.Button_Window_Rec)
+        self.screen.blit(self.Button_res1366x768, self.Button_res1366x768_Rec)
+        self.screen.blit(self.Button_res1600x900, self.Button_res1600x900_Rec)
+        self.screen.blit(self.Button_res1920x1080, self.Button_res1920x1080_Rec)
+        self.screen.blit(self.Button_res1920x1200, self.Button_res1920x1200_Rec)
+        self.music_config.draw_window()
+        self.music_config.draw_arrows()
+        slider = pygame.Rect(50, 650, 300, 20)
+        slider_button_x = 50 + int(300 * self.music_config.volume)
+        slider_button_y = 250 + 20 // 2
+        slider_button_radius = 10
+        self.music_config.draw_slider(slider, slider_button_x, slider_button_y, slider_button_radius)
+
+        pygame.display.update()
+
+class InputBox:
+    ID = 0
+    button_sound = pygame.mixer.Sound('music/music_ambient/button_sound.mp3')
+    button_sound.set_volume(1.0)
+    def __init__(self, x, y, w, h, text=''):
+        InputBox.ID += 1
+        self.ID = InputBox.ID
+        self.text_font = pygame.font.Font(None, 16)
+        color = (233, 248, 215)
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = color
+        self.text = text
+        self.txt_surface = self.text_font.render(text, True, self.color)
+        self.player_txt = self.text_font.render(f'Player {InputBox.ID}', True, self.color)
+        self.active = False
+        self.score = 1
+        # Cursor declare
+        self.txt_rect = self.txt_surface.get_rect()
+        
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # If the user clicked on the input_box rect.
+            InputBox.button_sound.play()
+            if self.rect.collidepoint(event.pos):
+                # Toggle the active variable.
+                self.active = not self.active
+            else:
+                self.active = False
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                if event.key == pygame.K_RETURN:
+                    print(self.text)
+
+                    self.active = False
+                elif event.key == pygame.K_BACKSPACE:
+                    self.text = self.text[:-1]
+                else:
+                    self.text += event.unicode
+                    # Cursor
+
+                    InputBox.button_sound.play()
+                    # Limit characters           -20 for border width
+                    if self.txt_surface.get_width() > self.rect.w - 15:
+                        self.text = self.text[:-1]
+
+    def draw(self, screen):
+        # Blit the text.
+        screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 10))
+        # Blit the rect.
+        screen.blit(self.player_txt,(self.rect.x -self.player_txt.get_width()-5, self.rect.y + 10))
+        if self.active:
+            pygame.draw.rect(screen, (255,0,0), self.rect, 1)
+        else:
+            pygame.draw.rect(screen, self.color, self.rect, 1)
+        
+
+    def update(self):
+        # Re-render the text.
+        self.txt_surface = self.text_font.render(self.text, True, self.color)
+class NumberBox:
+    def __init__(self,screen, x, y):
+
+        self.screen = screen        
+        # Define box dimensions
+        BOX_WIDTH = 100
+        BOX_HEIGHT = 50
+
+        # Define button dimensions
+        BUTTON_WIDTH = 50
+        BUTTON_HEIGHT = 50
+        self.value = 1
+        self.rect = pygame.Rect(x, y, BOX_WIDTH, BOX_HEIGHT)
+        self.font = pygame.font.SysFont(None, 48)
+        self.button_inc = pygame.Rect(x + BOX_WIDTH, y, BUTTON_WIDTH, BUTTON_HEIGHT)
+        self.button_dec = pygame.Rect(x - BUTTON_WIDTH, y, BUTTON_WIDTH, BUTTON_HEIGHT)
+        self.font_buttons = pygame.font.SysFont(None, 32)
+
+    def draw(self):
+        pygame.draw.rect(self.screen, (200, 200, 200), self.rect)
+        text = self.font.render(str(self.value), True, (0, 0, 0))
+        text_rect = text.get_rect(center=self.rect.center)
+        self.screen.blit(text, text_rect)
+
+        pygame.draw.rect(self.screen, (150, 150, 150), self.button_inc)
+        text_plus = self.font_buttons.render("+", True, (0, 0, 0))
+        self.text_plus_rect = text_plus.get_rect(center=self.button_inc.center)
+        self.screen.blit(text_plus, self.text_plus_rect)
+
+        pygame.draw.rect(self.screen, (150, 150, 150), self.button_dec)
+        text_minus = self.font_buttons.render("-", True, (0, 0, 0))
+        self.text_minus_rect = text_minus.get_rect(center=self.button_dec.center)
+        self.screen.blit(text_minus, self.text_minus_rect)
+
+    def increment(self):
+        self.value += 1
+        return self.value
+
+    def decrement(self):
+        self.value -= 1
+        return self.value
+
+    def handle_event(self,eventlist):
+        global PLAYER_COUNT
+        for event in eventlist:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if pygame.Rect.collidepoint(self.button_dec, mouse_pos):
+                    if self.value is not 1:
+                        PLAYER_COUNT = self.decrement()
+                if pygame.Rect.collidepoint(self.button_inc, mouse_pos):
+                    if self.value is not 4:
+                        PLAYER_COUNT = self.increment()
 
 class OptionBox():
 
@@ -302,10 +413,90 @@ class OptionBox():
                     return self.active_option
         return -1
 
+class PlayerConfig:
+    Active = True
+    def __init__(self,screen:pygame.Surface,clock: pygame.time.Clock, max_tps: int,Player_count:int) -> None:
+        self.screen = screen
+        self.clock =clock
+        self.max_tps = max_tps
+        self.allPlayers = []
+        self.Background = pygame.image.load("texture/main_menu/config/Background.png")
+        self.Button_Back = pygame.image.load("texture/main_menu/config/Button_Back.png")
+        self.Button_Start = pygame.image.load("texture/main_menu/config/Button_Start.png")
+        self.Button_Back_Rect = self.Button_Back.get_rect(center=(80, 40))
+        self.Button_Start_Rect = self.Button_Start.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 80))
+        self.Active = False
+        self.font = pygame.font.Font(None, 36)
+        self.Player_count = Player_count
+        self.input_boxes =[]
+        for i in range(1,Player_count+1):
+            self.input_boxes.append(InputBox(300,223+(50*i),250,36))
+        self.run()
+    def draw(self):
+        self.screen.blit(self.Background,(0,0))
+        self.screen.blit(self.Button_Back,self.Button_Back_Rect)
+        self.screen.blit(self.Button_Start,self.Button_Start_Rect)
+        for box in self.input_boxes:
+            box.update()
+        for box in self.input_boxes:
+            box.draw(self.screen)
+        pass
+    def handle_events(self):
+        global PLAYER_NAME
+        self.event = pygame.event.get()
+        for event in self.event:
+            for box in self.input_boxes:
+                box.handle_event(event)
+            pos = pygame.mouse.get_pos()
+            if event.type == pygame.QUIT:
+                sys.exit()
 
+            elif event.type == pygame.MOUSEBUTTONUP:
+
+                if self.Button_Start_Rect.collidepoint(pos) and PlayerConfig.Active == True:
+
+                    self.gameplay = True
+                    PlayerConfig.Active = False
+                    self.MAP_SIZE = MAP_SIZE
+                    self.SWITCH_FOG = SWITCH_FOG
+                    self.PLAYER_COUNT = PLAYER_COUNT
+                    
+                    for box in self.input_boxes:
+                        PLAYER_NAME += [box.text if box.text != '' else f'Player {box.ID}' ] 
+                    self.PLAYER_NAME = PLAYER_NAME
+
+
+                    PlayerConfig(self.screen,self.clock,self.max_tps,self.PLAYER_COUNT)
+                    Menu.new_game = True
+                    pygame.display.update()
+
+                elif self.Button_Back_Rect.collidepoint(pos):
+                    PlayerConfig.Active = False
+                    Menu.resume = False
+                    Menu.status = True
+                    self.input_boxes = []
+                    InputBox.ID =0
+                    return 0
+
+                
+    def run(self):
+        global PLAYER_NAME
+        while PlayerConfig.Active:
+            choice = self.handle_events()
+            pygame.display.update()
+            if choice == 'new_game':
+                PlayerConfig.Active = False
+                PLAYER_NAME = self.allPlayers
+            elif choice == 'quit':
+                sys.exit(0)
+            if choice:
+                return choice
+            self.draw()
+            self.clock.tick(self.max_tps)
+
+        pass
 class Config:
     def __init__(self, screen: pygame.surface):
-        FONT_NAME = 'timesnewroman'
         self.screen = screen
         self.Button_Back = pygame.image.load("texture/main_menu/config/Button_Back.png")
         self.Button_Start = pygame.image.load("texture/main_menu/config/Button_Start.png")
@@ -315,27 +506,31 @@ class Config:
         self.Active = False
         self.font = pygame.font.Font(None, 36)
         self.text_map_size = self.font.render("Wielkość mapy : ", True, (255, 255, 255))
+        self.text_player = self.font.render("Ilość graczy : ", True, (255, 255, 255))
         self.map_size = OptionBox(
-            300, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(FONT_NAME, 30),
+            300, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30),
             ["Mała (30x30)", "Średnia (50x50)", "Duża (60x60)"])
         self.text_fog_on_off = self.font.render("Mgła Wojny : ", True, (255, 255, 255))
         self.fog_on_off = OptionBox(
-            700, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(FONT_NAME, 30),
+            700, 223, 180, 60, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30),
             ["Wyłącz", "Włącz"])
-
+        self.Player_count_box = NumberBox(self.screen,350,350)
     def draw(self, event):
         global MAP_SIZE
 
         self.screen.blit(self.Background, (0, 0))
+        self.Player_count_box.draw()
         self.screen.blit(self.Button_Back, self.Button_Back_Rect)
         self.screen.blit(self.Button_Start, self.Button_Start_Rect)
         self.screen.blit(self.text_map_size, (60, 240))
+        self.screen.blit(self.text_player, (60, 360))
         self.screen.blit(self.text_fog_on_off, (525, 240))
         self.map_size.draw(self.screen)
         self.fog_on_off.draw(self.screen)
         self.event_list = event
         self.Size()
         self.Switching_Fog()
+        self.Player_count_box.handle_event(self.event_list)
 
         pygame.display.update()
 
@@ -357,250 +552,10 @@ class Config:
         elif self.selected_option == 1:
             SWITCH_FOG = True
 
-    def Player_count(self):
-        pass
+    
 
 
 #################################################################################################################
-
-class Gameconfig:
-    def __init__(self, s2, music):
-        self.screen = s2
-        self.music_config = music
-        self.Button_Back_conf = pygame.image.load("texture/main_menu/gameconf/button_back.png")
-        self.Button_Fullscreen = pygame.image.load("texture/main_menu/gameconf/button_fullscreen.png")
-        self.background_image = pygame.image.load("texture/main_menu/gameconf/background.png")
-        self.Button_Window = pygame.image.load("texture/main_menu/gameconf/button_window.png")
-        self.Button_res1366x768= pygame.image.load("texture/main_menu/gameconf/button_res_1366x768.png")
-        self.Button_res1600x900= pygame.image.load("texture/main_menu/gameconf/button_res_1600x900.png")
-        self.Button_res1920x1080= pygame.image.load("texture/main_menu/gameconf/button_res_1920x1080.png")
-        self.Button_res1920x1200= pygame.image.load("texture/main_menu/gameconf/button_res_1920x1200.png")
-        self.scale_background = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-        self.Background = self.scale_background
-        self.Button_Back_Rect_conf = self.Button_Back_conf.get_rect(center=(170, 60))
-        self.Button_Fullscreen_Rec = self.Button_Fullscreen.get_rect(center=(170, 180))
-        self.Button_Window_Rec = self.Button_Window.get_rect(center=(480, 180))
-        self.Button_res1366x768_Rec = self.Button_res1366x768.get_rect(center=(170, 300))
-        self.Button_res1600x900_Rec = self.Button_res1600x900.get_rect(center=(480, 300))
-        self.Button_res1920x1080_Rec = self.Button_res1920x1080.get_rect(center=(790, 300))
-        self.Button_res1920x1200_Rec = self.Button_res1920x1200.get_rect(center=(1100, 300))
-        self.Active = False
-        self.font = pygame.font.Font(None, 36)
-
-
-    def draw(self,event):
-        self.screen.blit(self.Background, (0, 0))
-        self.screen.blit(self.Button_Back_conf, self.Button_Back_Rect_conf)
-        self.screen.blit(self.Button_Fullscreen, self.Button_Fullscreen_Rec)
-        self.screen.blit(self.Button_Window, self.Button_Window_Rec)
-        self.screen.blit(self.Button_res1366x768, self.Button_res1366x768_Rec)
-        self.screen.blit(self.Button_res1600x900, self.Button_res1600x900_Rec)
-        self.screen.blit(self.Button_res1920x1080, self.Button_res1920x1080_Rec)
-        self.screen.blit(self.Button_res1920x1200, self.Button_res1920x1200_Rec)
-        self.music_config.draw_window()
-        self.music_config.draw_arrows()
-        slider = pygame.Rect(50, 650, 300, 20)
-        slider_button_x = 50 + int(300 * self.music_config.volume)
-        slider_button_y = 250 + 20 // 2
-        slider_button_radius = 10
-        self.music_config.draw_slider(slider, slider_button_x, slider_button_y, slider_button_radius)
-        self.event_list = event
-
-        pygame.display.update()
-
-class Music:
-    def __init__(self, s2):
-        pygame.init()
-        FONT_NAME = 'timesnewroman'
-        self.screen = s2
-        self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont(FONT_NAME, 48)
-        self.value = 3
-        self.music_playing = False
-        self.volume = 0.5  # Początkowa głośność muzyki
-
-    def run(self):
-        pygame.mixer.init()
-        self.play_music()
-        # Slider variables
-        slider_width, slider_height = 300, 20
-        slider_x, slider_y = 50, 650
-        slider = pygame.Rect(slider_x, slider_y, slider_width, slider_height)
-        slider_button_radius = 10
-        slider_button_x = slider_x + int(slider_width * self.volume)
-        slider_button_y = (slider_y + slider_height // 2) - 400
-        dragging = False
-        arrow_clicked = False
-
-        running = True
-
-        while running:
-            self.clock.tick(30)
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    return
-                elif event.type == MOUSEBUTTONDOWN:
-                    if self.left_arrow_rect.collidepoint(event.pos):
-                        self.change_music('previous')
-                        arrow_clicked = True
-                    elif self.right_arrow_rect.collidepoint(event.pos):
-                        self.change_music('next')
-                        arrow_clicked = True
-                    elif slider.collidepoint(event.pos):
-                        dragging = True
-                elif event.type == MOUSEBUTTONUP:
-                    if dragging:
-                        dragging = False
-                    if arrow_clicked:
-                        arrow_clicked = False
-                elif event.type == MOUSEMOTION:
-                    if dragging:
-                        slider_button_x = event.pos[0]
-                        if slider_button_x < slider_x:
-                            slider_button_x = slider_x
-                        elif slider_button_x > slider_x + slider_width:
-                            slider_button_x = slider_x + slider_width
-                        self.volume = ((slider_button_x - slider_x) / slider_width)
-                        pygame.mixer.music.set_volume(self.volume)
-
-            # Disable run() if no arrow or slider is clicked
-            if not (arrow_clicked or dragging):
-                running = False
-                continue
-
-            self.draw_window()
-            self.draw_arrows()
-            self.draw_slider(slider, slider_button_x, slider_button_y, slider_button_radius)
-            pygame.display.flip()
-
-    def draw_window(self):
-        window_rect = pygame.Rect(100, 500, 200, 100)
-        pygame.draw.rect(self.screen, (201, 184, 73), window_rect, 2)
-
-        inner_rect = pygame.Rect(window_rect.left + 2, window_rect.top + 2, window_rect.width - 4, window_rect.height - 4)
-        pygame.draw.rect(self.screen, (0, 0, 0), inner_rect)
-
-        text = self.font.render(str(self.value), True, (201, 184, 73))
-        text_rect = text.get_rect(center=window_rect.center)
-        self.screen.blit(text, text_rect)
-
-    def draw_arrows(self):
-        arrow_size = 40
-        arrow_thickness = 3
-
-        left_arrow_start = (325, 550)
-        left_arrow_end = (left_arrow_start[0] + arrow_size, left_arrow_start[1])
-        pygame.draw.line(self.screen, (0, 0, 0), left_arrow_start, left_arrow_end, arrow_thickness)
-        pygame.draw.polygon(self.screen, (0, 0, 0), [(left_arrow_end[0] - 10, left_arrow_end[1] - 10),
-                                                      (left_arrow_end[0] - 10, left_arrow_end[1] + 10),
-                                                      (left_arrow_end[0], left_arrow_end[1])])
-
-        right_arrow_start = (75, 550)
-        right_arrow_end = (right_arrow_start[0] - arrow_size, right_arrow_start[1])
-        pygame.draw.line(self.screen, (0, 0, 0), right_arrow_start, right_arrow_end, arrow_thickness)
-        pygame.draw.polygon(self.screen, (0, 0, 0), [(right_arrow_end[0] + 10, right_arrow_end[1] - 10),
-                                                      (right_arrow_end[0] + 10, right_arrow_end[1] + 10),
-                                                      (right_arrow_end[0], right_arrow_end[1])])
-
-        self.left_arrow_rect = pygame.Rect(left_arrow_start[0], left_arrow_start[1] - arrow_size // 2,
-                                            arrow_size, arrow_size)
-        self.right_arrow_rect = pygame.Rect(right_arrow_end[0], right_arrow_end[1] - arrow_size // 2,
-                                             arrow_size, arrow_size)
-
-    def draw_slider(self, slider, button_x, button_y, button_radius):
-        pygame.draw.rect(self.screen, (201, 184, 73), slider)
-        pygame.draw.circle(self.screen, (0, 0, 0), (button_x, button_y + 400), button_radius)
-
-    def change_music(self, direction):
-        pygame.mixer.music.stop()
-        if direction == 'next':
-            self.value -= 1
-            if self.value < 1:
-                self.value = 5
-        elif direction == 'previous':
-            self.value += 1
-            if self.value > 5:
-                self.value = 1
-        self.play_music()
-
-    def play_music(self):
-        pygame.mixer.music.load('music/music_background/' + str(self.value) + '.mp3')
-        pygame.mixer.music.set_volume(self.volume)
-        pygame.mixer.music.play(-1)
-        self.music_playing = True
-
-# class Music_ambient: Ignorujcie
-#     def __init__(self, s2):
-#         pygame.init()
-#         FONT_NAME = 'timesnewroman'
-#         self.screen = s2
-#         self.clock = pygame.time.Clock()
-#         self.font = pygame.font.SysFont(FONT_NAME, 48)
-#         self.value_ambient = 1
-#         self.music_playing_ambient = False
-#         self.volume_ambient = 1.0  # Initial music volume
-#         self.window_rect_ambient = pygame.Rect(700, 500, 200, 100)  # Declare window rectangle
-#
-#     def run_ambient(self):
-#         pygame.mixer.init()
-#         # Slider variables
-#         slider_width_ambient, slider_height_ambient = 300, 20
-#         slider_x_ambient, slider_y_ambient = 650, 650
-#         slider_ambient = pygame.Rect(slider_x_ambient, slider_y_ambient, slider_width_ambient, slider_height_ambient)
-#         slider_button_radius_ambient = 10
-#         slider_button_x_ambient = slider_x_ambient + int(slider_width_ambient * self.volume_ambient)
-#         slider_button_y_ambient = slider_y_ambient + slider_height_ambient // 2
-#         dragging_ambient = False
-#
-#         running_ambient = True
-#
-#         while running_ambient:
-#             self.clock.tick(30)
-#             for event in pygame.event.get():
-#                 if event.type == QUIT:
-#                     pygame.quit()
-#                     return
-#                 elif event.type == MOUSEBUTTONDOWN:
-#                     if slider_ambient.collidepoint(event.pos):
-#                         dragging_ambient = True
-#                 elif event.type == MOUSEBUTTONUP:
-#                     if dragging_ambient:
-#                         dragging_ambient = False
-#                 elif event.type == MOUSEMOTION:
-#                     if dragging_ambient:
-#                         slider_button_x_ambient = event.pos[0]
-#                         if slider_button_x_ambient < slider_x_ambient:
-#                             slider_button_x_ambient = slider_x_ambient
-#                         elif slider_button_x_ambient > slider_x_ambient + slider_width_ambient:
-#                             slider_button_x_ambient = slider_x_ambient + slider_width_ambient
-#                         self.volume_ambient = (slider_button_x_ambient - slider_x_ambient) / slider_width_ambient
-#                         self.play_music_ambient()
-#
-#             if not dragging_ambient:
-#                 running_ambient = False
-#                 continue
-#
-#             self.draw_window_ambient()
-#             self.draw_slider_ambient(slider_ambient, slider_button_x_ambient, slider_button_y_ambient,
-#                                      slider_button_radius_ambient)
-#             pygame.display.flip()
-#
-#     def draw_window_ambient(self):
-#         pygame.draw.rect(self.screen, (0, 0, 0), self.window_rect_ambient, 2)
-#
-#         text = self.font.render("Kliknij mnie", True, (0, 0, 0))
-#         text_rect = text.get_rect(center=self.window_rect_ambient.center)
-#         self.screen.blit(text, text_rect)
-#
-#     def draw_slider_ambient(self, slider_ambient, button_x_ambient, button_y_ambient, button_radius_ambient):
-#         pygame.draw.rect(self.screen, (128, 128, 128), slider_ambient)
-#         pygame.draw.circle(self.screen, (0, 0, 0), (button_x_ambient, button_y_ambient), button_radius_ambient)
-#
-#     def play_music_ambient(self):
-#         pygame.mixer.Sound('music/music_ambient/falling.mp3').play()
-#         self.music_playing_ambient = True
-
 
 class LoadMenu(object):
     """docstring for LoadMenu"""
@@ -708,7 +663,6 @@ class LoadMenu(object):
                 self.update()
                 pygame.time.Clock().tick(3)
             if item.rect_item.collidepoint(POS) and PRESS:
-                Menu.button_sound_load.play()
                 self.load_game(item.tmpID)
                 LoadMenu.status = False
                 pygame.time.Clock().tick(3)
@@ -846,13 +800,13 @@ class LoadItem(object):
 
 #################################################################################################################
 
-class SaveMenu(object):
+class SaveMenu2(object):
     """docstring for SaveMenu"""
     scroll = 0
     status = False
 
     def __init__(self, screen: pygame.Surface, GAME):
-        super(SaveMenu, self).__init__()
+        super(SaveMenu2, self).__init__()
         self.game = GAME
 
         self.MOUSE_Y = 0
@@ -902,7 +856,7 @@ class SaveMenu(object):
 
     def update(self):
         self.allItem = []
-        SaveItem.ID = 0
+        SaveItem2.ID = 0
 
         self.ILOSC_PLIKOW = len(
             [f for f in os.listdir(self.folder_path) if os.path.isfile(os.path.join(self.folder_path, f))]) + 1
@@ -917,8 +871,8 @@ class SaveMenu(object):
         mypath = 'save/'
         onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
         for i in range(self.ILOSC_PLIKOW - 1):
-            self.allItem += [SaveItem(f'{onlyfiles[i]}', self.window)]
-        self.allItem += [SaveItem(f'Save{SaveItem.ID + 1}', self.screen)]
+            self.allItem += [SaveItem2(f'{onlyfiles[i]}', self.window)]
+        self.allItem += [SaveItem2(f'Save{SaveItem2.ID + 1}', self.screen)]
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -932,7 +886,7 @@ class SaveMenu(object):
                 print('EXIT')
                 if Menu.resume == False:
                     Menu.status = True
-                SaveMenu.status = False
+                SaveMenu2.status = False
                 pygame.time.Clock().tick(3)
             if self.bar_rect.collidepoint(pos):
                 self.mouse_diff = pos[1] - self.bar_rect.y
@@ -954,45 +908,11 @@ class SaveMenu(object):
                 self.update()
                 pygame.time.Clock().tick(3)
             if item.rect_item.collidepoint(POS) and PRESS:
-                Menu.button_sound_save.play()
                 self.save_game(item.tmpID)
-                SaveMenu.status = False
+                SaveMenu2.status = False
                 pygame.time.Clock().tick(3)
         # if self.RECT.collidepoint(pygame.mouse.get_pos()) :
 
-    def save_game(self, index):
-        import gameplay
-        print('SaveGame')
-
-        folder_path = "save"
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-
-        with open('save/map.csv', 'w') as savefile:
-            savefile.write('x;y;number;texture_index;zajete\n')
-            for h in self.game.map.sprites():
-                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.zajete}')
-                savefile.write('\n')
-        with open('save/stats.txt', 'w') as savefile:
-
-            savefile.write(f'gold_count:{Stats.gold_count}\n')
-            savefile.write(f'army_count:{Stats.army_count}\n')
-            savefile.write(f'player_hex_status:{Stats.terrain_count}\n')
-            savefile.write(f'army_count_bonus:{Stats.army_count_bonus}\n')
-            savefile.write(f'gold_count_bonus:{Stats.gold_count_bonus}\n')
-            savefile.write(f'turn_count:{Stats.turn_count}\n')
-
-        pygame.time.Clock().tick(1)
-        if self.allItem[index].name[-4:] == '.zip':
-            filename = f"save/{self.allItem[index].name}"
-        else:
-            filename = f"save/{self.allItem[index].name}.zip"
-        with zipfile.ZipFile(filename, "w") as zip:
-            zip.write("save/stats.txt")
-            zip.write("save/map.csv")
-        os.remove("save/stats.txt")
-        os.remove("save/map.csv")
-        pass
 
     def draw(self):
 
@@ -1034,7 +954,7 @@ class SaveMenu(object):
         pygame.display.flip()
 
 
-class SaveItem(object):
+class SaveItem2(object):
     ID = 0
     """docstring for Item"""
 
@@ -1042,10 +962,10 @@ class SaveItem(object):
         FONT_SIZE = 25
         FONT_NAME = 'timesnewroman'
         font_text = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
-        super(SaveItem, self).__init__()
+        super(SaveItem2, self).__init__()
         self.screen = screen
         self.name = name
-        self.tmpID = SaveItem.ID
+        self.tmpID = SaveItem2.ID
         self.WIDTH = self.screen.get_size()[0] // 2
         self.HEIGHT = 100
         self.item_surface = pygame.image.load('texture/ui/load_menu/opis.png')
@@ -1054,15 +974,15 @@ class SaveItem(object):
         self.del_surface = pygame.image.load('texture/ui/load_menu/CheckBoxFalse.png')
         self.del_surface = pygame.transform.scale(self.del_surface, (90, 90))
 
-        self.rect_item = pygame.Rect(self.WIDTH / 2, 150 * self.tmpID + 50 + SaveMenu.scroll, self.WIDTH, 100)
-        self.rect_del = pygame.Rect(self.WIDTH / 2 - 5, 150 * self.tmpID + 50 + SaveMenu.scroll + 5, 90, 90)
+        self.rect_item = pygame.Rect(self.WIDTH / 2, 150 * self.tmpID + 50 + SaveMenu2.scroll, self.WIDTH, 100)
+        self.rect_del = pygame.Rect(self.WIDTH / 2 - 5, 150 * self.tmpID + 50 + SaveMenu2.scroll + 5, 90, 90)
 
         self.rect_del.right = self.rect_item.right
-        self.rect_item = pygame.Rect(self.WIDTH / 2, 150 * self.tmpID + 50 + SaveMenu.scroll, self.WIDTH - 100, 100)
+        self.rect_item = pygame.Rect(self.WIDTH / 2, 150 * self.tmpID + 50 + SaveMenu2.scroll, self.WIDTH - 100, 100)
 
         self.font_opis = font_text.render((f'{self.tmpID + 1}. {self.name}'), True, (255, 0, 0))
 
-        SaveItem.ID += 1
+        SaveItem2.ID += 1
 
     def remove(self):
         os.remove(f"save/{self.name}")
@@ -1077,5 +997,501 @@ class SaveItem(object):
         self.screen.blit(self.del_surface, self.rect_del)
 
     def update(self):
-        self.rect_item.top = 150 * self.tmpID + 50 + SaveMenu.scroll
-        self.rect_del.top = 150 * self.tmpID + 50 + SaveMenu.scroll + 5
+        self.rect_item.top = 150 * self.tmpID + 50 + SaveMenu2.scroll
+        self.rect_del.top = 150 * self.tmpID + 50 + SaveMenu2.scroll + 5
+
+#################################################################################################################
+class BuildingItem:
+    itemId = 0
+    offset_x = 0
+    offset_y = 0
+    def __init__(self, name:str, description:str, image:pygame.Surface, cost:int, gold_buff:int, army_buff:int):
+        self.available = True
+        BuildingItem.itemId += 1
+        self.item_id = BuildingItem.itemId
+        self.name = name
+        self.image = pygame.image.load(f'texture/ui/building/{image}').convert_alpha()
+        self.image = pygame.transform.scale(self.image,(90,90))
+        self.FONT = pygame.font.SysFont(None, 18)
+        
+        self.cost = cost
+        self.army_buff = army_buff
+        self.gold_buff = gold_buff
+
+
+        self.font_surface = self.FONT.render(f"{self.name} - {self.cost} $", True, (255, 255,255))
+        self.background = pygame.Surface((600-2,100-2))
+        self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/opis.png').convert_alpha(),(600-2,100-2))
+        # self.background.fill((128,128,128))
+        self.itemsurf = pygame.Surface((600,100),pygame.SRCALPHA)
+
+        self.description = description
+
+
+        self.button_rect = pygame.Rect(self.itemsurf.get_width() - 110, self.itemsurf.get_height() // 2 - 15, 100, 30)
+        self.button_text = None
+
+        self.image_width = self.image.get_width()
+        self.decssurf_width = self.itemsurf.get_width() - self.image_width - self.button_rect.width-25
+
+        self.decssurf = pygame.Surface((self.decssurf_width, 91), pygame.SRCALPHA)
+
+        # self.button_image = pygame.Surface((self.button_rect.width,self.button_rect.height),pygame.SRCALPHA)
+        # self.button_image = 
+        self.button_image = pygame.transform.scale(pygame.image.load('texture/ui/building/button_kup.png').convert_alpha(),(self.button_rect.width,self.button_rect.height))
+        
+
+
+        self.draw_text(self.decssurf,self.description,self.FONT,(255,255,255),self.decssurf.get_rect())
+
+    def split_text(self,text:str, font:pygame.font, surface_width:int):
+        words = text.split()
+        lines = []
+        current_line = words[0]
+        for word in words[1:]:
+            test_line = current_line + " " + word
+            if font.size(test_line)[0] <= surface_width:
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word
+        lines.append(current_line)
+        return lines
+
+    def draw_text(self,surface:pygame.Surface, text:str, font, color:pygame.Color, rect:pygame.Rect):
+        lines = self.split_text(text, font, rect.width)
+        rect.y+=8+font.size("Tg")[1] 
+        
+        line_height = font.size("Tg")[1]  # Wysokość jednej linii tekstu
+        
+        max_lines = rect.height // line_height  # Maksymalna liczba linii, która zmieści się w wysokości powierzchni
+        if len(lines) > max_lines:
+            lines = lines[:max_lines-1]
+            lines[-1] += " ..."  # Dodanie elips na końcu ostatniej linii
+    
+        y = rect.y
+        for line in lines:
+            text_surface = font.render(line, True, color)
+            surface.blit(text_surface, (rect.x, y))
+            y += line_height
+
+
+    def draw(self, window, x, y):
+        # Wyświetlanie g
+        # rafiki przedmiotu na określonych współrzędnych
+        self.itemsurf.blit(self.background,(1,1))
+        self.itemsurf.blit(self.image,(5,5))
+        self.itemsurf.blit(self.font_surface, (self.image.get_width()+9, 7))
+        self.itemsurf.blit(self.decssurf,(100,0))
+        
+
+        self.itemsurf.blit(self.button_image,self.button_rect)
+        if not self.button_text is None:
+            self.itemsurf.blit(self.button_text, (self.button_rect.x + 10, self.button_rect.y + 8))
+        window.blit(self.itemsurf, (x, y))
+
+    def button_action(self,player,items):
+        if self.cost<= player.gold_count:
+            items.remove(self)
+            self.button_image.fill('#00ff00')
+            self.available = False
+            self.button_text = self.FONT.render("Owned", True, (255, 255, 255))
+            # Może sie kiedyś przyda
+            player.gold_count += self.cost *-1
+            player.army_count += 0
+            #
+            player.army_count_bonus += self.army_buff
+            player.gold_count_bonus += self.gold_buff
+            return True
+        else:
+            print('Brak złota')
+            return False
+        
+        pass
+class BuildingMenu:
+    active = False
+    def __init__(self, window:pygame.Surface, items:list[BuildingItem], menu_width:int, menu_height:int, menux:int = 0,menuy:int = 0):
+        
+        BuildingItem.offset_x = menux
+        BuildingItem.offset_y = menuy
+        
+        self.window = window
+        self.menu_items = items  # Przykładowa lista przedmiotów w menu
+        self.menu_width = menu_width
+        self.menu_height = menu_height
+        self.menu_item_height = 100
+        self.menu_top_item_index = 0
+        self.item_spacing = 20  # Odstęp między przedmiotami
+        
+
+        self.background = pygame.Surface((menu_width,menu_height-25),pygame.SRCALPHA)
+        self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/opis_tlo.png').convert_alpha(), (menu_width,menu_height-25))
+        # self.background.fill('#002200')
+        ALPHA = 0.85
+        self.background.set_alpha(255*ALPHA)
+        
+
+        # Scrollbar settings
+        self.scrollbar_width = 16
+        self.scrollbar_margin = 8
+        
+        self.scrollbar_y =  BuildingItem.offset_y-25
+        self.scrollbar_height = self.background.get_height() - self.scrollbar_margin * 2
+
+        self.menu_items_per_page = (self.menu_height - self.scrollbar_margin * 2) // (self.menu_item_height + self.item_spacing)
+        self.menu_x = menux  # Set the desired x-coordinate of the menu
+        self.menu_y = menuy  # Set the desired y-coordinate of the menu
+
+        self.scrollbar_x = self.menu_x + self.background.get_width() - self.scrollbar_width - self.scrollbar_margin
+    def draw_menu(self):
+        
+        
+        # Rysowanie menu (inne elementy pominięte dla uproszczenia)
+        self.window.blit(self.background, (self.menu_x-25,self.menu_y-25))
+        for i, item in enumerate(self.menu_items):
+            item_y = 0 + self.scrollbar_margin + (i - self.menu_top_item_index) * (self.menu_item_height + self.item_spacing)
+            item_rect = pygame.Rect(25, item_y, self.background.get_width()-50, self.menu_item_height)
+            if item_rect.collidepoint(pygame.mouse.get_pos()):
+                # Zaznaczony przedmiot
+                pygame.draw.rect(self.background, (192, 192, 255), item_rect)
+            pygame.draw.rect(self.background, (20, 30, 100), item_rect, 1)
+            
+            item.draw(self.background, 25, item_y)
+            # self.window.blit(font_surface, (self.menu_x + 4, item_y + 2))
+        # Scrollbar
+        pygame.draw.rect(self.window, (128, 128, 128), (self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height))
+        self.scrollbar_rect = pygame.Rect(self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height)
+        # Calculate the position and height of the scrollbar thumb
+        if len(self.menu_items) <4:
+            self.thumb_height = self.scrollbar_height
+            self.thumb_y = self.scrollbar_y + (self.menu_top_item_index / 1) * self.scrollbar_height
+        else:
+            self.thumb_height = self.scrollbar_height / len(self.menu_items) * self.menu_items_per_page
+            self.thumb_y = self.scrollbar_y + (self.menu_top_item_index / len(self.menu_items)) * self.scrollbar_height
+        
+
+        # Draw the scrollbar thumb
+        pygame.draw.rect(self.window, (192, 192, 192), (self.scrollbar_x, self.thumb_y, self.scrollbar_width, self.thumb_height))
+    def handle_event(self, event,player):
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+            BuildingMenu.active = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:  # Kliknięcie lewym przyciskiem myszy
+                mouse_pos = pygame.mouse.get_pos()
+                for i, item in enumerate(self.menu_items):
+                    item_y = 0 + self.scrollbar_margin + (i - self.menu_top_item_index) * \
+                        (self.menu_item_height + self.item_spacing)
+                    item_rect = pygame.Rect(item.button_rect.x+BuildingItem.offset_x, item_y+BuildingItem.offset_y, item.button_rect.width, item.button_rect.height)
+        
+                    if item_rect.collidepoint(mouse_pos)and item.available and mouse_pos[1]<BuildingItem.offset_y+self.background.get_height() :
+                        if item.button_action(player,self.menu_items):
+                            self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/opis_tlo.png').convert_alpha(), (self.menu_width,self.menu_height-25))
+                            ALPHA = 0.85
+                            self.background.set_alpha(255*ALPHA)
+                        
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == pygame.BUTTON_WHEELUP:  # Scroll up
+                    if self.menu_top_item_index > 0:
+                        self.menu_top_item_index -= 1
+                elif event.button == pygame.BUTTON_WHEELDOWN:  # Scroll down
+                    if self.menu_top_item_index + self.menu_items_per_page < len(self.menu_items):
+                        self.menu_top_item_index += 1
+
+                
+                if event.button == pygame.BUTTON_LEFT:  # Left mouse button
+                    if self.scrollbar_rect.collidepoint(event.pos):  # Check if the mouse is on the scrollbar
+                        mouse_y = event.pos[1] - self.scrollbar_y
+                        thumb_position = mouse_y - self.thumb_height / 2
+                        max_thumb_position = self.scrollbar_height - self.thumb_height
+
+                        # Limit the thumb position within the scrollbar
+                        if thumb_position < 0:
+                            thumb_position = 0
+                        elif thumb_position > max_thumb_position:
+                            thumb_position = max_thumb_position
+
+                        # Calculate the corresponding menu top item index
+                        self.menu_top_item_index = int((thumb_position / max_thumb_position) * (len(self.menu_items) - self.menu_items_per_page))
+
+                elif event.type == pygame.MOUSEMOTION:
+                    if event.buttons[0]:  # Left mouse button is pressed
+                        if self.scrollbar_rect.collidepoint(event.pos):  # Check if the mouse is on the scrollbar
+                            mouse_y = event.pos[1] - self.scrollbar_y
+                            thumb_position = mouse_y - self.thumb_height / 2
+                            max_thumb_position = self.scrollbar_height - self.thumb_height
+
+                            # Limit the thumb position within the scrollbar
+                            if thumb_position < 0:
+                                thumb_position = 0
+                            elif thumb_position > max_thumb_position:
+                                thumb_position = max_thumb_position
+
+                            # Calculate the corresponding menu top item index
+                            self.menu_top_item_index = int((thumb_position / max_thumb_position) * (len(self.menu_items) - self.menu_items_per_page))
+
+
+
+
+
+class Item:
+    itemId = 0
+    
+    def __init__(self, name:str="Item ",description:str="Wylogowywanie się z życia jest Ok :P "*100, image:pygame.Surface=None, cost:int=0):
+        self.available = True
+        Item.itemId += 1
+        self.item_id = Item.itemId
+        self.name = name + str(self.item_id)
+        self.image = pygame.Surface((90, 90))
+        self.image.fill('#ff00ff')
+
+        self.FONT = pygame.font.SysFont(None, 30)
+        self.cost = random.randint(10,100)
+        self.font_surface = self.FONT.render(f"{self.name} - {self.cost} $", True, (0, 0, 0))
+        self.background = pygame.Surface((pygame.display.get_window_size()[0]/2,100-2))
+        self.background.fill((128,128,128))
+        self.itemsurf = pygame.Surface((pygame.display.get_window_size()[0]/2-2,100),pygame.SRCALPHA)
+
+        self.description = description
+
+
+        self.button_rect = pygame.Rect(self.itemsurf.get_width() - 110, self.itemsurf.get_height() // 2 - 15, 100, 30)
+        self.button_text = self.FONT.render("DELETE", True, (255, 255, 255))
+
+        self.image_width = self.image.get_width()
+        self.decssurf_width = self.itemsurf.get_width() - self.image_width - self.button_rect.width-25
+
+        self.decssurf = pygame.Surface((self.decssurf_width, 91), pygame.SRCALPHA)
+
+        self.button_image = pygame.Surface((self.button_rect.width,self.button_rect.height),SRCALPHA)
+        self.button_image.fill('#000000')
+
+
+        self.draw_text(self.decssurf,self.description,self.FONT,(0,0,0),self.decssurf.get_rect())
+    def split_text(self,text:str, font:pygame.font, surface_width:int):
+        words = text.split()
+        lines = []
+        current_line = words[0]
+        for word in words[1:]:
+            test_line = current_line + " " + word
+            if font.size(test_line)[0] <= surface_width:
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word
+        lines.append(current_line)
+        return lines
+
+    def draw_text(self,surface:pygame.Surface, text:str, font, color:pygame.Color, rect:pygame.Rect):
+        lines = self.split_text(text, font, rect.width)
+        rect.y+=8+font.size("Tg")[1] 
+        
+        line_height = font.size("Tg")[1]  # Wysokość jednej linii tekstu
+        
+        max_lines = rect.height // line_height  # Maksymalna liczba linii, która zmieści się w wysokości powierzchni
+        if len(lines) > max_lines:
+            lines = lines[:max_lines-1]
+            lines[-1] += " ..."  # Dodanie elips na końcu ostatniej linii
+    
+        y = rect.y
+        for line in lines:
+            text_surface = font.render(line, True, color)
+            surface.blit(text_surface, (rect.x, y))
+            y += line_height
+
+
+    def draw(self, window, x, y):
+        # Wyświetlanie g self.menu_width/2
+        # rafiki przedmiotu na określonych współrzędnych
+        self.itemsurf.blit(self.background,(1,1))
+        self.itemsurf.blit(self.image,(5,5))
+        self.itemsurf.blit(self.font_surface, (self.image.get_width()+9, 7))
+        self.itemsurf.blit(self.decssurf,(100,0))
+        
+
+        self.itemsurf.blit(self.button_image,self.button_rect)
+
+
+        self.itemsurf.blit(self.button_text, (self.button_rect.x + 10, self.button_rect.y + 8))
+
+        window.blit(self.itemsurf, (x, y))
+
+    def button_action(self,items):
+        
+        items.remove(self)
+        self.button_image.fill('#00ff00')
+        self.available = False
+        self.button_text = self.FONT.render("Owned", True, (255, 255, 255))
+        pass
+    
+    def button_action2(self,game_data):
+        
+        save_game_data = game_data
+        tmp = [game_data.allplayers,
+        game_data.allevents,
+        game_data.allbuildingmenu]
+        # print(tmp)
+
+
+        # Save Map
+        with open('hexmap.csv', 'w',encoding='utf-8') as f:
+            f.write('x;y;number;obwodka;zajete;odkryte;fild_add;textureID;rodzaj;surowiec\n')
+            for hexagon in range(len(save_game_data.map.allhex)):
+                f.write(str(save_game_data.map.allhex['hex',hexagon].polozenie_hex_x)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].polozenie_hex_y)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].number)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].obwodka)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].zajete)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].odkryte)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].field_add)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].texture_index)+';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].rodzaj)+ ';')
+                f.write(str(save_game_data.map.allhex['hex',hexagon].rodzaj_surowca_var)+';')
+                f.write('\n')
+        with open('playerStats.csv', 'w',encoding='utf-8') as f:
+            f.write('player_name;home;nacja;wyb;turn_stop;field_status;camera_stop;player_hex_status;gold_count;army_count;terrain_count;turn_count;army_count_bonus;gold_count_bonus;')
+            for surowiec in save_game_data.allplayers[0].surowce_ilosc:
+                f.write(str(surowiec[0])+';')
+            f.write('\n')
+            for player in save_game_data.allplayers:
+                f.write(str(player.player_name)+';')
+                f.write(str(player.home)+';')
+                f.write(str(player.nacja)+';')
+                f.write(str(player.wyb)+';')
+                f.write(str(player.turn_stop)+';')
+                f.write(str(player.field_status)+';')
+                f.write(str(player.camera_stop)+';')
+                f.write(str(player.player_hex_status)+';')
+                f.write(str(player.gold_count)+';')
+                f.write(str(player.army_count)+';')
+                f.write(str(player.terrain_count)+';')
+                f.write(str(player.turn_count)+';')
+                f.write(str(player.army_count_bonus)+';')
+                f.write(str(player.gold_count_bonus)+';')
+
+                ######
+                for surowiec in player.surowce_ilosc:
+                    f.write(str(surowiec[1])+';')
+                f.write('\n')
+                
+    
+    
+        
+        
+        self.button_text = self.FONT.render("Owned", True, (255, 255, 255))
+        pass
+
+    def print_info(self):
+        print("Item ID:", self.item_id)
+        print("Name:", self.name)
+        print("Cost:", self.cost)
+        print("Description:", self.description)
+        print("------------------------")
+
+
+class SaveMenu:
+    active = False
+    def __init__(self, window:pygame.Surface, items:list[Item], menu_width:int, menu_height:int):
+        self.window = window
+        self.menu_items = items  # Przykładowa lista przedmiotów w menu
+        self.menu_width = menu_width
+        self.menu_height = menu_height
+        self.menu_item_height = 100
+        self.menu_top_item_index = 0
+        self.item_spacing = 20  # Odstęp między przedmiotami
+
+        # Scrollbar settings
+        self.scrollbar_width = 16
+        self.scrollbar_margin = 8
+        self.scrollbar_x = self.window.get_width() - self.scrollbar_width - self.scrollbar_margin
+        self.scrollbar_y = self.scrollbar_margin
+        self.scrollbar_height = self.window.get_height() - self.scrollbar_margin * 2
+
+        self.menu_items_per_page = (self.menu_height - self.scrollbar_margin * 2) // (self.menu_item_height + self.item_spacing)
+        self.menu_x = 0  # Set the desired x-coordinate of the menu
+        self.menu_y = 0  # Set the desired y-coordinate of the menu
+
+        self.back_rect = pygame.Rect(self.scrollbar_x-200,50,150,50)
+
+    def draw_menu(self):
+        # Rysowanie menu (inne elementy pominięte dla uproszczenia)
+        
+        pygame.draw.rect(self.window,(255,255,0),self.back_rect)
+
+        for i, item in enumerate(self.menu_items):
+            item_y = self.menu_y + self.scrollbar_margin + (i - self.menu_top_item_index) * (self.menu_item_height + self.item_spacing)
+            item_rect = pygame.Rect(self.menu_width/4, item_y, self.menu_width/2, self.menu_item_height)
+            if item_rect.collidepoint(pygame.mouse.get_pos()):
+                # Zaznaczony przedmiot
+                pygame.draw.rect(self.window, (192, 192, 255), item_rect)
+            pygame.draw.rect(self.window, (20, 30, 100), item_rect, 1)
+            
+            item.draw(self.window, item_rect.x, item_y)
+
+        # Scrollbar
+        pygame.draw.rect(self.window, (128, 128, 128), (self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height))
+        self.scrollbar_rect = pygame.Rect(self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height)
+        # Calculate the position and height of the scrollbar thumb
+        self.thumb_height = self.scrollbar_height / len(self.menu_items) * self.menu_items_per_page
+        self.thumb_y = self.scrollbar_y + (self.menu_top_item_index / len(self.menu_items)) * self.scrollbar_height
+
+        # Draw the scrollbar thumb
+        pygame.draw.rect(self.window, (192, 192, 192), (self.scrollbar_x, self.thumb_y, self.scrollbar_width, self.thumb_height))
+    def handle_event(self, event,game):
+        offset = self.menu_width/4
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:  # Kliknięcie lewym przyciskiem myszy
+                mouse_pos = pygame.mouse.get_pos()
+                for i, item in enumerate(self.menu_items):
+                    item_y = item.button_rect.y + self.scrollbar_margin + (i - self.menu_top_item_index) * \
+                        (self.menu_item_height + self.item_spacing)
+                    item_rect = pygame.Rect(item.button_rect.x+offset, item_y, item.button_rect.width, item.button_rect.height)
+                    
+                    
+                    if self.back_rect.collidepoint(mouse_pos):
+                        SaveMenu.active = False
+                    if item_rect.collidepoint(mouse_pos)and item.available:
+                        item.button_action2(game)
+                        print('removed')
+        if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == pygame.BUTTON_WHEELUP:  # Scroll up
+                    if self.menu_top_item_index > 0:
+                        self.menu_top_item_index -= 1
+                elif event.button == pygame.BUTTON_WHEELDOWN:  # Scroll down
+                    if self.menu_top_item_index + self.menu_items_per_page < len(self.menu_items):
+                        self.menu_top_item_index += 1
+
+                
+                if event.button == pygame.BUTTON_LEFT:  # Left mouse button
+                    if self.scrollbar_rect.collidepoint(event.pos):  # Check if the mouse is on the scrollbar
+                        mouse_y = event.pos[1] - self.scrollbar_y
+                        thumb_position = mouse_y - self.thumb_height / 2
+                        max_thumb_position = self.scrollbar_height - self.thumb_height
+
+                        # Limit the thumb position within the scrollbar
+                        if thumb_position < 0:
+                            thumb_position = 0
+                        elif thumb_position > max_thumb_position:
+                            thumb_position = max_thumb_position
+
+                        # Calculate the corresponding menu top item index
+                        self.menu_top_item_index = int((thumb_position / max_thumb_position) * (len(self.menu_items) - self.menu_items_per_page))
+
+                elif event.type == pygame.MOUSEMOTION:
+                    if event.buttons[0]:  # Left mouse button is pressed
+                        if self.scrollbar_rect.collidepoint(event.pos):  # Check if the mouse is on the scrollbar
+                            mouse_y = event.pos[1] - self.scrollbar_y
+                            thumb_position = mouse_y - self.thumb_height / 2
+                            max_thumb_position = self.scrollbar_height - self.thumb_height
+
+                            # Limit the thumb position within the scrollbar
+                            if thumb_position < 0:
+                                thumb_position = 0
+                            elif thumb_position > max_thumb_position:
+                                thumb_position = max_thumb_position
+
+                            # Calculate the corresponding menu top item index
+                            self.menu_top_item_index = int((thumb_position / max_thumb_position) * (len(self.menu_items) - self.menu_items_per_page))
+
+
+
