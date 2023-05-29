@@ -98,11 +98,13 @@ class Player:
 
                             if allhex["hex", i].texture_index == -2: # ruiny
                                 enemy = random.randint(50,150)
-                                self.army_count -= enemy
+
                                 if self.army_count > enemy:
                                     self.gold_count += int(10*random.randint(1, enemy*2))
+                                    self.army_count -= enemy
                                 else:
                                     self.attack_fail = True
+                                    self.army_count = 0
 
                             if allhex["hex", i].texture_index == -3: # oboz 
                                 enemy = random.randint(10,50)
@@ -690,10 +692,14 @@ class EventMenagment:
         self.results.append(result)
 
     def check_result(self):
-        if not self.results == []:
+
+
+        if self.results:
+
             self.results[0].execute()
             if self.results[0].stop:
-                self.results = []
+                del self.results[0]
+                time.sleep(0.5)
 
 
 class Event:
@@ -807,7 +813,7 @@ class Event:
                 managment.add_result(Result)
         if self.Wybor == 1:
             x = random.randint(0, 99)
-            if x > 50:
+            if x > 1:
                 self.managment.player.gold_count -= 100
                 opis = " Wędrowiec był trochę rozczarowany \ntwoim skąpstwem ale jako że sam\n potrzebował złota stwierdził że\n  sprzeda ci eliksir  za \n 100 sztuk złota."
                 Result = EventResults(opis, self.ekran, self.managment)
@@ -815,19 +821,23 @@ class Event:
                 x = random.randint(0, 99)
                 if x < 30:
                     opis = " Testujesz eliksir jednak okazuje sie on\n być oszustwem i nic nie powoduję albo\n ma jakieś efekty których nie zauważyłeś\n\n\n Tracisz 100 złota"
+
                     Result = EventResults(opis, self.ekran, self.managment)
                     managment.add_result(Result)
+
                 if 30 < x < 75:
                     self.managment.player.army_count += 50
                     opis = " postanawiasz dać eliksir swoim \n żołnierzom którzy po spożyciu \n eliksiru poczuli sie silniejsi\n\n\n Zyskujesz +50 wojska ! \n Tracisz 100 złota"
                     Result = EventResults(opis, self.ekran, self.managment)
                     managment.add_result(Result)
 
+
                 if x > 75:
                     self.managment.player.gold_count += 500
                     opis = " Postanawiasz wypróbować eliksir \n na jednym ze swoich sług. \n Nieoczekiwanie sługa po wypiciu\n zamienia się w złoty posąg co \n prawda szkoda sługi jednak zyskałes\n sporo złota wiec jego\n śmieć nie poszła na marne\n\n\n Zyskujesz +400 złota !"
                     Result = EventResults(opis, self.ekran, self.managment)
                     managment.add_result(Result)
+
             else:
                 opis = " Wędrowiec stwierdził że i tak cena za taki\n wspaniały eliksir jest atrakcyjna a skoro\n ty nie chcesz to sprzeda go komuś innemu"
                 Result = EventResults(opis, self.ekran, self.managment)
@@ -972,6 +982,10 @@ class EventResults:
         if self.rect.collidepoint(collision) and mouse_pressed[0]:
             self.stop = True
             self.managment.player.turn_stop = False
+
+
+
+
 
 
 # Surowce

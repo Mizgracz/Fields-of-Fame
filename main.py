@@ -291,6 +291,7 @@ class Game:
             self.map.colision_detection_obwodka()
             self.currentevent.random_event()
             self.map.rysuj_obwodke_i_zajete()
+
             self.currentevent.check_result()
 
 
