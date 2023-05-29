@@ -55,7 +55,7 @@ class Player:
 
         self.attack_fail = False
         self.gold_count = 0
-        self.army_count = 100
+        self.army_count = 0
         self.terrain_count = 1
         self.turn_count = 1
         self.army_count_bonus = 0
@@ -657,27 +657,32 @@ class EventMenagment:
         self.events = []
         self.results = []
         self.placeholder = "texture/Events/ruiny_event.png"
+
     def start_event_list(self):
 
-        najemnicy = Event(self.screen, opis_najemnicy, "texture/Events/najemnicy_img.png", 3, select_najemnicy, "Najemnicy", self)
+        najemnicy = Event(self.screen, opis_najemnicy, "texture/Events/najemnicy_img.png", 3, select_najemnicy, "Najemnicy", self, 200, 50)
         self.events.append(najemnicy)
-        ruiny = Event(self.screen,opis_ruiny,self.placeholder, 2, select_ruiny, "Ruiny", self)
+        ruiny = Event(self.screen, opis_ruiny, self.placeholder, 2, select_ruiny, "Ruiny", self, 0, 25)
         self.events.append(ruiny)
+        eliksir = Event(self.screen,opis_eliksir, self.placeholder, 3, select_eliksir,"Eliksir",self,0,0)
+        self.events.append(eliksir)
 
     def random_event(self):
-
         if self.turn < self.player.turn_count:
             if self.events:
                 if random.randint(0, 99) < self.chance:
 
-                    x = random.choice(self.events)
-                    x.execute()
-                    self.events.remove(x)
-                    self.turn = self.player.turn_count
-                    self.chance = 0
+                    for i in range(0, 10):
+                        x = random.choice(self.events)
+                        if x.gold_min <= self.player.gold_count and x.army_min <= self.player.army_count:
+                            x.execute()
+                            self.events.remove(x)
+                            self.turn = self.player.turn_count
+                            self.chance = 0
+                            break
 
                 else:
-                    self.chance += 20
+                    self.chance += 10
 
                     self.turn = self.player.turn_count
 
@@ -702,7 +707,7 @@ class Event:
     sound_slice.set_volume(1.0)
 
     def __init__(self, ekran: pygame.Surface, opis: str, grafika, ilosc_opcji: int, opisy_opcji: str, nazwa: str,
-                 managment: EventMenagment):
+                 managment: EventMenagment,gold_min,army_min):
         self.ekran = ekran
         self.opis = opis
         self.grafika = grafika
@@ -710,7 +715,8 @@ class Event:
         self.opisy_opcji = opisy_opcji
         self.nazwa = nazwa
         self.managment = managment
-
+        self.gold_min = gold_min
+        self.army_min = army_min
 
     def execute(self):
         Event.sound_horn.play()
@@ -757,7 +763,7 @@ class Event:
 
                 opisy = [" OK "]
                 najemnicy_thief = Event(managment.screen, opis_najemnicy_thief, "texture/Events/najemnicy_img.png", 1, opisy,
-                                        "najemnicy_thief", managment)
+                                        "najemnicy_thief", managment, 50, 100)
                 managment.events.append(najemnicy_thief)
 
     def najemnicy_thief(self, managment):
@@ -778,6 +784,53 @@ class Event:
                 self.managment.player.gold_count += 100
                 opis = " Po całym dniu przeszukiwaniu ruin twoi\n żołnierze znaleźli trochę kosztowności \n\n\n Zyskujesz : + 100 złota !"
                 Result = EventResults(opis, self.ekran,self.managment)
+                managment.add_result(Result)
+
+    def Eliksir(self,managment):
+        if self.Wybor == 0:
+            x = random.randint(0, 99)
+            self.managment.player.gold_count -= 200
+            if x < 30:
+                opis = " Testujesz eliksir jednak okazuje sie on\n być oszustwem i nic nie powoduję albo\n ma jakieś efekty których nie zauważyłeś\n\n\n Tracisz 200 złota"
+                Result = EventResults(opis, self.ekran, self.managment)
+                managment.add_result(Result)
+            if 30 < x < 75:
+                self.managment.player.army_count += 50
+                opis = " postanawiasz dać eliksir swoim \n żołnierzom którzy po spożyciu \n eliksiru poczuli sie silniejsi\n\n\n Zyskujesz +50 wojska ! \n Tracisz 200 złota"
+                Result = EventResults(opis, self.ekran, self.managment)
+                managment.add_result(Result)
+
+            if x > 75:
+                self.managment.player.gold_count += 500
+                opis = " Postanawiasz wypróbować eliksir \n na jednym ze swoich sług. \n Nieoczekiwanie sługa po wypiciu\n zamienia się w złoty posąg co \n prawda szkoda sługi jednak zyskałes\n sporo złota wiec jego\n śmieć nie poszła na marne\n\n\n Zyskujesz +300 złota !"
+                Result = EventResults(opis, self.ekran, self.managment)
+                managment.add_result(Result)
+        if self.Wybor == 1:
+            x = random.randint(0, 99)
+            if x > 50:
+                self.managment.player.gold_count -= 100
+                opis = " Wędrowiec był trochę rozczarowany \ntwoim skąpstwem ale jako że sam\n potrzebował złota stwierdził że\n  sprzeda ci eliksir  za \n 100 sztuk złota."
+                Result = EventResults(opis, self.ekran, self.managment)
+                managment.add_result(Result)
+                x = random.randint(0, 99)
+                if x < 30:
+                    opis = " Testujesz eliksir jednak okazuje sie on\n być oszustwem i nic nie powoduję albo\n ma jakieś efekty których nie zauważyłeś\n\n\n Tracisz 100 złota"
+                    Result = EventResults(opis, self.ekran, self.managment)
+                    managment.add_result(Result)
+                if 30 < x < 75:
+                    self.managment.player.army_count += 50
+                    opis = " postanawiasz dać eliksir swoim \n żołnierzom którzy po spożyciu \n eliksiru poczuli sie silniejsi\n\n\n Zyskujesz +50 wojska ! \n Tracisz 100 złota"
+                    Result = EventResults(opis, self.ekran, self.managment)
+                    managment.add_result(Result)
+
+                if x > 75:
+                    self.managment.player.gold_count += 500
+                    opis = " Postanawiasz wypróbować eliksir \n na jednym ze swoich sług. \n Nieoczekiwanie sługa po wypiciu\n zamienia się w złoty posąg co \n prawda szkoda sługi jednak zyskałes\n sporo złota wiec jego\n śmieć nie poszła na marne\n\n\n Zyskujesz +400 złota !"
+                    Result = EventResults(opis, self.ekran, self.managment)
+                    managment.add_result(Result)
+            else:
+                opis = " Wędrowiec stwierdził że i tak cena za taki\n wspaniały eliksir jest atrakcyjna a skoro\n ty nie chcesz to sprzeda go komuś innemu"
+                Result = EventResults(opis, self.ekran, self.managment)
                 managment.add_result(Result)
 
 

@@ -1,4 +1,9 @@
 
+#opis 60
+#select 38
+#result 39
+
+
 # Najemnicy
 
 opis_najemnicy = " Na granicy Twojego królestwa pojawia się grupa najemników, \n którzy oferują swoje usługi w zamian za złoto.\n " \
@@ -28,3 +33,12 @@ select_ruiny = ["Postanawiasz przeszukać ruiny,\n wysyłasz tam grupę dzielnyc
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+
+
+# Eliksir
+
+opis_eliksir = "Spotykasz tajemniczego wędrowca, który proponuje ci wymianę\n złota na niezwykły eliksir, który ma podobno magiczną moc.\nWędrowiec długo zachwala eliksir jednak nie zdradza on \n co dokładnie powoduje eliksir. na koniec żąda 200 sztuk złota\n " \
+               "Co robisz ?"
+select_eliksir = ["Zgadasz się i kupujesz eliksir",
+                  "Postanawiasz sie targować i\n twierdzisz że cena jest zbyt duża",
+                  "Postanawiasz nie korzystać z tej  oferty\n bo wydaje ci sie ona podejrzana"]
