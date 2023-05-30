@@ -98,16 +98,39 @@ class Player:
                             print("budynek")
                             # dodawanie bonusu do zarabiania
 
-                            if allhex["hex", i].texture_index == -2: # ruiny
-                                enemy = random.randint(50,150)
+                            if allhex["hex", i].texture_index == -2: # krypta
 
-                                if self.army_count > enemy:
-                                    self.gold_count += int(10*random.randint(1, enemy*2))
-                                    self.army_count -= enemy
-                                else:
-                                    self.attack_fail = True
-                                    self.army_count = 0
+                                crypt = NeutralFight(screen, True)
+                                while crypt.active:
+                                    pygame.event.get()
+                                    crypt.draw(" Czy napewno chcesz przeszukać\n kryptę mogą tam sie kryć \n niebezpieczni wrogowie\n ale też różne skarby ?")
+                                    wybor = crypt.check()
+                                    if wybor == 1:
+                                        crypt.active = False
 
+                                        enemy = random.randint(50,150)
+
+                                        if self.army_count > enemy:
+                                            gold = int(10*random.randint(1, enemy*2))
+                                            self.gold_count += gold
+                                            self.army_count -= enemy
+                                            opis = " Udało ci się splądrować kryptę ! \n\n W środku znalazłeś :\n " + str(
+                                                gold) + "  złota\n\n\n" + "Jednak podczas przeszukiwania straciłeś : " \
+                                                   + str(enemy) + "wojska"
+                                            Result = EventResults(opis, screen, managment)
+                                            managment.add_result(Result)
+                                        else:
+                                            opis = " Niestety nie udało ci się splądrować \n\n krypty ! \n Wrogowie strzeżacy krypte okazali\n " \
+                                                   "się zbyt silni\n\n straciłeś wojsko"
+                                            Result = EventResults(opis, screen, managment)
+                                            managment.add_result(Result)
+
+                                            self.attack_fail = True
+                                            self.army_count = 0
+
+                                    elif wybor == 0:
+                                        crypt.active = False
+                                        self.atack_stop = True
 
                             if allhex["hex", i].texture_index == -3: # oboz 
 
