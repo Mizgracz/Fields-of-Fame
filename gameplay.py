@@ -52,7 +52,7 @@ class Player:
         self.camera_stop = False
         self.player_hex_status = False
         self.item_offset = pygame.Vector2(0, 115)
-
+        self.atack_stop = False
         self.attack_fail = False
         self.gold_count = 0
         self.army_count = 0
@@ -78,8 +78,10 @@ class Player:
             if surowiec == self.surowce_ilosc[i][0]:
                 self.surowce_ilosc[i][1] += 100
 
-    def zajmij_pole(self, allrect, allmask, allhex, dec):
+    def zajmij_pole(self, allrect, allmask, allhex, dec,screen,managment):
+
         if self.player_hex_status:
+            print("zajmuje")
             mouse_presses = pygame.mouse.get_pressed()
             if mouse_presses[0]:
                 pos1 = pygame.mouse.get_pos()
@@ -106,23 +108,46 @@ class Player:
                                     self.attack_fail = True
                                     self.army_count = 0
 
+
                             if allhex["hex", i].texture_index == -3: # oboz 
-                                enemy = random.randint(10,50)
-                                print(enemy)
 
-                                if self.army_count > enemy:
-                                    gold = int(3*enemy/random.randint(1, 6))
-                                    self.gold_count += gold
+                                barbarian = NeutralFight(screen,True)
+                                while barbarian.active:
+                                    pygame.event.get()
+                                    barbarian.draw(" Czy napewno chcesz zatakować\n obóz barbarzynców ? ")
+                                    wybor = barbarian.check()
+                                    if wybor == 1:
+                                        barbarian.active = False
+                                        enemy = random.randint(10,50)
 
-                                    allhex["hex", i].texture_index = 1
-                                    allhex["hex", i].update_texture()
 
-                                    self.surowce_ilosc[1][1] = random.randint(0,5)
-                                    self.surowce_ilosc[7][1] = random.randint(50,200)
-                                    self.army_count -= enemy
-                                else:
-                                    self.army_count = 0
-                                    self.attack_fail = True
+                                        if self.army_count > enemy:
+                                            gold = int(3*enemy/random.randint(1, 6))
+                                            self.gold_count += gold
+
+                                            allhex["hex", i].texture_index = 1
+                                            allhex["hex", i].update_texture()
+
+                                            self.surowce_ilosc[1][1] = random.randint(0,5)
+                                            self.surowce_ilosc[7][1] = random.randint(50,200)
+                                            self.army_count -= enemy
+
+                                            opis = " Udało ci się pokonać barbarzynców ! \n\n Po slądrowaniu wioski znajdujesz :\n " + str(gold) + "  złota\n\n\n" + "W walce straciłeś : "\
+                                                   + str(enemy) + "wojska"
+                                            Result = EventResults(opis, screen, managment)
+                                            managment.add_result(Result)
+
+                                        else:
+                                            opis = " Niestety Barbarzyncy okazali się zbyt \n silni pokonali cię a ty straciłeś\n swoje wojsko \n "
+                                            Result = EventResults(opis, screen, managment)
+                                            managment.add_result(Result)
+                                            self.army_count = 0
+                                            self.attack_fail = True
+
+                                    elif wybor == 0:
+                                        barbarian.active = False
+                                        self.atack_stop = True
+
 
                             elif allhex["hex", i].texture_index == 10: # wioska 
                                 self.gold_count_bonus += 10
@@ -133,6 +158,17 @@ class Player:
                             self.player_hex_status = False
                             self.turn_stop = False
                             self.confirm = True
+
+                        elif self.atack_stop:
+                            self.atack_stop = False
+                            allhex["hex", i].zajete = False
+                            allhex["hex", i].field_add = True
+                            self.field_status = True
+                            self.player_hex_status = True
+                            self.turn_stop = True
+                            self.confirm = False
+
+
                         else:
                             allhex["hex", i].zajete = True
                             allhex["hex", i].field_add = False
@@ -666,7 +702,7 @@ class EventMenagment:
         self.events.append(najemnicy)
         ruiny = Event(self.screen, opis_ruiny, self.placeholder, 2, select_ruiny, "Ruiny", self, 0, 25)
         self.events.append(ruiny)
-        eliksir = Event(self.screen,opis_eliksir, self.placeholder, 3, select_eliksir,"Eliksir",self,0,0)
+        eliksir = Event(self.screen,opis_eliksir, self.placeholder, 3, select_eliksir,"Eliksir",self,200,0)
         self.events.append(eliksir)
 
     def random_event(self):
@@ -1110,3 +1146,59 @@ class Resource:
                 self.player.surowce_ilosc[self.ID][1] -= self.count
                 self.player.gold_count += self.count * self.prize
                 self.count = 0
+
+
+class NeutralFight:
+
+    def __init__(self,screen,active):
+        self.background = pygame.transform.smoothscale(pygame.image.load("texture/fight/eventy_wybor_tak_nie_window.png").convert(),(1066/2.5,600/2.5))
+        self.yes =  pygame.transform.smoothscale(pygame.image.load("texture/fight/button_tak.png").convert(),(259/2.3,116/2.5))
+        self.no = pygame.transform.smoothscale(pygame.image.load("texture/fight/button_nie.png").convert(),(259/2.3,116/2.5))
+        self.screen = screen
+        self.active = active
+        self.screen_rect = screen.get_rect()
+        self.background_rect = self.background.get_rect()
+        self.background_rect.center = self.screen_rect.center
+        self.yes_rect = self.yes.get_rect()
+        self.yes_rect.bottomleft = self.background_rect.midbottom
+        self.yes_rect.x += 20
+        self.yes_rect.y -= 10
+        self.no_rect = self.no.get_rect()
+        self.no_rect.bottomright = self.background_rect.midbottom
+        self.no_rect.x -= 20
+        self.no_rect.y -= 10
+        self.font = pygame.font.SysFont("constanta", 30)
+        self.text_rect = self.background_rect.topleft
+
+
+
+
+
+
+    def draw(self,tekst):
+        if self.active:
+            opis_linie = tekst.split('\n')
+            self.screen.blit(self.background,self.background_rect)
+            self.screen.blit(self.yes,self.yes_rect)
+            self.screen.blit(self.no, self.no_rect)
+            odstep = 70
+            odstep_x = 40
+
+            for linia in opis_linie:
+                tekst = self.font.render(linia, True, 'gray')
+
+                self.screen.blit(tekst, (self.background_rect.topleft[0] + odstep_x, self.background_rect.topleft[1] + odstep))
+                odstep += 25
+            pygame.display.flip()
+
+
+    def check(self):
+
+        collision = pygame.mouse.get_pos()
+        mouse_pressed = pygame.mouse.get_pressed()
+        if self.no_rect.collidepoint(collision) and mouse_pressed[0]:
+            self.active = False
+            return 0
+        if self.yes_rect.collidepoint(collision) and mouse_pressed[0]:
+            self.active = False
+            return 1

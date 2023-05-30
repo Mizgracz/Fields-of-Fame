@@ -47,8 +47,8 @@ class Game:
         pygame.init()
         while not Menu.new_game :
             self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
-            
-        
+
+
 
         # budynki
         allbuilding1 = [
@@ -87,13 +87,14 @@ class Game:
         self.PlayerCount = self.start_menu.PLAYER_COUNT
         self.PlayerName = self.start_menu.PLAYER_NAME
 
-        
+
+
         self.camera = Camera()
-        
+
         self.up_bar = UpBar(screen)
         self.klepsydra1 = Hourglass(screen, frame_rate, animation_frame_interval)
 
-        
+
         self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
 
@@ -108,16 +109,16 @@ class Game:
         self.map.texture()
         self.map.generate()
         self.alldec = []
-        
+
 
         for i in range(Player.MAX):
             self.alldec.append(Decision(screen,self.map,self.allplayers[i]))
-        
+
         # definiowanie eventów dla graczy
 
         for p in range(len(self.allplayers)):
             self.alldec[p].fupdate.start(self.allplayers[p])
-        
+
         self.allevents = []
         self.allbuildingmenu =[]
         for e in range(len(self.allplayers)):
@@ -143,7 +144,7 @@ class Game:
         self.newSaveM = SaveMenu(screen,Buildings,SCREEN_WIDTH,SCREEN_HEIGHT)
 
 
-        
+
     def handle_events(self):
         global fps_on
         POZ = pygame.mouse.get_pos()
@@ -271,7 +272,7 @@ class Game:
             if not Player.start_turn:
                 Camera.player_camera_update(self.allplayers[Player.ID])
                 Player.start_turn = True
-            
+
             self.currentplayer = self.allplayers[Player.ID]
             self.currentevent = self.allevents[Player.ID]
             self.currentmenu = self.allbuildingmenu[Player.ID]
@@ -285,8 +286,8 @@ class Game:
 
             if self.currentplayer.field_status:
                 self.currentdec.fchoice.draw()
-            
-            self.currentplayer.zajmij_pole(self.map.allrect,self.map.allmask,self.map.allhex,self.currentdec) 
+
+            self.currentplayer.zajmij_pole(self.map.allrect,self.map.allmask,self.map.allhex,self.currentdec,screen,self.currentevent)
             self.map.odkryj_pole(self.Fog)
             self.map.colision_detection_obwodka()
             self.currentevent.random_event()
@@ -313,7 +314,7 @@ class Game:
                     if self.currentplayer.wyb and self.currentevent.results == []:
                         self.currentdec.draw(self.currentplayer)
             self.timer.update()
-            
+
             fps()
             pygame.display.flip()
             clock.tick(max_tps)
@@ -323,4 +324,4 @@ class Game:
 if __name__ == '__main__':
     game = Game()
     game.run()
-    
+
