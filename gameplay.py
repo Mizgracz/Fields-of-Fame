@@ -63,8 +63,9 @@ class Player:
         self.surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "],
                               ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "ryby: "],
                               ["sawmill", 0, "drewno: "], ["grain", 0, "zboże: "]]
-    
-    
+        self.licznik = 0
+        self.new_pick = True
+
     @staticmethod
     def next_player():
         if Player.ID == Player.MAX-1:
@@ -81,7 +82,11 @@ class Player:
     def zajmij_pole(self, allrect, allmask, allhex, dec,screen,managment):
 
         if self.player_hex_status:
-            print("zajmuje")
+            if self.licznik == 100:
+                self.new_pick = True
+                self.licznik = 0
+            self.licznik += 1
+
             mouse_presses = pygame.mouse.get_pressed()
             if mouse_presses[0]:
                 pos1 = pygame.mouse.get_pos()
@@ -90,7 +95,7 @@ class Player:
                     touching = allrect['hex', i].collidepoint(*pos1) and allmask['hex', i].get_at(
                         pos_in_mask1)
 
-                    if touching and allhex["hex", i].field_add and self.player_name in allhex["hex", i].playerable:
+                    if touching and allhex["hex", i].field_add and self.player_name in allhex["hex", i].playerable and self.new_pick:
                         if allhex["hex", i].rodzaj == "surowiec":
                             print(allhex["hex", i].rodzaj_surowca_var)
                             self.dopisz_surowiec(allhex["hex", i].rodzaj_surowca_var)
@@ -131,11 +136,13 @@ class Player:
                                     elif wybor == 0:
                                         crypt.active = False
                                         self.atack_stop = True
+                                        self.new_pick = False
 
                             if allhex["hex", i].texture_index == -3: # oboz 
 
                                 barbarian = NeutralFight(screen,True)
                                 while barbarian.active:
+
                                     pygame.event.get()
                                     barbarian.draw(" Czy napewno chcesz zatakować\n obóz barbarzynców ? ")
                                     wybor = barbarian.check()
@@ -168,6 +175,7 @@ class Player:
                                             self.attack_fail = True
 
                                     elif wybor == 0:
+                                        self.new_pick = False
                                         barbarian.active = False
                                         self.atack_stop = True
 
