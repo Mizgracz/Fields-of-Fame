@@ -209,7 +209,15 @@ class MapGenerator(pygame.sprite.Group):
             self.hex_zajete_surface4
         ]
         for x in range(Player.MAX):
-            self.all_zajete_surface[f'{self.players[x].player_name}'] = zajete[x] 
+            t = 2
+            if self.players[x].nacja == "kupcy":
+                t = 3
+            if self.players[x].nacja == "wojownicy":
+                t = 0
+            if self.players[x].nacja == "nomadzi":
+                t = 1
+
+            self.all_zajete_surface[f'{self.players[x].player_name}'] = zajete[t]
         
         self.allhex = {}
         self.alltex = {}

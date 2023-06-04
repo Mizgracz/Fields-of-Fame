@@ -85,8 +85,10 @@ class Game:
         self.size = self.start_menu.MAP_SIZE
         self.Fog = self.start_menu.SWITCH_FOG
         self.PlayerCount = self.start_menu.PLAYER_COUNT
+
         self.PlayerName = self.start_menu.PLAYER_NAME
 
+        self.PlayerNation = self.start_menu.PLAYER_NATION
 
 
         self.camera = Camera()
@@ -98,11 +100,14 @@ class Game:
         self.timer = Timer(screen, self)
         self.sd = SideMenu(screen)
 
+
         # gracz
         self.allplayers = []
+        x = 0
         for name in self.PlayerName:
-            self.allplayers.append(Player(name))
 
+            self.allplayers.append(Player(name,self.PlayerNation[x]))
+            x += 1
 
         self.map = MapGenerator(self.size, self.size, screen, self.camera,self.allplayers)
 

@@ -15,11 +15,13 @@ SWITCH_FOG = False
 PLAYER_COUNT = 1
 PLAYER_NAME =[]
 
+
 pygame.mixer.init()
 class Menu:
     status = True
     resume = False
     new_game = False
+    PLAYER_NATION = []
 
     button_sound_save= pygame.mixer.Sound('music/music_ambient/save.mp3')
     button_sound_save.set_volume(1.0)
@@ -58,8 +60,8 @@ class Menu:
         self.SWITCH_FOG = SWITCH_FOG
         self.PLAYER_COUNT = PLAYER_COUNT
         self.PLAYER_NAME = PLAYER_NAME
-        
-        
+
+
         self.run()
 
 
@@ -387,8 +389,10 @@ class NationConfig:
         self.Rozpocznij_rect = self.Rozpocznij.get_rect()
         self.player_names = player_name
         self.select_list = []
+        self.player_nation_list = []
         self.select_start()
         self.pick = None
+        self.all_nation = ["kupcy","wojownicy","nomadzi","budowniczowie"]
         self.run()
 
 
@@ -409,6 +413,7 @@ class NationConfig:
         for i in range(0, PLAYER_COUNT):
             name = self.player_names[licznik]
             Select = NationSelect(self.screen, x, y,self.Rozpocznij_rect.width,name)
+            self.player_nation_list.append("kupcy")
             self.select_list.append(Select)
             y += 65
             licznik += 1
@@ -423,8 +428,11 @@ class NationConfig:
                 pos = pygame.mouse.get_pos()
                 if self.Rozpocznij_rect.collidepoint(pos) and NationConfig.Active == True:
                     return "new_game"
+
                 for i in self.select_list:
+
                     if i.box_rect.collidepoint(pos):
+
                         if self.pick != None:
                             self.pick.nation_pick = False
                         i.nation_pick = True
@@ -436,21 +444,27 @@ class NationConfig:
                         pass
                     else:
                         i.nation_pick = False
+                if self.pick != None:
+                    if self.pick.left_rect.collidepoint(pos):
 
-                if self.pick.left_rect.collidepoint(pos):
 
-                    if self.pick.selected > 0:
-                        self.pick.selected -= 1
-                    self.pick.nation_pick = True
-                if self.pick.right_rect.collidepoint(pos):
+                        if self.pick.selected > 0:
+                            self.pick.selected -= 1
+                        self.pick.nation_pick = True
 
-                    if self.pick.selected < 3:
-                        self.pick.selected += 1
-                    self.pick.nation_pick = True
-                if self.pick.opis_box_rect.collidepoint(pos):
-                    self.pick.opis_select = 0
-                if self.pick.statystki_box_rect.collidepoint(pos):
-                    self.pick.opis_select = 1
+                if self.pick != None:
+                    if self.pick.right_rect.collidepoint(pos):
+
+                        if self.pick.selected < 3:
+                            self.pick.selected += 1
+                        self.pick.nation_pick = True
+
+                if self.pick != None:
+                    if self.pick.opis_box_rect.collidepoint(pos):
+                        self.pick.opis_select = 0
+                    if self.pick.statystki_box_rect.collidepoint(pos):
+                        self.pick.opis_select = 1
+
 
     def run(self):
 
@@ -467,6 +481,11 @@ class NationConfig:
             if choice:
                 return choice
             self.draw()
+            l = 0
+            for i in self.select_list:
+                self.player_nation_list[l] = self.all_nation[i.selected]
+                l += 1
+
             self.clock.tick(self.max_tps)
 
 
@@ -645,10 +664,13 @@ class PlayerConfig:
                     self.PLAYER_NAME = PLAYER_NAME
 
 
-                    NationConfig(self.screen,self.clock,self.max_tps,self.PLAYER_COUNT,self.PLAYER_NAME)
+                    nation =NationConfig(self.screen,self.clock,self.max_tps,self.PLAYER_COUNT,self.PLAYER_NAME)
 
 
+
+                    Menu.PLAYER_NATION = nation.player_nation_list
                     Menu.new_game = True
+
                     pygame.display.update()
 
 
