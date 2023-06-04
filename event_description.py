@@ -46,9 +46,9 @@ merchant_staty = "\n\n" \
 
 warior = "lubi sie bić i jest umieśniony"
 
-nomad = "taki cygan podróżny"
+nomad = "podróżnicy"
 
-architekt = "jako kobieta posiada bimbały"
+architekt = "budowniczowie"
 
 
 nation_opis_list = [merchant,warior,nomad,architekt]
