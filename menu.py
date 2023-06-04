@@ -1223,7 +1223,7 @@ class BuildingItem:
         self.gold_buff = gold_buff
 
 
-        self.font_surface = self.FONT.render(f"{self.name} - {self.cost} $", True, (255, 255,255))
+
         self.background = pygame.Surface((600-2,100-2))
         self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/opis.png').convert_alpha(),(600-2,100-2))
         # self.background.fill((128,128,128))
@@ -1285,7 +1285,7 @@ class BuildingItem:
         # rafiki przedmiotu na określonych współrzędnych
         self.itemsurf.blit(self.background,(1,1))
         self.itemsurf.blit(self.image,(5,5))
-        self.itemsurf.blit(self.font_surface, (self.image.get_width()+9, 7))
+        self.itemsurf.blit(self.FONT.render(f"{self.name} - {self.cost} $", True, (255, 255,255)), (self.image.get_width()+9, 7))
         self.itemsurf.blit(self.decssurf,(100,0))
         
 
@@ -1312,6 +1312,7 @@ class BuildingItem:
             return False
         
         pass
+
 class BuildingMenu:
     active = False
     def __init__(self, window:pygame.Surface, items:list[BuildingItem], menu_width:int, menu_height:int, menux:int = 0,menuy:int = 0):

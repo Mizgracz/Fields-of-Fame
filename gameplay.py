@@ -23,7 +23,7 @@ class Stats:
     camera_stop = False
     player_hex_status = False
     turn_stop = False
-    
+
     def __init__(self) -> None:
         pass
 
@@ -37,7 +37,7 @@ class Player:
     def __init__(self, name: str,nation :str) -> None:
         Player.MAX += 1
         self.confirm = False
-        self.buildMenu = None 
+        self.buildMenu = None
         self.home = random.choice(Player.castle_hex)
         self.home_x = 0
         self.home_y = 0
@@ -63,8 +63,15 @@ class Player:
         self.surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "],
                               ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "ryby: "],
                               ["sawmill", 0, "drewno: "], ["grain", 0, "zboże: "]]
+        self.resource_sell_bonus = 0
+        self.field_bonus = False
+        self.building_buy_bonus = 0
         self.licznik = 0
+        self.barbarian_bonus = 0
+        self.crypt_bonus = 0
         self.new_pick = True
+        self.nation_bonus()
+
 
     @staticmethod
     def next_player():
@@ -73,7 +80,7 @@ class Player:
         else:
             Player.ID += 1
         Player.start_turn = False
-        
+
     def dopisz_surowiec(self, surowiec):
         for i in range(len(self.surowce_ilosc)):
             if surowiec == self.surowce_ilosc[i][0]:
@@ -113,10 +120,12 @@ class Player:
                                     if wybor == 1:
                                         crypt.active = False
 
-                                        enemy = random.randint(50,150)
+                                        enemy = random.randint(50, 150)
+                                        gold = int(10 * random.randint(1, enemy * 2))
+                                        enemy = enemy - int((enemy/100 * self.crypt_bonus))
 
                                         if self.army_count > enemy:
-                                            gold = int(10*random.randint(1, enemy*2))
+
                                             self.gold_count += gold
                                             self.army_count -= enemy
                                             opis = " Udało ci się splądrować kryptę ! \n\n W środku znalazłeś :\n " + str(
@@ -138,7 +147,7 @@ class Player:
                                         self.atack_stop = True
                                         self.new_pick = False
 
-                            if allhex["hex", i].texture_index == -3: # oboz 
+                            if allhex["hex", i].texture_index == -3: # oboz
 
                                 barbarian = NeutralFight(screen,True)
                                 while barbarian.active:
@@ -149,10 +158,13 @@ class Player:
                                     if wybor == 1:
                                         barbarian.active = False
                                         enemy = random.randint(10,50)
+                                        gold = int(3 * enemy / random.randint(1, 6))
+
+                                        enemy = enemy - int((enemy / 100 * self.barbarian_bonus))
 
 
                                         if self.army_count > enemy:
-                                            gold = int(3*enemy/random.randint(1, 6))
+
                                             self.gold_count += gold
 
                                             allhex["hex", i].texture_index = 1
@@ -180,7 +192,7 @@ class Player:
                                         self.atack_stop = True
 
 
-                            elif allhex["hex", i].texture_index == 10: # wioska 
+                            elif allhex["hex", i].texture_index == 10: # wioska
                                 self.gold_count_bonus += 10
 
                         if self.attack_fail:
@@ -189,6 +201,7 @@ class Player:
                             self.player_hex_status = False
                             self.turn_stop = False
                             self.confirm = True
+                            self.new_pick = True
 
                         elif self.atack_stop:
                             self.atack_stop = False
@@ -213,6 +226,44 @@ class Player:
 
 
 
+    def nation_bonus(self):
+        if self.nacja == "kupcy":
+            self.gold_count = 50
+            self.gold_count_bonus = 10
+            self.army_count = 20
+            self.resource_sell_bonus = 30
+
+        if self.nacja == "wojownicy":
+            self.army_count = 70
+            self.gold_count = 20
+            self.army_count_bonus = 10
+            self.crypt_bonus = 15
+            self.barbarian_bonus = 30
+
+        if self.nacja == "nomadzi":
+            self.army_count = 30
+            self.gold_count = 0
+            self.army_count_bonus = - 10
+            self.gold_count_bonus = - 10
+            self.field_bonus = True
+
+        if self.nacja == "budowniczowie":
+            self.army_count = 50
+            self.gold_count = 50
+            self.building_buy_bonus = 30
+
+    def nomad_bonus(self,fchoice):
+
+        if self.nacja == "nomadzi":
+            if self.field_bonus and self.confirm == True:
+                print("xd")
+                self.field_status = True
+                self.player_hex_status = True
+                self.turn_stop = True
+                self.confirm = False
+                self.field_bonus = False
+                fchoice.check()
+
 class Camera:
     camera_x = 0
     camera_y = 0
@@ -225,7 +276,7 @@ class Camera:
         if Camera.camera_x > 1600:
             Camera.camera_x -= (Camera.camera_x-1600)
             print(f"{Camera.camera_x } {Camera.camera_y }")
-        
+
     # end def
     def __init__(self):
 
@@ -423,6 +474,7 @@ class Hourglass:
             if player.wyb == False and not player.turn_stop:
                 player.wyb = True
                 player.turn_count += 1
+                self.field_bonus = False
                 self.next_frame()
                 self.last_frame_time = pygame.time.get_ticks()
 
@@ -458,7 +510,7 @@ class Decision:
         self.numhex = self.map.num_hex_right_side
 
         self.fupdate = FieldUpdate(self.map.sprites(), self.numhex)
-        
+
         self.fchoice = FieldChoice(self.map.sprites(), self.screen,player)
 
         self.bacground_rect = self.background_image.get_rect(center=(self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2))
@@ -529,7 +581,7 @@ class FieldUpdate:
             next_index = (player.home + 1) % self.num_sprites
             c = (player.home - self.quantity_hex-1) % self.num_sprites
             d = (player.home + 1 - self.quantity_hex-1) % self.num_sprites
-            
+
             e = (player.home + self.quantity_hex-1) % self.num_sprites
             f = (player.home + self.quantity_hex ) % self.num_sprites
 
@@ -542,19 +594,19 @@ class FieldUpdate:
             FieldUpdate.sound_diamond.play()
             self.sprites[next_index].field_add = True
             self.sprites[next_index].playerable += [player.player_name]
-        
+
         if not self.sprites[c].zajete and self.sprites[player.home].player == player.player_name:
             self.sprites[c].field_add = True
             self.sprites[c].playerable += [player.player_name]
-        
+
         if not self.sprites[d].zajete and self.sprites[player.home].player == player.player_name:
             self.sprites[d].field_add = True
             self.sprites[d].playerable += [player.player_name]
-        
+
         if not self.sprites[e].zajete and self.sprites[player.home].player == player.player_name:
             self.sprites[e].field_add = True
             self.sprites[e].playerable += [player.player_name]
-        
+
         if not self.sprites[f].zajete and self.sprites[player.home].player == player.player_name:
             self.sprites[f].field_add = True
             self.sprites[f].playerable += [player.player_name]
@@ -588,7 +640,7 @@ class FieldUpdate:
             self.sprites[next_index].field_add = True
             if not player.player_name is self.sprites[next_index].playerable:
                 self.sprites[next_index].playerable += [player.player_name]
-            
+
 
         if not self.sprites[c].zajete :
             self.sprites[c].field_add = True
@@ -1272,7 +1324,13 @@ class Resource:
         if self.sell_rect.collidepoint(collision) and mouse_pressed[0]:
             if self.count > 0 :
                 self.player.surowce_ilosc[self.ID][1] -= self.count
-                self.player.gold_count += self.count * self.prize
+                gold = self.count * self.prize
+
+                if self.player.resource_sell_bonus > 0:
+                    gold = gold + (gold / 100 * self.player.resource_sell_bonus)
+
+
+                self.player.gold_count += int(gold)
                 self.count = 0
 
 

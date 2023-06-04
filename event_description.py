@@ -40,20 +40,57 @@ merchant_staty = "\n\n" \
                  "  Dostępne Pola do zajęcia : 1\n\n\n\n" \
                  "  Przychód złota na turę : 20\n\n" \
                  "  Przychód wojska na turę : 10\n\n\n\n\n\n\n" \
-                 "  Dodatkowa Premia :\n\n" \
+                 "  Dodatkowe Premie :\n\n" \
                  "  Cena sprzedaży wszystkich" \
-                 "\n  surowców +20%"
+                 "\n  surowców +30%"
 
 warior = "lubi sie bić i jest umieśniony"
 
+warior_staty = "\n\n" \
+                 "  Startowe złoto : 20\n\n" \
+                 "  Startowe Wojsko : 70\n\n" \
+                 "  Dostępne Pola do zajęcia : 1\n\n\n\n" \
+                 "  Przychód złota na turę : 10\n\n" \
+                 "  Przychód wojska na turę : 20\n\n\n\n\n\n\n" \
+                 "  Dodatkowe Premie :\n\n" \
+                 "  Premia do walki z\n  barbarzyńcami" \
+                 " +30%\n\n" \
+                 "  Premia do przeszukiwania \n" \
+                 "  Krypt +15%"
+
+
+
 nomad = "podróżnicy"
 
+nomad_staty = "\n\n" \
+                 "  Startowe złoto : 0\n\n" \
+                 "  Startowe Wojsko : 30\n\n" \
+                 "  Dostępne Pola do zajęcia : 2\n\n\n\n" \
+                 "  Przychód złota na turę : 0\n\n" \
+                 "  Przychód wojska na turę : 0\n\n\n\n\n\n\n" \
+                 "  Dodatkowe Premie :\n\n" \
+                 "  Brak opcji pozyskiwania\n" \
+              "  złota i rekrutowania wojska\n" \
+              "  ale za to możliwość " \
+              " zdobycia\n  2 pól w jednej turzę\n"
+
+
 architekt = "budowniczowie"
+
+architekt_staty = "\n\n" \
+                 "  Startowe złoto : 50\n\n" \
+                 "  Startowe Wojsko : 50\n\n" \
+                 "  Dostępne Pola do zajęcia : 1\n\n\n\n" \
+                 "  Przychód złota na turę : 10\n\n" \
+                 "  Przychód wojska na turę : 10\n\n\n\n\n\n\n" \
+                 "  Dodatkowe Premie :\n\n" \
+                 "  Wszystkie Buddynki tańszę o\n" \
+                 "  20%\n\n"
 
 
 nation_opis_list = [merchant,warior,nomad,architekt]
 
-nation_stats_list = [merchant_staty,"brak","brak","brak"]
+nation_stats_list = [merchant_staty,warior_staty,nomad_staty,architekt_staty]
 
 
 

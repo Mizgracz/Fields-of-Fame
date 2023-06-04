@@ -130,6 +130,9 @@ class Game:
             self.allevents.append(EventMenagment(screen, self.allplayers[e]))
             self.allevents[e].start_event_list()
             self.allbuildingmenu.append(BuildingMenu(screen,self.allbuildingList[e],screen.get_width()/2,500,int(0.25*screen.get_width()),int(0.2*screen.get_height())))
+            if self.allplayers[e].nacja == "kupcy":
+                for i in self.allbuildingList[e]:
+                    i.cost = i.cost - int(i.cost/100 * 30)
 
 
         self.currentplayer = self.allplayers[Player.ID]
@@ -277,6 +280,8 @@ class Game:
             if not Player.start_turn:
                 Camera.player_camera_update(self.allplayers[Player.ID])
                 Player.start_turn = True
+                if self.currentplayer.nacja == "nomadzi":
+                    self.currentplayer.field_bonus = True
 
             self.currentplayer = self.allplayers[Player.ID]
             self.currentevent = self.allevents[Player.ID]
@@ -293,6 +298,7 @@ class Game:
                 self.currentdec.fchoice.draw()
 
             self.currentplayer.zajmij_pole(self.map.allrect,self.map.allmask,self.map.allhex,self.currentdec,screen,self.currentevent)
+            self.currentplayer.nomad_bonus(self.currentdec.fchoice)
             self.map.odkryj_pole(self.Fog)
             self.map.colision_detection_obwodka()
             self.currentevent.random_event()
