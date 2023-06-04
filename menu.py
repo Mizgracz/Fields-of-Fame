@@ -52,7 +52,6 @@ class Menu:
         self.load_button_texture = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/wczytaj_button.png").convert_alpha(),(339 * 0.769,81*0.75))
         self.load_marked_button_texture = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/wczytaj_gre_button_red.png").convert_alpha(),(339 * 0.769,81*0.75))
         self.save_button_texture = pygame.image.load("texture/main_menu/zapisz_button.png").convert_alpha()
-        self.gameplay = False
         self.config1 = Config(screen)
         self.MAP_SIZE = MAP_SIZE
         self.SWITCH_FOG = SWITCH_FOG
@@ -80,7 +79,7 @@ class Menu:
                 button_sound.play()
                 if self.config1.Button_Start_Rect.collidepoint(pos) and self.config1.Active == True:
                     PlayerConfig.Active = True
-                    self.gameplay = True
+
                     self.config1.Active = False
                     Menu.status = False
                     self.MAP_SIZE = MAP_SIZE
@@ -190,7 +189,7 @@ class Menu:
                 SaveMenu.active = True
                 Menu.status = False
             if choice == 'game_options':
-                Gameconfig.Active = True
+
                 Menu.status = False
 
             elif choice == 'quit':
@@ -199,50 +198,9 @@ class Menu:
                 return choice
             self.draw()
             self.clock.tick(self.max_tps)
-class Gameconfig:
-    Active = False
-    def __init__(self, s2, music):
-        self.screen = s2
-        self.music_config = music
-        self.Button_Back_conf = pygame.image.load("texture/main_menu/gameconf/button_back.png")
-        self.Button_Fullscreen = pygame.image.load("texture/main_menu/gameconf/button_fullscreen.png")
-        self.background_image = pygame.image.load("texture/main_menu/gameconf/background.png")
-        self.Button_Window = pygame.image.load("texture/main_menu/gameconf/button_window.png")
-        self.Button_res1366x768= pygame.image.load("texture/main_menu/gameconf/button_res_1366x768.png")
-        self.Button_res1600x900= pygame.image.load("texture/main_menu/gameconf/button_res_1600x900.png")
-        self.Button_res1920x1080= pygame.image.load("texture/main_menu/gameconf/button_res_1920x1080.png")
-        self.Button_res1920x1200= pygame.image.load("texture/main_menu/gameconf/button_res_1920x1200.png")
-        self.scale_background = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-        self.Background = self.scale_background
-        self.Button_Back_Rect_conf = self.Button_Back_conf.get_rect(center=(170, 60))
-        self.Button_Fullscreen_Rec = self.Button_Fullscreen.get_rect(center=(170, 180))
-        self.Button_Window_Rec = self.Button_Window.get_rect(center=(480, 180))
-        self.Button_res1366x768_Rec = self.Button_res1366x768.get_rect(center=(170, 300))
-        self.Button_res1600x900_Rec = self.Button_res1600x900.get_rect(center=(480, 300))
-        self.Button_res1920x1080_Rec = self.Button_res1920x1080.get_rect(center=(790, 300))
-        self.Button_res1920x1200_Rec = self.Button_res1920x1200.get_rect(center=(1100, 300))
-        
-        self.font = pygame.font.Font(None, 36)
 
 
-    def draw(self,event):
-        self.screen.blit(self.Background, (0, 0))
-        self.screen.blit(self.Button_Back_conf, self.Button_Back_Rect_conf)
-        self.screen.blit(self.Button_Fullscreen, self.Button_Fullscreen_Rec)
-        self.screen.blit(self.Button_Window, self.Button_Window_Rec)
-        self.screen.blit(self.Button_res1366x768, self.Button_res1366x768_Rec)
-        self.screen.blit(self.Button_res1600x900, self.Button_res1600x900_Rec)
-        self.screen.blit(self.Button_res1920x1080, self.Button_res1920x1080_Rec)
-        self.screen.blit(self.Button_res1920x1200, self.Button_res1920x1200_Rec)
-        self.music_config.draw_window()
-        self.music_config.draw_arrows()
-        slider = pygame.Rect(50, 650, 300, 20)
-        slider_button_x = 50 + int(300 * self.music_config.volume)
-        slider_button_y = 250 + 20 // 2
-        slider_button_radius = 10
-        self.music_config.draw_slider(slider, slider_button_x, slider_button_y, slider_button_radius)
 
-        pygame.display.update()
 
 class InputBox:
     ID = 0
@@ -413,6 +371,58 @@ class OptionBox():
                     return self.active_option
         return -1
 
+class NationConfig:
+    Active = True
+    def __init__(self,screen:pygame.Surface,clock: pygame.time.Clock, max_tps: int,Player_count:int) -> None:
+        self.screen = screen
+        self.clock =clock
+        self.max_tps = max_tps
+        self.screen_width, self.screen_height = self.screen.get_size()
+        self.Background = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/menu_konfiguracji_nacje.png")
+                                                       , (self.screen_width,self.screen_height))
+        self.Rozpocznij = pygame.image.load("texture/main_menu/Rozpocznij gre.png")
+        self.Rozpocznij_rect = self.Rozpocznij.get_rect()
+        self.run()
+
+    def draw(self):
+        self.screen.blit(self.Background, (0, 0))
+        self.Rozpocznij_rect.x =self.screen_width/15
+        self.Rozpocznij_rect.y = self.screen_height - 100
+        self.screen.blit(self.Rozpocznij,(self.Rozpocznij_rect))
+
+
+    def handle_events(self):
+        global PLAYER_NAME
+        self.event = pygame.event.get()
+        for event in self.event:
+            pos = pygame.mouse.get_pos()
+            if event.type == pygame.QUIT:
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                if self.Rozpocznij_rect.collidepoint(pos) and NationConfig.Active == True:
+                    return "new_game"
+
+
+
+    def run(self):
+
+        while NationConfig.Active:
+            choice = self.handle_events()
+            pygame.display.update()
+            if choice == 'new_game':
+                NationConfig.Active = False
+
+
+
+            elif choice == 'quit':
+                sys.exit(0)
+            if choice:
+                return choice
+            self.draw()
+            self.clock.tick(self.max_tps)
+
+
 class PlayerConfig:
     Active = True
     def __init__(self,screen:pygame.Surface,clock: pygame.time.Clock, max_tps: int,Player_count:int) -> None:
@@ -433,14 +443,15 @@ class PlayerConfig:
             self.input_boxes.append(InputBox(300,223+(50*i),250,36))
         self.run()
     def draw(self):
-        self.screen.blit(self.Background,(0,0))
-        self.screen.blit(self.Button_Back,self.Button_Back_Rect)
-        self.screen.blit(self.Button_Start,self.Button_Start_Rect)
-        for box in self.input_boxes:
-            box.update()
-        for box in self.input_boxes:
-            box.draw(self.screen)
-        pass
+        if PlayerConfig.Active:
+            self.screen.blit(self.Background,(0,0))
+            self.screen.blit(self.Button_Back,self.Button_Back_Rect)
+            self.screen.blit(self.Button_Start,self.Button_Start_Rect)
+            for box in self.input_boxes:
+                box.update()
+            for box in self.input_boxes:
+                box.draw(self.screen)
+            pass
     def handle_events(self):
         global PLAYER_NAME
         self.event = pygame.event.get()
@@ -455,7 +466,7 @@ class PlayerConfig:
 
                 if self.Button_Start_Rect.collidepoint(pos) and PlayerConfig.Active == True:
 
-                    self.gameplay = True
+
                     PlayerConfig.Active = False
                     self.MAP_SIZE = MAP_SIZE
                     self.SWITCH_FOG = SWITCH_FOG
@@ -466,16 +477,18 @@ class PlayerConfig:
                     self.PLAYER_NAME = PLAYER_NAME
 
 
-                    PlayerConfig(self.screen,self.clock,self.max_tps,self.PLAYER_COUNT)
+                    NationConfig(self.screen,self.clock,self.max_tps,self.PLAYER_COUNT)
+
                     Menu.new_game = True
                     pygame.display.update()
+
 
                 elif self.Button_Back_Rect.collidepoint(pos):
                     PlayerConfig.Active = False
                     Menu.resume = False
                     Menu.status = True
                     self.input_boxes = []
-                    InputBox.ID =0
+                    InputBox.ID = 0
                     return 0
 
                 

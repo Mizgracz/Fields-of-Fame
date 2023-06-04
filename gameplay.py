@@ -726,15 +726,18 @@ class EventMenagment:
         self.events = []
         self.results = []
         self.placeholder = "texture/Events/ruiny_event.png"
+        self.turniej_udzial_chance = 0
 
     def start_event_list(self):
 
-        najemnicy = Event(self.screen, opis_najemnicy, "texture/Events/najemnicy_img.png", 3, select_najemnicy, "Najemnicy", self, 200, 50)
+        najemnicy = Event(self.screen, opis_najemnicy, "texture/Events/najemnicy_img.png", 3, select_najemnicy, "Najemnicy", self, 200, 50,"Najemnicy")
         self.events.append(najemnicy)
-        ruiny = Event(self.screen, opis_ruiny, self.placeholder, 2, select_ruiny, "Ruiny", self, 0, 25)
+        ruiny = Event(self.screen, opis_ruiny, self.placeholder, 2, select_ruiny, "Ruiny", self, 0, 25,"Ruiny")
         self.events.append(ruiny)
-        eliksir = Event(self.screen,opis_eliksir, self.placeholder, 3, select_eliksir,"Eliksir",self,200,0)
+        eliksir = Event(self.screen,opis_eliksir, self.placeholder, 3, select_eliksir,"Eliksir",self,200,0,"Wędrowiec i Eliksir")
         self.events.append(eliksir)
+        turniej = Event(self.screen,opis_turniej,self.placeholder,3,select_turniej,"Turniej",self,100,1,"Turniej Rycerski")
+        self.events.append(turniej)
 
     def random_event(self):
         if self.turn < self.player.turn_count:
@@ -779,13 +782,14 @@ class Event:
     sound_slice = pygame.mixer.Sound('music/music_ambient/slice.mp3')
     sound_slice.set_volume(1.0)
 
-    def __init__(self, ekran: pygame.Surface, opis: str, grafika, ilosc_opcji: int, opisy_opcji: str, nazwa: str,
-                 managment: EventMenagment,gold_min,army_min):
+    def __init__(self, ekran: pygame.Surface, opis: str, grafika, ilosc_opcji: int, opisy_opcji: str, funkcja: str,
+                 managment: EventMenagment, gold_min, army_min, nazwa):
         self.ekran = ekran
         self.opis = opis
         self.grafika = grafika
         self.ilosc_opcji = ilosc_opcji
         self.opisy_opcji = opisy_opcji
+        self.funkcja = funkcja
         self.nazwa = nazwa
         self.managment = managment
         self.gold_min = gold_min
@@ -798,7 +802,7 @@ class Event:
         self.Choose = EventOptions(self.ilosc_opcji, self.opisy_opcji, self.ekran)
         self.Choose.draw()
         self.Wybor = self.Choose.colision_check(None)
-        getattr(self, self.nazwa)(self.managment)
+        getattr(self, self.funkcja)(self.managment)
 
 
 
@@ -832,11 +836,11 @@ class Event:
 
 
             x = random.randint(0, 99)
-            if x < 30:
+            if x < 100:
 
                 opisy = [" OK "]
                 najemnicy_thief = Event(managment.screen, opis_najemnicy_thief, "texture/Events/najemnicy_img.png", 1, opisy,
-                                        "najemnicy_thief", managment, 50, 100)
+                                        "najemnicy_thief", managment, 50, 100, "Najemnicy")
                 managment.events.append(najemnicy_thief)
 
     def najemnicy_thief(self, managment):
@@ -910,17 +914,110 @@ class Event:
                 Result = EventResults(opis, self.ekran, self.managment)
                 managment.add_result(Result)
 
+    def Turniej(self,managment):
+        if self.Wybor == 0:
+            self.managment.player.gold_count -= 100
+            self.managment.player.army_count -= 1
+            opis = " Zapłaciłeś 100 złota za udział w turnieju \n" \
+                   " a twój rycerz już niedługo zabierze się \n do treningów !\n\n" \
+                   " Turniej rozpocznie się za jakiś czas\n\n\n Tracisz : 100 złota"
+
+            Result = EventResults(opis, self.ekran, self.managment)
+            managment.add_result(Result)
+            turniej_przygotowanie = Event(managment.screen, opis_turniej_przygotowanie, "texture/Events/najemnicy_img.png", 3,
+                                    select_turniej_przygotowanie,
+                                    "turniej_przygotowanie", managment, 300, 0, "Przygotowanie do Turnieju")
+            managment.events.append(turniej_przygotowanie)
+
+        if self.Wybor == 2:
+            x = random.randint(0,100)
+            if x < 50:
+                self.managment.player.army_count -= 40
+                opis = "Twoi wojskowi są niezadowoleni z braku \n" \
+                       "reprezentacji i szansy pokazania się\n" \
+                       "na turnieju\n" \
+                       "morale twoje wojska spadło\n\n" \
+                       "Tracisz : 40 wojska"
+                Result = EventResults(opis, self.ekran, self.managment)
+                managment.add_result(Result)
+
+
+    def turniej_przygotowanie(self,managment):
+        if self.Wybor == 0:
+            self.managment.player.gold_count -= 300
+
+            opis = " Wydałeś 300 złota na wyposażenie \n" \
+                   " najwyżej klasy dla swojego zawodnika \n który bedzie brał udział w turnieju !\n\n" \
+                   " Turniej rozpocznie się za jakiś czas\n\n\n Tracisz : 300 złota"
+
+            Result = EventResults(opis, self.ekran, self.managment)
+            managment.add_result(Result)
+
+            turniej_udzial = Event(managment.screen, opis_turniej_udzial,
+                                          "texture/Events/najemnicy_img.png", 1,
+                                          select_turniej_udzial,
+                                          "turniej_udzial", managment, 0, 50, "Rozpoczęcię Turnieju !")
+            managment.events.append(turniej_udzial)
+            managment.turniej_udzial_chance += 40
+
+        if self.Wybor == 1:
+            self.managment.player.gold_count -= 100
+            opis = " Wydałeś 100 złota na wyposażenie \n" \
+                   " średniej klasy dla swojego zawodnika \n który bedzie brał udział w turnieju !\n\n" \
+                   " Turniej rozpocznie się za jakiś czas\n\n\n Tracisz : 100 złota"
+
+            Result = EventResults(opis, self.ekran, self.managment)
+            managment.add_result(Result)
+            turniej_udzial = Event(managment.screen, opis_turniej_udzial,
+                                   "texture/Events/najemnicy_img.png", 1,
+                                   select_turniej_udzial,
+                                   "turniej_udzial", managment, 0, 50, "Rozpoczęcię Turnieju !")
+            managment.events.append(turniej_udzial)
+            managment.turniej_udzial_chance += 20
+        if self.Wybor == 2:
+            opis = " Postanowiłeś nie inwestować w \n" \
+                   " wyposażenie dla swojego zawodnika \n Rycerz jest mocno niezadowolony\n z twojej decyzji, narzeka\n" \
+                   " że bedzię mieć mniejsze szanse\n bo inni królowie w przeciwieństwie\n do ciebie bardzo dbają o \n" \
+                   " dofinansowanie dla swoich zawodników \n\n" \
+                   " Turniej rozpocznie się za jakiś czas"
+
+            Result = EventResults(opis, self.ekran, self.managment)
+            managment.add_result(Result)
+            turniej_udzial = Event(managment.screen, opis_turniej_udzial,
+                                   "texture/Events/najemnicy_img.png", 1,
+                                   select_turniej_udzial,
+                                   "turniej_udzial", managment, 0, 50, "Rozpoczęcię Turnieju !")
+            managment.events.append(turniej_udzial)
+
+    def turniej_udzial(self,managment):
+        if self.Wybor == 0:
+            x = random.randint(0,100)
+            print("x = ",x)
+            print("chance add =",managment.turniej_udzial_chance)
+            if x + managment.turniej_udzial_chance > 90:
+                Result = EventResults(result_turniej_udzial[0], self.ekran, self.managment)
+                managment.add_result(Result)
+                managment.player.gold_count += 1000
+                managment.player.army_count += 100
+            elif x + managment.turniej_udzial_chance > 50:
+                Result = EventResults(result_turniej_udzial[1], self.ekran, self.managment)
+                managment.add_result(Result)
+                managment.player.gold_count += 200
+            else:
+                Result = EventResults(result_turniej_udzial[2], self.ekran, self.managment)
+                managment.add_result(Result)
+                managment.player.army_count -= 50
 
 
 class EventRender:
     def __init__(self, screen: pygame.Surface, opis: str, grafika,nazwa):
         self.screen = screen
         screen_x, screen_y = self.screen.get_size()
-        self.font = pygame.font.SysFont("cambria", 20)
+        self.font = pygame.font.SysFont("cambria", 18)
         self.font2 = pygame.font.SysFont("cambria", 25)
         # wizualne rzeczy config
-        wysokosc_background = screen_y * (92 / 100)
-        szerokosc_background = screen_x * (64 / 100)
+        wysokosc_background = screen_y * (95 / 100)
+        szerokosc_background = screen_x * (68 / 100)
         wysokosc_img = wysokosc_background * (60 / 100)
         szerokosc_img = szerokosc_background * (57 / 100)
         self.nazwa = nazwa
@@ -928,7 +1025,7 @@ class EventRender:
         self.x = (screen_x / 2) - (szerokosc_background / 2)
         self.y = (screen_y / 2) - (wysokosc_background / 2)
         self.img_posx = self.x - 10
-        self.img_posy = self.y + screen_y * 0.149
+        self.img_posy = self.y + screen_y * 0.149 + 7
         self.opis_posy = wysokosc_img + self.img_posy + 40
         self.opis_posx = self.img_posx
 
@@ -943,16 +1040,16 @@ class EventRender:
     def draw(self):
         self.screen.blit(self.event_back, (self.x - 36, self.y + 15))
         self.screen.blit(self.event_img, (self.img_posx, self.img_posy))
-        odstep = 0
+        odstep = -18
         for linia in self.opis_linie:
-            tekst = self.font.render(linia, True, 'white')
+            tekst = self.font.render(linia, True, 'gray')
 
-            self.screen.blit(tekst, (self.opis_posx, self.opis_posy + odstep))
+            self.screen.blit(tekst, (self.opis_posx - 4, self.opis_posy + odstep))
             odstep += 20
         title = self.font2.render("Event : ", True, 'white')
         title2 = self.font2.render(self.nazwa, True, 'white')
-        self.screen.blit(title, (self.x * 2.20, self.y+45 ))
-        self.screen.blit(title2, (self.x * 2.55, self.y + 45))
+        self.screen.blit(title, (self.x * 2.45, self.y+45 ))
+        self.screen.blit(title2, (self.x * 2.85, self.y + 45))
 
 
 class EventOptions:
@@ -980,10 +1077,10 @@ class EventOptions:
                 if i < len(self.opisy):
                     opis = self.opisy[i]
                     opis_lines = opis.split('\n')
-                    y_offset = 0
+                    y_offset = - 5
                     for line in opis_lines:
                         self.screen.blit(self.font.render(line, True, (255, 255, 255)), (self.x / 2 * 1.13,
-                                                                                         event_options_posy + self.mid_text / 2 + y_offset))
+                                                                                         event_options_posy + self.mid_text /6 + y_offset))
                         y_offset += self.font.get_height()
                 else:
                     opis = "Brak Opisu"
@@ -1034,7 +1131,7 @@ class EventResults:
         self.rect = pygame.draw.rect(self.screen, "red", (background_x + 30, background_y * 4.23, 369, 50))
         self.screen.blit(self.background_result, (background_x, background_y))
 
-        odstep = 0
+        odstep = -60
 
 
         for linia in self.opis_linie:

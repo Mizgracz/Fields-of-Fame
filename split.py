@@ -3,6 +3,7 @@ def split_text(text, chunk_size):
     return chunks
 
 text = input("Wprowadź tekst: ")
+
 chunk_size = int(input("Podaj ilość znaków na część: "))
 
 result = split_text(text, chunk_size)
