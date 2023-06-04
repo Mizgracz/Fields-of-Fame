@@ -4,6 +4,61 @@
 #result 39
 
 
+# nacje 35
+
+merchant = " Godfrey Ametystowy Władca\n\n stoi na czele Królestwa Luminaris, \n którego"\
+" siłą jest ekonomia oraz \n handel."\
+"\n\n Zaczynał jako zwykły kupiec, ale"\
+"\n jego niezwykły talent w handlu"\
+"\n i zdolność do rozpoznawania szans"\
+"\n i okazji sprawiły, że szybko"\
+"\n zdobył pozycję wśród innych"\
+"\n kupców. Zarobił fortunę na"\
+"\n sprzedaży ametystu i objął"\
+"\n przywództwo w gildii kupieckiej."\
+"\n Gdy nacja borykała się z"\
+"\n problemami i chaosem, Godfrey"\
+"\n został wybrany na króla. Jego"\
+"\n wizją było nie tylko"\
+"\n przewodzenie w handlu, ale także"\
+"\n doprowadzenie swoich ludzi do"\
+"\n niezwykłego bogactwa i chwały."\
+"\n\n Pod przywództwem Godfreya,\n Królestwo"\
+" Luminaris stworzyło\n złożony system"\
+"\n handlowy, pozyskując i sprzedając"\
+"\n różnorodne surowce, od egzotycznych"\
+"\n przypraw i jedwabiu po"\
+"\n cenne metale i kamienie szlachetne."\
+"\n Dzięki temu, ich wpływy i potęga"\
+"\n  handlowa rozciągają się na odległe"\
+"\n krainy, umieszczając ich nację"\
+"\n w czołówce ekonomicznej potęgi."
+
+merchant_staty = "\n\n" \
+                 "  Startowe złoto : 50\n\n" \
+                 "  Startowe Wojsko : 20\n\n" \
+                 "  Dostępne Pola do zajęcia : 1\n\n\n\n" \
+                 "  Przychód złota na turę : 20\n\n" \
+                 "  Przychód wojska na turę : 10\n\n\n\n\n\n\n" \
+                 "  Dodatkowa Premia :\n\n" \
+                 "  Cena sprzedaży wszystkich" \
+                 "\n  surowców +20%"
+
+warior = "lubi sie bić i jest umieśniony"
+
+nomad = "taki cygan podróżny"
+
+architekt = "jako kobieta posiada bimbały"
+
+
+nation_opis_list = [merchant,warior,nomad,architekt]
+
+nation_stats_list = [merchant_staty,"brak","brak","brak"]
+
+
+
+
+
 # Najemnicy
 
 opis_najemnicy = " Na granicy Twojego królestwa pojawia się grupa najemników, \n którzy oferują swoje usługi w zamian za złoto.\n " \

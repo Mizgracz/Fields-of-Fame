@@ -1,6 +1,7 @@
 import sys, os
 import zipfile
 import random
+from event_description import *
 from pygame.locals import *
 import pygame
 
@@ -85,7 +86,8 @@ class Menu:
                     self.MAP_SIZE = MAP_SIZE
                     self.SWITCH_FOG = SWITCH_FOG
                     self.PLAYER_COUNT = PLAYER_COUNT
-                    
+
+
                     PlayerConfig(self.screen,self.clock,self.max_tps,self.PLAYER_COUNT)
                     
 
@@ -373,24 +375,43 @@ class OptionBox():
 
 class NationConfig:
     Active = True
-    def __init__(self,screen:pygame.Surface,clock: pygame.time.Clock, max_tps: int,Player_count:int) -> None:
+
+    def __init__(self,screen:pygame.Surface,clock: pygame.time.Clock, max_tps: int,Player_count:int,player_name) -> None:
         self.screen = screen
         self.clock =clock
         self.max_tps = max_tps
         self.screen_width, self.screen_height = self.screen.get_size()
-        self.Background = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/menu_konfiguracji_nacje.png")
+        self.Background = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/menu_konfiguracji_nacje.png")
                                                        , (self.screen_width,self.screen_height))
-        self.Rozpocznij = pygame.image.load("texture/main_menu/Rozpocznij gre.png")
+        self.Rozpocznij = pygame.image.load("texture/main_menu/nation/Rozpocznij gre.png")
         self.Rozpocznij_rect = self.Rozpocznij.get_rect()
+        self.player_names = player_name
+        self.select_list = []
+        self.select_start()
+        self.pick = None
         self.run()
+
 
     def draw(self):
         self.screen.blit(self.Background, (0, 0))
-        self.Rozpocznij_rect.x =self.screen_width/15
+        self.Rozpocznij_rect.x = self.screen_width/15
         self.Rozpocznij_rect.y = self.screen_height - 100
-        self.screen.blit(self.Rozpocznij,(self.Rozpocznij_rect))
+        for i in self.select_list:
+            i.draw()
+        self.screen.blit(self.Rozpocznij, self.Rozpocznij_rect)
 
 
+    def select_start(self):
+        global PLAYER_COUNT
+        x = self.screen_width/15
+        y = self.screen_height/4
+        licznik = 0
+        for i in range(0, PLAYER_COUNT):
+            name = self.player_names[licznik]
+            Select = NationSelect(self.screen, x, y,self.Rozpocznij_rect.width,name)
+            self.select_list.append(Select)
+            y += 65
+            licznik += 1
     def handle_events(self):
         global PLAYER_NAME
         self.event = pygame.event.get()
@@ -402,8 +423,34 @@ class NationConfig:
                 pos = pygame.mouse.get_pos()
                 if self.Rozpocznij_rect.collidepoint(pos) and NationConfig.Active == True:
                     return "new_game"
+                for i in self.select_list:
+                    if i.box_rect.collidepoint(pos):
+                        if self.pick != None:
+                            self.pick.nation_pick = False
+                        i.nation_pick = True
+                        self.pick = i
+                        break
+                    elif i.nation_rect.collidepoint(pos):
+                        pass
+                    elif i.opis_rect.collidepoint(pos):
+                        pass
+                    else:
+                        i.nation_pick = False
 
+                if self.pick.left_rect.collidepoint(pos):
 
+                    if self.pick.selected > 0:
+                        self.pick.selected -= 1
+                    self.pick.nation_pick = True
+                if self.pick.right_rect.collidepoint(pos):
+
+                    if self.pick.selected < 3:
+                        self.pick.selected += 1
+                    self.pick.nation_pick = True
+                if self.pick.opis_box_rect.collidepoint(pos):
+                    self.pick.opis_select = 0
+                if self.pick.statystki_box_rect.collidepoint(pos):
+                    self.pick.opis_select = 1
 
     def run(self):
 
@@ -421,6 +468,127 @@ class NationConfig:
                 return choice
             self.draw()
             self.clock.tick(self.max_tps)
+
+
+class NationSelect:
+
+    def __init__(self,screen,x,y,start_width,name):
+
+        self.box = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/player_box.png"),(347/1.2,52/1.2))
+
+        self.box_red = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/player_box_red.png"),
+                                                (347 / 1.2, 52 / 1.2))
+        self.box_blue = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/player_box_blue.png"),
+                                                (347 / 1.2, 52 / 1.2))
+        self.box_yellow = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/player_box_yellow.png"),
+                                                (347 / 1.2, 52 / 1.2))
+        self.box_purple = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/player_box_purple.png"),
+                                                (347 / 1.2, 52 / 1.2))
+
+        self.opis_box = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/Opis_box.png"),(169/(100/75),61/(100/75)))
+        self.statystki_box = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/statystyki_box.png"),
+                                                     (169 / (100 / 75), 61 / (100 / 75)))
+
+        self.opis_box_select = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/Opis_box_select.png"),
+                                                     (169 / (100 / 75), 61 / (100 / 75)))
+        self.statystki_box_select = pygame.transform.smoothscale(
+            pygame.image.load("texture/main_menu/nation/statystyki_box_select.png"),
+            (169 / (100 / 75), 61 / (100 / 75)))
+
+        self.box_color_lists = [self.box_purple,self.box_red,self.box_yellow,self.box_blue]
+        self.box_texture = self.box
+        self.box_rect = self.box.get_rect()
+        self.merchant = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/kupiec.png"),(536/(100/75),626/(100/80)))
+        self.warior = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/wojownik.png"),(536/(100/75),626/(100/80)))
+        self.opis = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/opis.png"),(336/(100/75),626/(100/80)))
+        self.font_opis = pygame.font.Font(None, 20)
+        self.left = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/arrow_left.png"),
+                                                 (83 / (100 / 75), 374 / (100 / 75)))
+        self.right = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/arrow_right.png"),
+                                                 (83 / (100 / 75), 374 / (100 / 75)))
+
+        self.screen = screen
+        self.nation_pick = False
+        self.font = pygame.font.Font(None, 32)
+        self.font_wladcy = pygame.font.Font(None, 42)
+        self.name = self.font.render(name, True, (255, 255, 255))
+        self.wladcy = ["Godfrey Ametystowy Władca","Gunnvald Pogromca Barbarzynców","Chagan Pustynny Monarcha","Aurora Budownicza Cudów"]
+        self.opis_select = 0
+        self.selected = 0
+        # ustawienie
+        self.screen_width, self.screen_height = self.screen.get_size()
+        self.box_rect.x = x + (start_width - self.box_rect.width) / 2
+        self.box_rect.y = y
+        self.name_rect = self.box_rect.copy()
+        self.name_rect.x += 10
+        self.name_rect.y += 10
+        self.nation_rect = self.merchant.get_rect()
+        self.nation_rect.x = self.screen_width/2.45
+        self.nation_rect.y = self.screen_height * 0.20
+        self.opis_rect = self.opis.get_rect()
+        self.opis_rect.x = self.screen_width/1.365
+        self.opis_rect.y = self.screen_height * 0.20
+        self.opis_box_rect = self.opis_box.get_rect()
+        self.opis_box_rect.x = self.opis_rect.x
+        self.opis_box_rect.y = self.opis_rect.y
+        self.opis_text_rect = self.opis_rect.copy()
+        self.opis_text_rect.y += self.opis_box_rect.height + 10
+        self.statystki_box_rect = self.statystki_box.get_rect()
+        self.statystki_box_rect.x = self.opis_rect.x + self.opis_box_rect.width
+        self.statystki_box_rect.y = self.opis_rect.y
+        self.wladcy_rect = self.nation_rect.copy()
+        self.wladcy_rect.y -= 80
+        self.wladcy_rect.x += self.wladcy_rect.x/3.4
+        self.left_rect = self.left.get_rect()
+        self.right_rect = self.right.get_rect()
+        self.left_rect.x = self.wladcy_rect.width +48
+        self.left_rect.y = self.wladcy_rect.height /2
+        self.right_rect.x = self.opis_rect.x + self.opis_rect.width + 20
+        self.right_rect.y = self.left_rect.y
+
+
+    def draw(self):
+       self.screen.blit(self.box_texture, self.box_rect)
+       self.screen.blit(self.name, self.name_rect)
+       if self.nation_pick:
+           self.box_texture = self.box_color_lists[self.selected]
+           self.screen.blit(self.opis, self.opis_rect)
+           self.screen.blit(self.left, self.left_rect)
+           self.screen.blit(self.right, self.right_rect)
+           self.screen.blit((self.font_wladcy.render(self.wladcy[self.selected], True, (255, 255, 255))), (self.wladcy_rect))
+           self.opis_draw()
+           if self.opis_select == 0:
+               self.screen.blit(self.opis_box_select, self.opis_box_rect)
+               self.screen.blit(self.statystki_box, self.statystki_box_rect)
+           if self.opis_select == 1:
+               self.screen.blit(self.opis_box, self.opis_box_rect)
+               self.screen.blit(self.statystki_box_select, self.statystki_box_rect)
+
+
+           if self.selected == 0:
+               self.screen.blit(self.merchant, self.nation_rect)
+
+
+           if self.selected == 1:
+               self.screen.blit(self.warior, self.nation_rect)
+
+    def opis_draw(self):
+
+        if self.opis_select == 0:
+            opisy = nation_opis_list[self.selected].splitlines()
+            y = self.opis_text_rect.y
+
+            for opis in opisy:
+                self.font_opis = pygame.font.Font(None, 20)
+                self.screen.blit(self.font_opis.render(opis, True, (255, 255, 255)), (self.opis_text_rect.x, y))
+                y += self.font_opis.get_height()
+        if self.opis_select == 1:
+            opisy = nation_stats_list[self.selected].splitlines()
+            y = self.opis_text_rect.y
+            for opis in opisy:
+                self.font_opis = pygame.font.Font(None, 24)
+                self.screen.blit(self.font_opis.render(opis, True, (255, 255, 255)), (self.opis_text_rect.x, y))
+                y += self.font_opis.get_height()
 
 
 class PlayerConfig:
@@ -477,7 +645,8 @@ class PlayerConfig:
                     self.PLAYER_NAME = PLAYER_NAME
 
 
-                    NationConfig(self.screen,self.clock,self.max_tps,self.PLAYER_COUNT)
+                    NationConfig(self.screen,self.clock,self.max_tps,self.PLAYER_COUNT,self.PLAYER_NAME)
+
 
                     Menu.new_game = True
                     pygame.display.update()
