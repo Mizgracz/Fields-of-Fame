@@ -156,6 +156,10 @@ class MapGenerator(pygame.sprite.Group):
         self.willage_surface = pygame.image.load("texture/hex/budynki.png").convert_alpha()
         self.ruin = pygame.image.load("texture/hex/krypta_walka.png").convert_alpha()
         self.castle_surface = pygame.image.load("texture/hex/zamek.png", ).convert_alpha()
+        self.castle_nomad_surface = pygame.image.load("texture/hex/oboz_nomadow.png", ).convert_alpha()
+        self.castle_warior = pygame.image.load("texture/hex/wojownicy_castle.png", ).convert_alpha()
+        self.castle_arhitect = pygame.image.load("texture/hex/budowniczy_castle.png", ).convert_alpha()
+
         self.oboz_chuliganuw = pygame.image.load("texture/hex/oboz_chuliganuw.png", ).convert_alpha()
         # SUROWCE
         self.clay = pygame.image.load("texture/surowce/hex_glina_surowiec.png").convert_alpha()
@@ -195,6 +199,7 @@ class MapGenerator(pygame.sprite.Group):
                          ((self.fish_port, 19), 0.8), ((self.sawmill, 20), 0.5), ((self.grain, 21), 0.65),
                          ((self.mine_rocks, 22), 0.3), ((self.mine_iron, 23), 0.3), ((self.mine_gold, 24), 0.3),
                          ((self.ruin,-2),0.9),((self.oboz_chuliganuw,-3),1)]
+
         self.fog_element = [(self.fog_surface, 99), 100]
         self.num_hex_x = numx
         self.num_hex_y = numy

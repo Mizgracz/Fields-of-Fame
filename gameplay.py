@@ -36,8 +36,10 @@ class Player:
     castle_hex = [137, 137 * 2, 137 * 5, 137 * 4]
     # castle_hex = [137*2,137*2,137*2,137*2,137*2]
     use_castle = []
+    nacja = None
 
     def __init__(self, name: str, nation: str) -> None:
+
         Player.MAX += 1
         self.confirm = False
         self.buildMenu = None
@@ -47,8 +49,11 @@ class Player:
 
         Player.castle_hex.remove(self.home)
         Player.use_castle.append(self.home)
+
         self.player_name = name
         self.nacja = nation
+        global nacja
+        nacja = nation
         self.wyb = False
         self.turn_stop = False
         self.field_status = False
