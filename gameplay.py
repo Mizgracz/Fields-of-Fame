@@ -104,8 +104,13 @@ class Player:
                     touching = allrect['hex', i].collidepoint(*pos1) and allmask['hex', i].get_at(
                         pos_in_mask1)
 
+
+
                     if touching and allhex["hex", i].field_add and self.player_name in allhex[
                         "hex", i].playerable and self.new_pick:
+
+
+
                         if allhex["hex", i].rodzaj == "surowiec":
                             print(allhex["hex", i].rodzaj_surowca_var)
                             self.dopisz_surowiec(allhex["hex", i].rodzaj_surowca_var)
@@ -227,6 +232,8 @@ class Player:
                             self.turn_stop = False
                             allhex['hex', i].player = self.player_name
                             self.confirm = True
+
+
 
     def nation_bonus(self):
         if self.nacja == "kupcy":
@@ -593,6 +600,7 @@ class FieldUpdate:
         self.num_sprites = len(sprites)
         self.quantity_hex = num
 
+
     def start(self, player: Player):
         if player.home % 2 == 1:
             prev_index = (player.home - 1) % self.num_sprites
@@ -676,6 +684,7 @@ class FieldUpdate:
             self.sprites[d].field_add = True
             if not player.player_name is self.sprites[d].playerable:
                 self.sprites[d].playerable += [player.player_name]
+                print(self.sprites[d].playerable)
 
         if not self.sprites[e].zajete:
             self.sprites[e].field_add = True
@@ -696,7 +705,9 @@ class FieldChoice:
         self.sprites = sprites
         self.screen = screen
         self.player = player
+
         self.avalible_hex = []
+
 
     def check(self):
         self.avalible_hex = []
