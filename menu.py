@@ -1159,7 +1159,7 @@ class BuildingMenu:
             item.draw(self.background, 25, item_y)
             # self.window.blit(font_surface, (self.menu_x + 4, item_y + 2))
         # Scrollbar
-        pygame.draw.rect(self.window, (128, 128, 128), (self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height + 16))
+        pygame.draw.rect(self.window, (16, 32, 66), (self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height + 16))
         self.scrollbar_rect = pygame.Rect(self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height + 16)
         # Calculate the position and height of the scrollbar thumb
         if len(self.menu_items) <4:
@@ -1171,7 +1171,7 @@ class BuildingMenu:
         
 
         # Draw the scrollbar thumb
-        pygame.draw.rect(self.window, (192, 192, 192), (self.scrollbar_x, self.thumb_y, self.scrollbar_width, self.thumb_height))
+        pygame.draw.rect(self.window, (255, 170, 20), (self.scrollbar_x, self.thumb_y, self.scrollbar_width, self.thumb_height))
     def handle_event(self, event,player):
         if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
             BuildingMenu.active = False
