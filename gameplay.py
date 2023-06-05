@@ -567,20 +567,99 @@ class Hourglass:
         self.SCREEN_HEIGHT = screen.get_size()[1]
         self.screen = screen
         self.hourglass_rect = pygame.Rect(10, self.SCREEN_HEIGHT - 190, 173, 184)
+        self.nation_color = "red"
+
         # Load animation frames
-        path_to_images = "texture/ui/klepsydra"
+        self.path_to_images = f"texture/ui/klepsydra/klepsydra_{self.nation_color}"
+
+
+
         self.animation_frames = []
-        for file_name in sorted(os.listdir(path_to_images)):
+        for file_name in sorted(os.listdir(self.path_to_images)):
             if file_name.endswith(".png"):
-                image = pygame.image.load(os.path.join(path_to_images, file_name))
+                image = pygame.image.load(os.path.join(self.path_to_images, file_name))
                 self.animation_frames.append(pygame.transform.scale(image, (173, 184)).convert_alpha())
+
+
+
+        self.nation_color = "blue"
+        self.path_to_images = f"texture/ui/klepsydra/klepsydra_{self.nation_color}"
+        self.animation_frames_blue = []
+        for file_name in sorted(os.listdir(self.path_to_images)):
+            if file_name.endswith(".png"):
+                image = pygame.image.load(os.path.join(self.path_to_images, file_name))
+                self.animation_frames_blue.append(pygame.transform.scale(image, (173, 184)).convert_alpha())
+
+        self.nation_color = "purple"
+        self.path_to_images = f"texture/ui/klepsydra/klepsydra_{self.nation_color}"
+        self.animation_frames_purple = []
+        for file_name in sorted(os.listdir(self.path_to_images)):
+            if file_name.endswith(".png"):
+                image = pygame.image.load(os.path.join(self.path_to_images, file_name))
+                self.animation_frames_purple.append(pygame.transform.scale(image, (173, 184)).convert_alpha())
+
+
+        self.nation_color = "yellow"
+        self.path_to_images = f"texture/ui/klepsydra/klepsydra_{self.nation_color}"
+        self.animation_frames_yellow = []
+        for file_name in sorted(os.listdir(self.path_to_images)):
+            if file_name.endswith(".png"):
+                image = pygame.image.load(os.path.join(self.path_to_images, file_name))
+                self.animation_frames_yellow.append(pygame.transform.scale(image, (173, 184)).convert_alpha())
+
+
+
         self.frame_index = 0
         self.frame_rate = frame_rate
         self.animation_frame_interval = animation_frame_interval
         self.last_frame_time = pygame.time.get_ticks()
 
-    def draw(self):
+
+    def draw(self,player):
         self.screen.blit(self.animation_frames[self.frame_index], self.hourglass_rect)
+        if player.nacja == "wojownicy":
+            self.nation_color = "red"
+
+            self.screen.blit(self.animation_frames[self.frame_index], self.hourglass_rect)
+
+        elif player.nacja == "kupcy":
+            self.nation_color = "purple"
+
+            self.screen.blit(self.animation_frames_purple[self.frame_index], self.hourglass_rect)
+
+        elif player.nacja == "nomadzi":
+            self.nation_color = "yellow"
+
+            self.screen.blit(self.animation_frames_yellow[self.frame_index], self.hourglass_rect)
+
+        elif player.nacja == "budowniczowie":
+            self.nation_color = "blue"
+
+            self.screen.blit(self.animation_frames_blue[self.frame_index], self.hourglass_rect)
+
+
+    def nation(self, player):
+        if player.nacja == "wojownicy":
+            self.nation_color = "red"
+
+
+
+        elif player.nacja == "kupcy":
+            self.nation_color = "purple"
+
+
+
+
+        elif player.nacja == "nomadzi":
+            self.nation_color = "yellow"
+
+
+
+
+        elif player.nacja == "budowniczowie":
+            self.nation_color = "blue"
+
+
 
     def next_frame(self):
         # Switch to the next animation frame
@@ -595,6 +674,7 @@ class Hourglass:
         if self.hourglass_rect.collidepoint(collision) and mouse_pressed[0]:
             Hourglass.button_sound_hourglass.play()
             if player.wyb == False and not player.turn_stop:
+
                 player.wyb = True
                 player.turn_count += 1
                 self.field_bonus = False
@@ -607,6 +687,7 @@ class Hourglass:
         if time_since_last_frame >= 1000 / self.frame_rate * self.animation_frame_interval:
             self.next_frame()
             self.last_frame_time = current_time
+
 
 
 class Decision:

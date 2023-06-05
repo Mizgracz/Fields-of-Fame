@@ -318,8 +318,9 @@ class Game:
 
             self.resource.update_player(self.currentplayer)
             self.resource.draw()
+            self.klepsydra1.nation(self.currentplayer)
+            self.klepsydra1.draw(self.currentplayer)
 
-            self.klepsydra1.draw()
             if not BuildingMenu.active:
                 if not Stats.wyb:
                     if not self.currentplayer.wyb:

@@ -518,7 +518,13 @@ class NationSelect:
         self.box_texture = self.box
         self.box_rect = self.box.get_rect()
         self.merchant = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/kupiec.png"),(536/(100/75),626/(100/80)))
-        self.warior = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/wojownik.png"),(536/(100/75),626/(100/80)))
+        self.warior = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/wojownik2.png"),(536/(100/75),626/(100/80)))
+        self.nomad = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/nomad.png"),
+                                                   (536 / (100 / 75), 626 / (100 / 80)))
+        self.budowniczowie = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/budowniczy.png"),
+                                                  (536 / (100 / 75), 626 / (100 / 80)))
+
+
         self.opis = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/opis.png"),(336/(100/75),626/(100/80)))
         self.font_opis = pygame.font.Font(None, 20)
         self.left = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/arrow_left.png"),
@@ -590,6 +596,12 @@ class NationSelect:
 
            if self.selected == 1:
                self.screen.blit(self.warior, self.nation_rect)
+
+           if self.selected == 2:
+               self.screen.blit(self.nomad, self.nation_rect)
+
+           if self.selected == 3:
+               self.screen.blit(self.budowniczowie, self.nation_rect)
 
     def opis_draw(self):
 
