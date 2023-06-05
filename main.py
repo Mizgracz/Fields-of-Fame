@@ -30,8 +30,8 @@ pygame.display.set_icon(icon_image)
 fps_on = True
 pygame.mixer.music.load("music/main.mp3")
 pygame.mixer.music.play(-1)
-pygame.mixer.music.set_volume(0)
-# pygame.mixer.music.set_volume(0.5)
+#pygame.mixer.music.set_volume(0)
+pygame.mixer.music.set_volume(0.5)
 
 
 
@@ -125,7 +125,9 @@ class Game:
         for e in range(len(self.allplayers)):
             self.allevents.append(EventMenagment(screen, self.allplayers[e]))
             self.allevents[e].start_event_list()
-            self.allbuildingmenu.append(BuildingMenu(screen,self.allbuildingList[e],screen.get_width()/2,500,int(0.25*screen.get_width()),int(0.2*screen.get_height())))
+            self.allbuildingmenu.append(BuildingMenu(screen,self.allbuildingList[e],screen.get_width()/2,screen.get_height()*0.695,int(0.25*screen.get_width()),int(0.2*screen.get_height())))
+            print(screen.get_width()/2)
+            print(screen.get_height()*0.695)
 
 
         self.currentplayer = self.allplayers[Player.ID]

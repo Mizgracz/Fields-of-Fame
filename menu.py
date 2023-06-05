@@ -1125,7 +1125,7 @@ class BuildingMenu:
         
 
         self.background = pygame.Surface((menu_width,menu_height-25),pygame.SRCALPHA)
-        self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/opis_tlo.png').convert_alpha(), (menu_width,menu_height-25))
+        self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/budynki_tlo.png').convert_alpha(), (menu_width,menu_height-25))
         # self.background.fill('#002200')
         ALPHA = 0.85
         self.background.set_alpha(255*ALPHA)
@@ -1159,14 +1159,14 @@ class BuildingMenu:
             item.draw(self.background, 25, item_y)
             # self.window.blit(font_surface, (self.menu_x + 4, item_y + 2))
         # Scrollbar
-        pygame.draw.rect(self.window, (128, 128, 128), (self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height))
-        self.scrollbar_rect = pygame.Rect(self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height)
+        pygame.draw.rect(self.window, (128, 128, 128), (self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height + 16))
+        self.scrollbar_rect = pygame.Rect(self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height + 16)
         # Calculate the position and height of the scrollbar thumb
         if len(self.menu_items) <4:
-            self.thumb_height = self.scrollbar_height
+            self.thumb_height = self.scrollbar_height + 16
             self.thumb_y = self.scrollbar_y + (self.menu_top_item_index / 1) * self.scrollbar_height
         else:
-            self.thumb_height = self.scrollbar_height / len(self.menu_items) * self.menu_items_per_page
+            self.thumb_height = self.scrollbar_height / len(self.menu_items) * self.menu_items_per_page + 16
             self.thumb_y = self.scrollbar_y + (self.menu_top_item_index / len(self.menu_items)) * self.scrollbar_height
         
 
