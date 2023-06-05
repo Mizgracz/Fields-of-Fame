@@ -369,14 +369,10 @@ class MapGenerator(pygame.sprite.Group):
             else:
                 self.allhex[c].obwodka = False
 
-    def odkryj_pole(self, Fog:bool):
+    def odkryj_pole(self, Fog: bool):
         if Fog:
-            pos1 = pygame.mouse.get_pos()
             for i in range(self.num_hex_all):
-                pos_in_mask1 = pos1[0] - self.allrect['hex', i].x, pos1[1] - self.allrect['hex', i].y
-                touching = self.allrect['hex', i].collidepoint(*pos1) and self.allmask['hex', i].get_at(pos_in_mask1)
-
-                if touching and self.allhex["hex", i].zajete:
+                if self.allhex["hex", i].zajete:
                     left_neighbor_index = (i - 1) % self.num_hex_all
                     self.allhex["hex", left_neighbor_index].odkryte = True
                     right_neighbor_index = (i + 1) % self.num_hex_all
@@ -402,7 +398,52 @@ class MapGenerator(pygame.sprite.Group):
                     self.allhex["hex", upper_right_neighbor_index].odkryte = True
                     self.allhex["hex", bottom_right_neighbor_index].odkryte = True
 
-                    break
+                    # dodatkowe odkrywnanie poniżej
+
+                    left_left_neighbor_index = (i - 2) % self.num_hex_all
+                    self.allhex["hex", left_left_neighbor_index].odkryte = True
+                    right_right_neighbor_index = (i + 2) % self.num_hex_all
+                    self.allhex["hex", right_right_neighbor_index].odkryte = True
+
+                    if i // self.num_hex_side % 2 == 0:
+                        upper_right_right_neighbor_index = (i - self.num_hex_side - 1) % self.num_hex_all
+                        bottom_right_right_neighbor_index = (i + self.num_hex_side - 1) % self.num_hex_all
+                    else:
+                        upper_right_right_neighbor_index = (i - self.num_hex_side + 1) % self.num_hex_all
+                        bottom_right_right_neighbor_index = (i + self.num_hex_side + 1) % self.num_hex_all
+
+                    self.allhex["hex", upper_right_right_neighbor_index].odkryte = True
+                    self.allhex["hex", bottom_right_right_neighbor_index].odkryte = True
+
+                    if i // self.num_hex_side % 2 == 1:
+                        upper_right_right_neighbor_index = (i - self.num_hex_side - 2) % self.num_hex_all
+                        bottom_right_right_neighbor_index = (i + self.num_hex_side - 2) % self.num_hex_all
+                    else:
+                        upper_right_right_neighbor_index = (i - self.num_hex_side + 2) % self.num_hex_all
+                        bottom_right_right_neighbor_index = (i + self.num_hex_side + 2) % self.num_hex_all
+
+                    self.allhex["hex", upper_right_right_neighbor_index].odkryte = True
+                    self.allhex["hex", bottom_right_right_neighbor_index].odkryte = True
+
+                    upper_upper_left_neighbor_index = (i - self.num_hex_side * 2) % self.num_hex_all
+                    if (i % self.num_hex_side) == 0:  # case when i is on the left edge of the board
+                        upper_upper_left_neighbor_index += self.num_hex_side
+                    self.allhex["hex", upper_upper_left_neighbor_index].odkryte = True
+
+                    bottom_bottom_bottom_left_neighbor_index = (i + self.num_hex_side * 2) % self.num_hex_all
+                    if (i % self.num_hex_side) == 0:  # case when i is on the left edge of the board
+                        bottom_bottom_bottom_left_neighbor_index += self.num_hex_side
+                    self.allhex["hex", bottom_bottom_bottom_left_neighbor_index].odkryte = True
+
+                    corner_upper_left_neighbor_index = (i - 1 - self.num_hex_side * 2) % self.num_hex_all
+                    self.allhex["hex", corner_upper_left_neighbor_index].odkryte = True
+                    corner_upper_right_neighbor_index = (i + 1 + self.num_hex_side * 2) % self.num_hex_all
+                    self.allhex["hex", corner_upper_right_neighbor_index].odkryte = True
+
+                    corner_bottom_left_neighbor_index = (i - 1 + self.num_hex_side * 2) % self.num_hex_all
+                    self.allhex["hex", corner_bottom_left_neighbor_index].odkryte = True
+                    corner_botton_right_neighbor_index = (i + 1 - self.num_hex_side * 2) % self.num_hex_all
+                    self.allhex["hex", corner_botton_right_neighbor_index].odkryte = True
 
 
 
