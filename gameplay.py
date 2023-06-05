@@ -88,7 +88,7 @@ class Player:
             if surowiec == self.surowce_ilosc[i][0]:
                 self.surowce_ilosc[i][1] += 100
 
-    def zajmij_pole(self, allrect, allmask, allhex, dec, screen, managment):
+    def zajmij_pole(self, allrect, allmask, allhex, dec, screen, managment,quanity,all_players):
 
         if self.player_hex_status:
             if self.licznik == 100:
@@ -106,6 +106,95 @@ class Player:
 
 
 
+         #walka  z graczami
+                    if touching and self.player_name in allhex["hex", i].atack:
+
+                        self.quantity_hex =  quanity
+                        self.add = False
+
+                        column = i // self.quantity_hex
+                        if i % self.quantity_hex == 0:
+                            column + 1
+
+                        if column % 2 == 0:
+                            prev_index = (allhex["hex", i].number - 1)
+                            next_index = (allhex["hex", i].number + 1)
+                            c = (allhex["hex", i].number - self.quantity_hex)
+                            d = (allhex["hex", i].number + 1 - self.quantity_hex)
+                            e = (allhex["hex", i].number + self.quantity_hex)
+                            f = (allhex["hex", i].number + self.quantity_hex + 1)
+                        else:
+                            prev_index = (allhex["hex", i].number - 1)
+                            next_index = (allhex["hex", i].number + 1)
+                            c = (allhex["hex", i].number - self.quantity_hex)
+                            d = (allhex["hex", i].number - 1 - self.quantity_hex)
+                            e = (allhex["hex", i].number + self.quantity_hex)
+                            f = (allhex["hex", i].number + self.quantity_hex - 1)
+
+                        if allhex["hex", prev_index].zajete and allhex["hex", prev_index].player == self.player_name :
+                            self.add = True
+                        if allhex["hex", next_index].zajete and allhex["hex", next_index].player == self.player_name :
+                            self.add = True
+
+                        if allhex["hex", c].zajete and allhex["hex", c].player == self.player_name :
+                            self.add = True
+
+                        if allhex["hex", d].zajete and allhex["hex", d].player == self.player_name :
+                            self.add = True
+
+                        if allhex["hex", e].zajete and allhex["hex", e].player == self.player_name :
+                            self.add = True
+
+                        if allhex["hex", f].zajete and allhex["hex", f].player == self.player_name :
+                            self.add = True
+
+                        if self.add :
+                            enemy = None
+                            for n in all_players:
+                                if allhex["hex", i].player == n.player_name:
+                                    enemy = n
+
+                            if self.army_count > enemy.army_count:
+                                self.army_count -= enemy.army_count
+                                enemy.army_count = 0
+                                allhex["hex", i].zajete = True
+                                allhex["hex", i].field_add = False
+                                dec.fupdate.new_hex(i, self)
+                                self.field_status = False
+                                self.player_hex_status = False
+                                enemy.terrain_count -= 1
+                                self.terrain_count += 1
+                                self.turn_stop = False
+                                allhex['hex', i].player = self.player_name
+                                self.confirm = True
+                                self.add = False
+
+
+
+                            if self.army_count < enemy.army_count:
+                                enemy.army_count -= self.army_count
+                                self.army_count = 0
+                                self.field_status = False
+                                self.player_hex_status = False
+                                self.turn_stop = False
+                                self.confirm = True
+                                self.add = False
+
+                            if self.army_count == enemy.army_count:
+                                if self.army_count > 1:
+                                    enemy.army_count = enemy.army_count / 2
+                                    self.army_count = self.army_count / 2
+                                else:
+                                    enemy.army_count = 0
+                                    self.army_count = 0
+
+                                self.field_status = False
+                                self.player_hex_status = False
+                                self.turn_stop = False
+                                self.confirm = True
+                                self.add = False
+
+        # dodawnie pól
                     if touching and allhex["hex", i].field_add and self.player_name in allhex[
                         "hex", i].playerable and self.new_pick:
 
@@ -223,6 +312,7 @@ class Player:
 
 
                         else:
+
                             allhex["hex", i].zajete = True
                             allhex["hex", i].field_add = False
                             dec.fupdate.new_hex(i, self)
@@ -232,6 +322,8 @@ class Player:
                             self.turn_stop = False
                             allhex['hex', i].player = self.player_name
                             self.confirm = True
+
+
 
 
 
@@ -665,37 +757,56 @@ class FieldUpdate:
             e = (hex + self.quantity_hex) % self.num_sprites
             f = (hex + self.quantity_hex - 1) % self.num_sprites
 
-        if not self.sprites[prev_index].zajete:
+        if not self.sprites[prev_index].zajete :
             self.sprites[prev_index].field_add = True
             if not player.player_name is self.sprites[prev_index].playerable:
                 self.sprites[prev_index].playerable += [player.player_name]
 
-        if not self.sprites[next_index].zajete:
+        if not self.sprites[next_index].zajete :
             self.sprites[next_index].field_add = True
             if not player.player_name is self.sprites[next_index].playerable:
                 self.sprites[next_index].playerable += [player.player_name]
 
-        if not self.sprites[c].zajete:
+        if not self.sprites[c].zajete :
             self.sprites[c].field_add = True
             if not player.player_name is self.sprites[c].playerable:
                 self.sprites[c].playerable += [player.player_name]
 
-        if not self.sprites[d].zajete:
+        if not self.sprites[d].zajete :
             self.sprites[d].field_add = True
             if not player.player_name is self.sprites[d].playerable:
                 self.sprites[d].playerable += [player.player_name]
                 print(self.sprites[d].playerable)
 
-        if not self.sprites[e].zajete:
+        if not self.sprites[e].zajete :
+
             self.sprites[e].field_add = True
             if not player.player_name is self.sprites[e].playerable:
                 self.sprites[e].playerable += [player.player_name]
 
-        if not self.sprites[f].zajete:
+        if not self.sprites[f].zajete :
             self.sprites[f].field_add = True
             if not player.player_name is self.sprites[f].playerable:
                 self.sprites[f].playerable += [player.player_name]
 
+
+        # if self.sprites[prev_index].zajete and player.player_name != self.sprites[prev_index].player:
+        #     self.sprites[prev_index].field_add = True
+        #
+        # if self.sprites[next_index].zajete and player.player_name != self.sprites[next_index].player:
+        #     self.sprites[next_index].field_add = True
+        #
+        # if self.sprites[c].zajete and player.player_name != self.sprites[c].player:
+        #     self.sprites[c].field_add = True
+        #
+        # if self.sprites[d].zajete and player.player_name != self.sprites[d].player:
+        #     self.sprites[d].field_add = True
+        #
+        # if self.sprites[e].zajete and player.player_name != self.sprites[e].player:
+        #     self.sprites[e].field_add = True
+        #
+        # if self.sprites[f].zajete and player.player_name != self.sprites[f].player:
+        #     self.sprites[f].field_add = True
 
 class FieldChoice:
 
@@ -711,14 +822,23 @@ class FieldChoice:
 
     def check(self):
         self.avalible_hex = []
+
+        for i in self.sprites:
+            i.atack = []
+
         for i in self.sprites:
             if i.field_add and self.player.player_name in i.playerable:
+                self.avalible_hex.append(i)
+
+            elif i.zajete and self.player.player_name != i.player:
+                i.atack.append(self.player.player_name)
                 self.avalible_hex.append(i)
 
     def draw(self):
         for i in self.avalible_hex:
             self.screen.blit(self.Field_add_surface, [i.polozenie_hex_x + Camera.camera_x,
                                                       i.polozenie_hex_y + Camera.camera_y])
+
 
 
 class SideMenu:

@@ -101,6 +101,7 @@ class Game:
         self.sd = SideMenu(screen)
 
 
+
         # gracz
         self.allplayers = []
         x = 0
@@ -114,6 +115,7 @@ class Game:
         self.map.texture()
         self.map.generate()
         self.alldec = []
+
 
 
         for i in range(Player.MAX):
@@ -297,7 +299,7 @@ class Game:
             if self.currentplayer.field_status:
                 self.currentdec.fchoice.draw()
 
-            self.currentplayer.zajmij_pole(self.map.allrect,self.map.allmask,self.map.allhex,self.currentdec,screen,self.currentevent)
+            self.currentplayer.zajmij_pole(self.map.allrect,self.map.allmask,self.map.allhex,self.currentdec,screen,self.currentevent,self.map.num_hex_right_side,self.allplayers)
             self.currentplayer.nomad_bonus(self.currentdec.fchoice)
             self.map.odkryj_pole(self.Fog)
             self.map.colision_detection_obwodka()
