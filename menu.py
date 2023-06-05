@@ -1123,9 +1123,9 @@ class BuildingMenu:
         self.menu_top_item_index = 0
         self.item_spacing = 20  # Odstęp między przedmiotami
         
-
+        #Tu na dole odstęp marginesu na dole
         self.background = pygame.Surface((menu_width,menu_height-25),pygame.SRCALPHA)
-        self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/budynki_tlo.png').convert_alpha(), (menu_width,menu_height-25))
+        self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/budynki_tlo.png').convert_alpha(), (menu_width + 5,menu_height-5))
         # self.background.fill('#002200')
         ALPHA = 0.85
         self.background.set_alpha(255*ALPHA)
@@ -1137,7 +1137,7 @@ class BuildingMenu:
         
         self.scrollbar_y =  BuildingItem.offset_y-25
         self.scrollbar_height = self.background.get_height() - self.scrollbar_margin * 2
-
+        # Tu na dole można fajnie manipulować listą
         self.menu_items_per_page = (self.menu_height - self.scrollbar_margin * 2) // (self.menu_item_height + self.item_spacing)
         self.menu_x = menux  # Set the desired x-coordinate of the menu
         self.menu_y = menuy  # Set the desired y-coordinate of the menu
@@ -1149,7 +1149,7 @@ class BuildingMenu:
         # Rysowanie menu (inne elementy pominięte dla uproszczenia)
         self.window.blit(self.background, (self.menu_x-25,self.menu_y-25))
         for i, item in enumerate(self.menu_items):
-            item_y = 0 + self.scrollbar_margin + (i - self.menu_top_item_index) * (self.menu_item_height + self.item_spacing)
+            item_y = 10 + self.scrollbar_margin + (i - self.menu_top_item_index) * (self.menu_item_height + self.item_spacing)
             item_rect = pygame.Rect(25, item_y, self.background.get_width()-50, self.menu_item_height)
             if item_rect.collidepoint(pygame.mouse.get_pos()):
                 # Zaznaczony przedmiot
