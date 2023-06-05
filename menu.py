@@ -617,7 +617,8 @@ class PlayerConfig:
         self.clock =clock
         self.max_tps = max_tps
         self.allPlayers = []
-        self.Background = pygame.image.load("texture/main_menu/config/Background.png")
+        self.screen_width, self.screen_height = self.screen.get_size()
+        self.Background = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/config/nick_back.png"),(self.screen_width,self.screen_height))
         self.Button_Back = pygame.image.load("texture/main_menu/config/Button_Back.png")
         self.Button_Start = pygame.image.load("texture/main_menu/config/Button_Start.png")
         self.Button_Back_Rect = self.Button_Back.get_rect(center=(80, 40))
@@ -704,7 +705,8 @@ class Config:
         self.screen = screen
         self.Button_Back = pygame.image.load("texture/main_menu/config/Button_Back.png")
         self.Button_Start = pygame.image.load("texture/main_menu/config/Button_Start.png")
-        self.Background = pygame.image.load("texture/main_menu/config/Background.png")
+        self.screen_width, self.screen_height = self.screen.get_size()
+        self.Background = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/config/nick_back.png"),(self.screen_width,self.screen_height))
         self.Button_Back_Rect = self.Button_Back.get_rect(center=(80, 40))
         self.Button_Start_Rect = self.Button_Start.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 80))
         self.Active = False
