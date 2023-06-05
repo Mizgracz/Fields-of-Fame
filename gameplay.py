@@ -540,6 +540,7 @@ class Decision:
             player.camera_stop = False
             player.gold_count += 10 + player.gold_count_bonus
             player.confirm = True
+            player.field_bonus = 0
 
         if self.army_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
             Decision.button_sound_army.play()
@@ -547,6 +548,7 @@ class Decision:
             player.camera_stop = False
             player.army_count += 10 + player.army_count_bonus
             player.confirm = True
+            player.field_bonus = 0
 
         if self.field_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
             Decision.button_sound_field.play()
