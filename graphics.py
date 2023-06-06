@@ -153,10 +153,10 @@ class MapGenerator(pygame.sprite.Group):
         self.hex_zajete_surface3 = pygame.image.load("texture/hex/hex_zajete_pole3.png").convert_alpha()
         self.hex_zajete_surface4 = pygame.image.load("texture/hex/hex_zajete_pole4.png").convert_alpha()
         # self.hex_zajete_surfaceNIE = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
-        self.hex_zajete_surface1.set_alpha(100)
-        self.hex_zajete_surface2.set_alpha(100)
-        self.hex_zajete_surface3.set_alpha(100)
-        self.hex_zajete_surface4.set_alpha(100)
+        self.hex_zajete_surface1.set_alpha(140)
+        self.hex_zajete_surface2.set_alpha(140)
+        self.hex_zajete_surface3.set_alpha(140)
+        self.hex_zajete_surface4.set_alpha(180)
 
         # Mgla wojny
         self.fog_surface = pygame.image.load("texture/hex/fog.png").convert_alpha()
