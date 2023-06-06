@@ -115,8 +115,9 @@ class Game:
         self.map.texture()
         self.map.generate()
         self.alldec = []
-
-
+        #NOWE ####################
+        self.start = True
+        ##########################
 
         for i in range(Player.MAX):
             self.alldec.append(Decision(screen,self.map,self.allplayers[i]))
@@ -141,6 +142,8 @@ class Game:
         self.currentevent = self.allevents[Player.ID]
         self.currentmenu = self.allbuildingmenu[Player.ID]
         self.currentdec = self.alldec[Player.ID]
+
+
 
 
         self.music_on = 1
@@ -295,6 +298,13 @@ class Game:
             self.camera.keybord(self.size)
             self.map.Draw(SCREEN_WIDTH, SCREEN_HEIGHT)
             self.map.fog_draw(self.Fog, SCREEN_WIDTH, SCREEN_HEIGHT)
+
+            # NOWE ####
+            if self.start:
+                for i in self.allplayers:
+                    i.castle_nation(self.map.allhex)
+                self.start = False
+            # NOWE ####
 
             if self.currentplayer.field_status:
                 self.currentdec.fchoice.draw()

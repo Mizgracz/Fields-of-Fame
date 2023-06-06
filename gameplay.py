@@ -327,10 +327,21 @@ class Player:
                             self.turn_stop = False
                             allhex['hex', i].player = self.player_name
                             self.confirm = True
-
-
-
-
+ ######################################################
+ ##### NOWOŚC DO POŁACZENIA #########
+    def castle_nation(self,allhex):
+        for i in range(len(allhex)):
+            if allhex["hex", i].number in Player.use_castle:
+                if allhex["hex", i].number == self.home:
+                    if self.nacja == "wojownicy":
+                        allhex["hex", i].texture_index = - 6
+                        allhex["hex", i].update_texture()
+                    if self.nacja == "nomadzi":
+                        allhex["hex", i].texture_index = - 4
+                        allhex["hex", i].update_texture()
+                    if self.nacja == "budowniczowie":
+                        allhex["hex", i].texture_index = - 5
+                        allhex["hex", i].update_texture() # #
 
     def nation_bonus(self):
         if self.nacja == "kupcy":

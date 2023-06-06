@@ -23,7 +23,7 @@ class Hex(pygame.sprite.Sprite):
         self.texture_index = tex_id
         if self.number in Player.use_castle:
             self.zajete = True
-            self.texture_index =-1
+            self.texture_index = -1
         self.texture = self.texturing(self.group)
         self.rodzaj = self.surowiec()  # self.czy_to_surowiec()
         self.rodzaj_surowca_var = None
@@ -40,6 +40,16 @@ class Hex(pygame.sprite.Sprite):
         return self.texture
 
     def texturing(self, group):
+
+        #### NOWE ########
+        if self.texture_index ==-4:
+            return group.castle_nomad_surface
+        if self.texture_index ==-5:
+            return group.castle_arhitect
+        if self.texture_index ==-6:
+            return group.castle_warior
+
+
         if self.texture_index ==-1:
             return group.castle_surface
         elif self.texture_index == -2:
