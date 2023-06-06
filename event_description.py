@@ -44,7 +44,38 @@ merchant_staty = "\n\n" \
                  "  Cena sprzedaży wszystkich" \
                  "\n  surowców +30%"
 
-warior = "lubi sie bić i jest umieśniony"
+warior = " Królestwo Andorath było niegdyś" \
+         "\n brutalnie atakowane i dewastowane" \
+         "\n przez barbarzyńskie hordy, co" \
+         "\n spowodowało wielką niewolę i" \
+         "\n cierpienie. Gunvald przez wiele" \
+         "\n lat cierpiał i trzymał w" \
+         "\n sobie gniew i pragnienie zemsty" \
+         "\n Po wielu latach nieustannych" \
+         "\n treningów i walki z" \
+         "\n barbarzyncami, Gunvald stał się" \
+         "\n niezwykle silnym i niepokonanym" \
+         "\n wojownikiem.\n" \
+         "\n Podczas jednej z swoich wypraw" \
+         "\n natrafił on na pradawną krypte" \
+         "\n i postanowił sprawdzić co się" \
+         "\n w niej kryje. W krypcie czaiło" \
+         "\n się wiele niebezpiecznych" \
+         "\n potworów oraz pułapek,Jednak on" \
+         "\n dał sobie z nimi radę." \
+         "\n Podczas przeszukiwania znalazł" \
+         "\n pradawne ostrze, dzięki któremu " \
+         "\n zdołał pózniej podporządkować" \
+         "\n sobie wszystkie wioski gnębione" \
+         "\n przez barbarzynców których zmusił" \
+         "\n do wycofania się z tych ziem" \
+         "\n\n Teraz jako król jego celem jest" \
+         "\n odbudowanie i odzyskanie dawnej " \
+         "\n chwały swojeg królestwa a przede" \
+         "\n wszystkim dokonanie zemsty na" \
+         "\n barbarzyńcach, którzy sprowadzili" \
+         "\n nań tyle krzywdy."
+
 
 warior_staty = "\n\n" \
                  "  Startowe złoto : 20\n\n" \

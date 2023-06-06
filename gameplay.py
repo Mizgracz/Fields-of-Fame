@@ -1023,6 +1023,9 @@ class SideMenu:
             self.screen.blit(self.surowce_icons[i], (x - 30, y))
             y += 26
 
+
+
+
     def draw(self, player: Player):
         if player.nacja == "budowniczowie":
             self.screen.blit(self.main_surface, self.main_rect)
