@@ -461,6 +461,7 @@ class Okno:
 class Camera:
     camera_x = 0
     camera_y = 0
+    camera_always_on = False
 
     def player_camera_update(player):
         """
@@ -478,6 +479,7 @@ class Camera:
         self.mouse_x = 0
         self.mouse_y = 0
         self.move_mouse_max = 160
+        self.camera_always_on = False
 
     def mouse(self, mapsize):
 
@@ -485,7 +487,8 @@ class Camera:
         predkosc = 5
         press = pygame.key.get_pressed()
         if Stats.camera_stop is False:
-            if press[pygame.K_LCTRL]:
+            print(Camera.camera_always_on)
+            if press[pygame.K_LCTRL] or Camera.camera_always_on:
                 if Camera.camera_x < 1600:
                     if self.mouse_x < 30:
                         Camera.camera_x += (predkosc + 10)

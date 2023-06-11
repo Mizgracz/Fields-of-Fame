@@ -183,6 +183,9 @@ class Game:
                     
             if event.type == pygame.QUIT:
                     sys.exit(0)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
+                Camera.camera_always_on = not Camera.camera_always_on
+
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F5:
                     fps_on = not fps_on
             if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
@@ -217,6 +220,8 @@ class Game:
             print(f"{Camera.camera_x } {Camera.camera_y }")
         if press[pygame.K_HOME]:
             Camera.player_camera_update(self.currentplayer)
+
+
 
     def save_game(self):
         folder_path = "save"
