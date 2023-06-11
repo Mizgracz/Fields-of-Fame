@@ -68,7 +68,7 @@ class Player:
         self.gold_count_bonus = 0
         self.surowce_ilosc = [["clay", 0, "glina: "], ["mine_diamonds", 0, "diamenty: "], ["mine_rocks", 0, "kamień: "],
                               ["mine_iron", 0, "żelazo: "], ["mine_gold", 0, "złoto: "], ["fish_port", 0, "ryby: "],
-                              ["sawmill", 0, "drewno: "], ["grain", 0, "zboże: "]]
+                              ["grain", 0, "zboże: "]]
         self.resource_sell_bonus = 0
         self.field_bonus = False
         self.building_buy_bonus = 0
@@ -117,7 +117,7 @@ class Player:
         self.gold_count_bonus = gold_count_bonus
         self.surowce_ilosc = [["clay",clay , "glina: "], ["mine_diamonds", mine_diamonds , "diamenty: "], ["mine_rocks", mine_rocks, "kamień: "],
                               ["mine_iron", mine_iron, "żelazo: "], ["mine_gold", mine_gold, "złoto: "], ["fish_port", fish_port, "ryby: "],
-                              ["sawmill", sawmill, "drewno: "], ["grain", grain, "zboże: "]]
+                              ["grain", grain, "zboże: "]]
         self.resource_sell_bonus = resource_sell_bonus
         self.field_bonus = field_bonus 
         self.building_buy_bonus = building_buy_bonus 
@@ -422,6 +422,7 @@ class Player:
                 self.confirm = False
                 self.field_bonus = False
                 fchoice.check()
+
 class Okno:
     active = False
     def __init__(self, szerokosc, wysokosc):
@@ -1099,7 +1100,6 @@ class SideMenu:
         self.surowce_icons.append(self.iron_icon_surface)
         self.surowce_icons.append(self.gold_icon_surface)
         self.surowce_icons.append(self.fish_icon_surface)
-        self.surowce_icons.append(self.wood_icon_surface)
         self.surowce_icons.append(self.cereal_icon_surface)
 
         ####
@@ -1131,9 +1131,9 @@ class SideMenu:
         y = 67
         for i in range(len(player.surowce_ilosc)):
             self.surowce_staty(x, y, f"{player.surowce_ilosc[i][2]} {player.surowce_ilosc[i][1]}")
-            self.surowce_icons[i] = pygame.transform.scale(self.surowce_icons[i], (21, 25))
+            self.surowce_icons[i] = pygame.transform.scale(self.surowce_icons[i], (21, 30))
             self.screen.blit(self.surowce_icons[i], (x - 30, y))
-            y += 26
+            y += 30
 
 
 
@@ -1623,10 +1623,8 @@ class ResourceSell:
         self.Resource_List.append(gold)
         fish = Resource(2, self.fish_texture, self.up_arrow, self.down_arrow, self.button, self.player)
         self.Resource_List.append(fish)
-        wood = Resource(3, self.wood_texture, self.up_arrow, self.down_arrow, self.button, self.player)
-        self.Resource_List.append(wood)
-        # grain = Resource(20, self.grain_texture, self.up_arrow, self.down_arrow, self.button, self.player)
-        # self.Resource_List.append(grain)
+        grain = Resource(20, self.grain_texture, self.up_arrow, self.down_arrow, self.button, self.player)
+        self.Resource_List.append(grain)
 
     def draw(self):
         if ResourceSell.active:

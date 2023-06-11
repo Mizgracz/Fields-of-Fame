@@ -164,6 +164,43 @@ class SOUND:
         elif SOUND.mouse_over_back and not config1.Button_Back_Rect.collidepoint(pos):
             SOUND.mouse_over_back = False
 
+    def hover_player_menu(self,pos,new_game_rect, Button_Back_Rect):
+
+        if not new_game_rect.collidepoint(pos):
+            SOUND.mouse_over_new_game = False
+            SOUND.new_game_sound_played = False
+        elif not SOUND.mouse_over_new_game and not SOUND.new_game_sound_played:
+            if not SOUND.button_sound_channel2.get_busy():
+                SOUND.button_sound_channel2.play(SOUND.slide_sound)
+                SOUND.new_game_sound_played = True
+            SOUND.mouse_over_new_game = True
+        elif SOUND.mouse_over_new_game and not new_game_rect.collidepoint(pos):
+            SOUND.mouse_over_new_game = False
+
+
+        if not Button_Back_Rect.collidepoint(pos):
+            SOUND.mouse_over_back = False
+            SOUND.option_sound_played = False
+        elif not SOUND.mouse_over_back and not SOUND.option_sound_played:
+            if not SOUND.button_sound_channel.get_busy():
+                SOUND.button_sound_channel.play(SOUND.slide_sound)
+                SOUND.option_sound_played = True
+            SOUND.mouse_over_back = True
+        elif SOUND.mouse_over_back and not Button_Back_Rect.collidepoint(pos):
+            SOUND.mouse_over_back = False
+
+    def hover_nation(self,pos,new_game_rect):
+        if not new_game_rect.collidepoint(pos):
+            SOUND.mouse_over_new_game = False
+            SOUND.new_game_sound_played = False
+        elif not SOUND.mouse_over_new_game and not SOUND.new_game_sound_played:
+            if not SOUND.button_sound_channel2.get_busy():
+                SOUND.button_sound_channel2.play(SOUND.slide_sound)
+                SOUND.new_game_sound_played = True
+            SOUND.mouse_over_new_game = True
+        elif SOUND.mouse_over_new_game and not new_game_rect.collidepoint(pos):
+            SOUND.mouse_over_new_game = False
+
 
 class Menu:
     status = True
@@ -539,6 +576,7 @@ class NationConfig:
         self.Background = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/menu_konfiguracji_nacje.png")
                                                        , (self.screen_width,self.screen_height))
         self.Rozpocznij = pygame.image.load("texture/main_menu/nation/Rozpocznij gre.png")
+        self.Rozpocznij_HOV = pygame.image.load("texture/main_menu/nation/wybornacji_button_hover.png")
         self.Rozpocznij_rect = self.Rozpocznij.get_rect()
         self.player_names = player_name
         self.select_list = []
@@ -573,20 +611,25 @@ class NationConfig:
     def handle_events(self):
         global PLAYER_NAME
         self.event = pygame.event.get()
+        pos = pygame.mouse.get_pos()
+        SOUND.hover_nation("",pos,self.Rozpocznij_rect)
+        if self.Rozpocznij_rect.collidepoint(pos):
+            self.screen.blit(self.Rozpocznij_HOV, self.Rozpocznij_rect)
         for event in self.event:
-            pos = pygame.mouse.get_pos()
+
             if event.type == pygame.QUIT:
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
 
                 if self.Rozpocznij_rect.collidepoint(pos) and NationConfig.Active == True:
+                    SOUND.button_sound.play()
                     return "new_game"
 
                 for i in self.select_list:
 
                     if i.box_rect.collidepoint(pos):
-
+                        SOUND.button_sound.play()
                         if self.pick != None:
                             self.pick.nation_pick = False
                         i.nation_pick = True
@@ -600,7 +643,7 @@ class NationConfig:
                         i.nation_pick = False
                 if self.pick != None:
                     if self.pick.left_rect.collidepoint(pos):
-
+                        SOUND.button_sound.play()
 
                         if self.pick.selected > 0:
                             self.pick.selected -= 1
@@ -608,15 +651,17 @@ class NationConfig:
 
                 if self.pick != None:
                     if self.pick.right_rect.collidepoint(pos):
-
+                        SOUND.button_sound.play()
                         if self.pick.selected < 3:
                             self.pick.selected += 1
                         self.pick.nation_pick = True
 
                 if self.pick != None:
                     if self.pick.opis_box_rect.collidepoint(pos):
+                        SOUND.button_sound.play()
                         self.pick.opis_select = 0
                     if self.pick.statystki_box_rect.collidepoint(pos):
+                        SOUND.button_sound.play()
                         self.pick.opis_select = 1
 
 
@@ -782,11 +827,20 @@ class PlayerConfig:
         self.clock =clock
         self.max_tps = max_tps
         self.allPlayers = []
-        self.Background = pygame.image.load("texture/main_menu/config/menu_konfiguracji_pseudnimy.png")
-        self.Button_Back = pygame.image.load("texture/main_menu/config/wrocdomenu.png")
-        self.Button_Start = pygame.image.load("texture/main_menu/config/wybor_nacji.png")
-        self.Button_Back_Rect = self.Button_Back.get_rect(topleft=(SCREEN_WIDTH*0.450, SCREEN_HEIGHT - 3*self.Button_Back.get_height()))
-        self.Button_Start_Rect = self.Button_Start.get_rect(topleft=(self.Button_Back_Rect.right+30,self.Button_Back_Rect.y ))
+        self.Background = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/config/menu_konfiguracji_pseudnimy.png"),(SCREEN_WIDTH,SCREEN_HEIGHT))
+        self.Button_Back = pygame.transform.scale_by(pygame.image.load("texture/main_menu/config/wrocdomenu.png"), 0.9)
+        self.Button_Start = pygame.transform.scale_by(pygame.image.load("texture/main_menu/config/wybor_nacji.png"), 0.9)
+        self.Button_Back_Rect = self.Button_Back.get_rect(
+            topleft=(SCREEN_WIDTH * 0.30, SCREEN_HEIGHT - 3 * self.Button_Back.get_height()))
+        self.Button_Start_Rect = self.Button_Start.get_rect(
+            topleft=(self.Button_Back_Rect.right + 30, self.Button_Back_Rect.y))
+
+        self.Button_Start_HOV = pygame.transform.scale_by(
+            pygame.image.load("texture/main_menu/config/wybornacji_button_hover.png"),
+            0.9)
+        self.Button_Back_HOV = pygame.transform.scale_by(
+            pygame.image.load("texture/main_menu/config/wroc_do_menu_button.png"), 0.9)
+
         self.Active = False
         self.font = pygame.font.Font('fonts/PirataOne-Regular.ttf', 36)
         self.Player_count = Player_count
@@ -795,9 +849,10 @@ class PlayerConfig:
             self.input_boxes.append(InputBox(SCREEN_WIDTH*0.46,223+(50*i),250,36))
         self.run()
     def draw(self):
+
         self.screen.blit(self.Background,(0,0))
-        self.screen.blit(self.Button_Back,self.Button_Back_Rect)
-        self.screen.blit(self.Button_Start,self.Button_Start_Rect)
+
+
         for box in self.input_boxes:
             box.update()
         for box in self.input_boxes:
@@ -806,17 +861,31 @@ class PlayerConfig:
     def handle_events(self):
         global PLAYER_NAME
         self.event = pygame.event.get()
+        pos = pygame.mouse.get_pos()
+        SOUND.hover_player_menu("",pos,self.Button_Start_Rect,self.Button_Back_Rect)
+        if self.Button_Start_Rect.collidepoint(pos):
+            self.screen.blit(self.Button_Start_HOV, self.Button_Start_Rect)
+        else:
+            self.screen.blit(self.Button_Start, self.Button_Start_Rect)
+
+        if self.Button_Back_Rect.collidepoint(pos):
+            self.screen.blit(self.Button_Back_HOV, self.Button_Back_Rect)
+        else:
+            self.screen.blit(self.Button_Back, self.Button_Back_Rect)
+
         for event in self.event:
             for box in self.input_boxes:
                 box.handle_event(event)
-            pos = pygame.mouse.get_pos()
+
             if event.type == pygame.QUIT:
                 sys.exit()
+
+
 
             elif event.type == pygame.MOUSEBUTTONUP:
 
                 if self.Button_Start_Rect.collidepoint(pos) and PlayerConfig.Active == True:
-
+                    SOUND.button_sound.play()
                     self.gameplay = True
                     PlayerConfig.Active = False
                     self.MAP_SIZE = MAP_SIZE
@@ -835,6 +904,7 @@ class PlayerConfig:
                     pygame.display.update()
 
                 elif self.Button_Back_Rect.collidepoint(pos):
+                    SOUND.button_sound.play()
                     PlayerConfig.Active = False
                     
                     Menu.status = True
@@ -869,7 +939,7 @@ class MenuSettings:
     def __init__(self, screen:pygame.Surface ):
         self.screen = screen
         self.Button_Back = pygame.transform.scale_by(pygame.image.load("texture/main_menu/config/wrocdomenu.png"),0.9)
-        # self.Button_Start = pygame.transform.scale_by(pygame.image.load("texture/main_menu/config/przejdz_dalej.png"),0.9)
+        self.Button_Back_HOV =  pygame.transform.scale_by(pygame.image.load("texture/main_menu/config/wroc_do_menu_button.png"),0.9)
         self.Background = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/config/nick_back.png"),(SCREEN_WIDTH,SCREEN_HEIGHT))
         self.zaznaczone = pygame.image.load("texture/main_menu/config/zaznaczone.png")
         self.niezaznaczone = pygame.image.load("texture/main_menu/config/niezaznaczone.png")
@@ -929,10 +999,13 @@ class MenuSettings:
         config.read('settings.ini')
         pos = pygame.mouse.get_pos()
         press = pygame.mouse.get_pressed()
+
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
-            
+
+
             if self.plus_rect.collidepoint(pos) and press[0]:
                 SOUND.button_sound.play()
                 self.music_volume.increment()
@@ -1029,8 +1102,13 @@ class MenuSettings:
                         config.write(configfile)
                     # SCREEN_WIDTH,SCREEN_HEIGHT = 1920,1080
                     # pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT),flags)
+
+
         self.screen.blit(self.Background, (0, 0))
-        self.screen.blit(self.Button_Back, self.Button_Back_Rect)
+        if self.Button_Back_Rect.collidepoint(pos):
+            self.screen.blit(self.Button_Back_HOV, self.Button_Back_Rect)
+        else:
+            self.screen.blit(self.Button_Back, self.Button_Back_Rect)
         
         self.screen.blit(self.minus, self.minus_rect)
         self.screen.blit(self.ramka_ilosc, self.ramka_ilosc_rect)
@@ -1051,14 +1129,10 @@ class MenuSettings:
         self.screen.blit(self.text_1366x768,self.mapMedium_Rect)
         self.screen.blit(self.text_1280x720,self.mapSmall_Rect)
 
-        # pygame.draw.rect(self.screen,'#ff0000',self.mapSmall_Rect,2)
-        # pygame.draw.rect(self.screen,'#00ff00',self.mapMedium_Rect,2)
-        # pygame.draw.rect(self.screen,'#0000ff',self.mapBig_Rect,2)
+
         self.music_volume.draw()
         self.sound_volume.draw()
-        # self.screen.blit(self.text_map_size, (60, 240))
-        # self.screen.blit(self.text_player, (60, 360))
-        # self.screen.blit(self.text_fog_on_off, (525, 240))
+
         self.screen.blit(self.text_size_screen, (SCREEN_WIDTH*0.29, self.mapSmall_Rect.y))
         self.screen.blit(self.text_volume, (SCREEN_WIDTH*0.29, self.minus_rect.y))
         self.screen.blit(self.text_sound, (SCREEN_WIDTH*0.29, self.minus_rect2.y))
@@ -1115,7 +1189,7 @@ class Config:
         self.mapBig_HOV = pygame.image.load("texture/main_menu/config/duza_button.png")
         self.mapMedium_HOV = pygame.image.load("texture/main_menu/config/srednia_button.png")
         self.mapSmall_HOV = pygame.image.load("texture/main_menu/config/mala_button.png")
-
+        self.fog_button_HOV = pygame.image.load("texture/main_menu/config/mgla_wojny_button.png")
 
         self.text_map_size = self.font_file.render('Wielkość mapy: ', True, '#ffffff')
         self.text_player = self.font_file.render('Ilość graczy', True, '#ffffff')
@@ -1199,7 +1273,12 @@ class Config:
         if SWITCH_FOG:
             self.screen.blit(self.zaznaczone, self.zaznaczone_rect)
         else:
-            self.screen.blit(self.niezaznaczone, self.zaznaczone_rect)
+            if self.zaznaczone_rect.collidepoint(pos):
+                self.screen.blit(self.fog_button_HOV, self.zaznaczone_rect)
+            else:
+                self.screen.blit(self.niezaznaczone, self.zaznaczone_rect)
+
+
         self.screen.blit(self.mapBig,self.mapBig_Rect)
         self.screen.blit(self.mapMedium,self.mapMedium_Rect)
         self.screen.blit(self.mapSmall,self.mapSmall_Rect)
