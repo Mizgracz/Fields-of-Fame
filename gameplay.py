@@ -43,17 +43,15 @@ class Player:
         Player.MAX += 1
         self.confirm = False
         self.buildMenu = None
-        self.home = random.choice(Player.castle_hex)
+        self.home = random.choice(Player.castle_hex) if len(Player.castle_hex)>0 else 0
         self.home_x = 0
         self.home_y = 0
-
-        Player.castle_hex.remove(self.home)
+        if self.home != 0:
+            Player.castle_hex.remove(self.home)
         Player.use_castle.append(self.home)
 
         self.player_name = name
         self.nacja = nation
-        global nacja
-        nacja = nation
         self.wyb = False
         self.turn_stop = False
         self.field_status = False
@@ -87,7 +85,52 @@ class Player:
         else:
             Player.ID += 1
         Player.start_turn = False
+    def set_data(self,player_name,home,home_x,home_y,
+                 nacja,wyb,turn_stop,field_status,
+                 camera_stop,player_hex_status,
+                 atack_stop,attack_fail,gold_count,
+                 army_count,terrain_count,turn_count,
+                 army_count_bonus,gold_count_bonus,
+                 clay,mine_diamonds,mine_rocks,mine_iron,mine_gold,fish_port,sawmill,grain,
+                 resource_sell_bonus,field_bonus,building_buy_bonus,licznik,barbarian_bonus,crypt_bonus,new_pick,
+                 MAX_PLAYER,ID_PLAYER,USE_CASTLE,CASTLE_HEX):
+        
+        
+        
+        self.home = home
+        self.home_x = home_x
+        self.home_y = home_y
+        self.player_name = player_name
+        self.nacja = nacja
+        self.wyb = wyb
+        self.turn_stop = turn_stop
+        self.field_status = field_status
+        self.camera_stop = camera_stop
+        self.player_hex_status = player_hex_status
+        self.atack_stop = atack_stop
+        self.attack_fail = attack_fail
+        self.gold_count = gold_count
+        self.army_count = army_count
+        self.terrain_count = terrain_count
+        self.turn_count = turn_count
+        self.army_count_bonus = army_count_bonus
+        self.gold_count_bonus = gold_count_bonus
+        self.surowce_ilosc = [["clay",clay , "glina: "], ["mine_diamonds", mine_diamonds , "diamenty: "], ["mine_rocks", mine_rocks, "kamień: "],
+                              ["mine_iron", mine_iron, "żelazo: "], ["mine_gold", mine_gold, "złoto: "], ["fish_port", fish_port, "ryby: "],
+                              ["sawmill", sawmill, "drewno: "], ["grain", grain, "zboże: "]]
+        self.resource_sell_bonus = resource_sell_bonus
+        self.field_bonus = field_bonus 
+        self.building_buy_bonus = building_buy_bonus 
+        self.licznik = licznik 
+        self.barbarian_bonus = barbarian_bonus 
+        self.crypt_bonus = crypt_bonus 
+        self.new_pick = new_pick 
 
+        Player.MAX = MAX_PLAYER
+        Player.ID = ID_PLAYER
+        Player.use_castle = USE_CASTLE
+        Player.castle_hex = CASTLE_HEX 
+        
     def dopisz_surowiec(self, surowiec):
         for i in range(len(self.surowce_ilosc)):
             if surowiec == self.surowce_ilosc[i][0]:
@@ -327,9 +370,8 @@ class Player:
                             self.turn_stop = False
                             allhex['hex', i].player = self.player_name
                             self.confirm = True
- ######################################################
- ##### NOWOŚC DO POŁACZENIA #########
-    def castle_nation(self,allhex):
+
+    def castle_nation(self, allhex):
         for i in range(len(allhex)):
             if allhex["hex", i].number in Player.use_castle:
                 if allhex["hex", i].number == self.home:
@@ -341,7 +383,7 @@ class Player:
                         allhex["hex", i].update_texture()
                     if self.nacja == "budowniczowie":
                         allhex["hex", i].texture_index = - 5
-                        allhex["hex", i].update_texture() # #
+                        allhex["hex", i].update_texture()  # #
 
     def nation_bonus(self):
         if self.nacja == "kupcy":
@@ -380,6 +422,39 @@ class Player:
                 self.confirm = False
                 self.field_bonus = False
                 fchoice.check()
+class Okno:
+    active = False
+    def __init__(self, szerokosc, wysokosc):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+        
+        self.czcionka = pygame.font.SysFont("Arial", 24)
+        self.tura_gracza = 1
+        self.window_rect = pygame.Rect((SCREEN_WIDTH-szerokosc)/2,(SCREEN_HEIGHT-wysokosc)/2,szerokosc,wysokosc)
+        
+        self.ok_rect = pygame.Rect((SCREEN_WIDTH-szerokosc)/2,(SCREEN_HEIGHT-wysokosc)/2,150,50)
+        self.ok_rect.top = (self.window_rect.bottom+self.ok_rect.height)
+        self.ok_rect.centerx = self.window_rect.centerx
+        
+        self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/budynki_tlo.png'),(self.szerokosc,self.wysokosc))
+        
+        
+        self.font = pygame.font.Font('fonts/PirataOne-Regular.ttf',50)
+        
+    def draw(self,screen:pygame.Surface,player:Player = None):
+        self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/budynki_tlo.png'),(self.szerokosc,self.wysokosc))
+
+        screen.blit(self.background,self.window_rect)
+        text = self.font.render(f"Tura Gracza",True,'#ffffff')
+        text2 = self.font.render(f"{player.player_name}",True,'#ffffff')
+        self.background.blit(text,((self.background.get_width()-text.get_width())/2,(self.background.get_height()-text.get_height()*2)/2))
+        self.background.blit(text2,((self.background.get_width()-text2.get_width())/2,(self.background.get_height()-text2.get_height()*0.5)/2))
+        screen.blit(self.background,self.window_rect)
+
+        # screen.blit(self.background,self.window_rect)
+        
+        pass
+
 
 
 class Camera:
@@ -409,7 +484,7 @@ class Camera:
         predkosc = 5
         press = pygame.key.get_pressed()
         if Stats.camera_stop is False:
-            if not press[pygame.K_LCTRL]:
+            if press[pygame.K_LCTRL]:
                 if Camera.camera_x < 1600:
                     if self.mouse_x < 30:
                         Camera.camera_x += (predkosc + 10)
@@ -460,31 +535,29 @@ class Camera:
 class UpBar:
 
     def __init__(self, screen: pygame.Surface):
-        # SCREEN#
-        self.SCREEN_WIDTH = screen.get_size()[0]
-        self.SCREEN_HEIGHT = screen.get_size()[1]
+        
         ########
         FONT_NAME = 'timesnewroman'
         FONT_SIZE = 17
         self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
 
         ########
-        self.bar = pygame.Surface((self.SCREEN_WIDTH, 30))
-        self.up_bar_surface = pygame.Surface((self.SCREEN_WIDTH, 30))
+        self.bar = pygame.Surface((SCREEN_WIDTH, 30))
+        self.up_bar_surface = pygame.Surface((SCREEN_WIDTH, 30))
         
 
         # grafiki
         self.bar_main = pygame.transform.scale(pygame.image.load('texture/ui/up_bar/bar.png').convert_alpha(),
-                                               (self.SCREEN_WIDTH, 30))
+                                               (SCREEN_WIDTH, 30))
         
         self.bar_main_red = pygame.transform.scale(pygame.image.load('texture/ui/up_bar/red/bar.png').convert_alpha(),
-                                        (self.SCREEN_WIDTH, 30))
+                                        (SCREEN_WIDTH, 30))
         
         self.bar_main_yellow = pygame.transform.scale(pygame.image.load('texture/ui/up_bar/yellow/bar.png').convert_alpha(),
-                                        (self.SCREEN_WIDTH, 30))
+                                        (SCREEN_WIDTH, 30))
         
         self.bar_main_purple = pygame.transform.scale(pygame.image.load('texture/ui/up_bar/purple/bar.png').convert_alpha(),
-                                        (self.SCREEN_WIDTH, 30))
+                                        (SCREEN_WIDTH, 30))
         self.screen = screen
 
     def draw(self, player):
@@ -506,17 +579,15 @@ class UpBar:
         tiles_score = self.font.render("Ilość Posiadanych Pól: " + str(player.terrain_count), True, "white")
         turn_score = self.font.render("Tura: " + str(player.turn_count), True, "white")
 
-        self.screen.blit(money_score, (20, 2))
-        self.screen.blit(army_score, (210, 2))
-        self.screen.blit(tiles_score, (400, 2))
-        self.screen.blit(turn_score, (1100, 4))
+        self.screen.blit(money_score, (SCREEN_WIDTH*0.017, 2))
+        self.screen.blit(army_score, (SCREEN_WIDTH*0.17, 2))
+        self.screen.blit(tiles_score, (SCREEN_WIDTH*0.32, 2))
+        self.screen.blit(turn_score, (SCREEN_WIDTH*0.86, 4))
 
 
 class Timer:
     def __init__(self, screen: pygame.Surface, game):
-        # SCREEN#
-        self.SCREEN_WIDTH = screen.get_size()[0]
-        self.SCREEN_HEIGHT = screen.get_size()[1]
+        
         ########
         self.game = game
         self.screen = screen
@@ -524,7 +595,7 @@ class Timer:
         FONT_NAME = 'timesnewroman'
         self.font_timer = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
         self.start_time = time.time()
-        self.timer_box = pygame.Rect(self.SCREEN_WIDTH - 90, 0, 90, 30)
+        self.timer_box = pygame.Rect(SCREEN_WIDTH - 90, 0, 90, 30)
 
     def update(self):
         # Update the timer
@@ -575,14 +646,11 @@ class Timer:
 
 
 class Hourglass:
-    button_sound_hourglass = pygame.mixer.Sound('music/music_ambient/hourglass.mp3')
-    button_sound_hourglass.set_volume(1.0)
-
+    
     def __init__(self, screen: pygame.Surface, frame_rate: int, animation_frame_interval: int):
-        self.SCREEN_WIDTH = screen.get_size()[0]
-        self.SCREEN_HEIGHT = screen.get_size()[1]
+        
         self.screen = screen
-        self.hourglass_rect = pygame.Rect(10, self.SCREEN_HEIGHT - 190, 173, 184)
+        self.hourglass_rect = pygame.Rect(10, SCREEN_HEIGHT - 190, 173, 184)
         self.nation_color = "red"
 
         # Load animation frames
@@ -687,15 +755,24 @@ class Hourglass:
         collision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
 
-        if self.hourglass_rect.collidepoint(collision) and mouse_pressed[0]:
-            Hourglass.button_sound_hourglass.play()
-            if player.wyb == False and not player.turn_stop:
+        if  mouse_pressed[0]:
+            
+            if self.hourglass_rect.collidepoint(collision):
+                if player.wyb == False and player.turn_stop:
+                    SOUND.button_sound_hourglass.play()
+                    player.wyb = True
 
-                player.wyb = True
-                player.turn_count += 1
-                self.field_bonus = False
-                self.next_frame()
-                self.last_frame_time = pygame.time.get_ticks()
+                    self.field_bonus = False
+                    self.next_frame()
+                    self.last_frame_time = pygame.time.get_ticks()
+                elif player.wyb == False:
+                    player.wyb = True
+                    self.next_frame()
+                    self.last_frame_time = pygame.time.get_ticks()
+                
+                    
+                pygame.time.Clock().tick(3)
+
 
         # Check if it's time to switch animation frame
         current_time = pygame.time.get_ticks()
@@ -707,13 +784,6 @@ class Hourglass:
 
 
 class Decision:
-    button_sound_money = pygame.mixer.Sound('music/music_ambient/coins.mp3')
-    button_sound_money.set_volume(1.0)
-    button_sound_army = pygame.mixer.Sound('music/music_ambient/army.mp3')
-    button_sound_army.set_volume(1.0)
-    button_sound_field = pygame.mixer.Sound('music/music_ambient/sand.mp3')
-    button_sound_field.set_volume(1.0)
-
     def __init__(self, screen: pygame.Surface, map, player):
 
         self.SCREEN_WIDTH = screen.get_size()[0] - 256
@@ -733,28 +803,34 @@ class Decision:
         self.fchoice = FieldChoice(self.map.sprites(), self.screen, player)
 
         self.bacground_rect = self.background_image.get_rect(center=(self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2))
-        self.gold_rect = self.gold_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, 230))
-        self.army_rect = self.army_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, 330))
-        self.field_rect = self.field_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, 430))
+        self.gold_rect = self.gold_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, SCREEN_HEIGHT*0.32))
+        self.army_rect = self.army_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, SCREEN_HEIGHT*0.46))
+        self.field_rect = self.field_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, SCREEN_HEIGHT*0.60))
 
-        self.background_image.blit(self.gold_button, (self.gold_button.get_size()[0] / 4 - 2, 50))
-        self.background_image.blit(self.army_button, (self.army_button.get_size()[0] / 4 - 2, 150))
-        self.background_image.blit(self.field_button, (self.field_button.get_size()[0] / 4 - 2, 250))
-
+        self.screen.blit(self.gold_button, self.gold_rect)
+        self.screen.blit(self.army_button, self.army_rect)
+        self.screen.blit(self.field_button, self.field_rect)
     def draw(self, player):
         if player.confirm:
+            player.wyb = False
             player.confirm = False
+            player.turn_count += 1
             Player.next_player()
+            
+            Okno.active = True
         else:
             if player.wyb:
                 player.camera_stop = True
                 self.screen.blit(self.background_image, self.bacground_rect)
+                self.screen.blit(self.gold_button, self.gold_rect)
+                self.screen.blit(self.army_button, self.army_rect)
+                self.screen.blit(self.field_button, self.field_rect)
 
     def click(self, player):
         colision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
         if self.gold_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
-            Decision.button_sound_money.play()
+            SOUND.button_sound_money.play()
             player.wyb = False
             player.camera_stop = False
             player.gold_count += 10 + player.gold_count_bonus
@@ -762,7 +838,7 @@ class Decision:
             player.field_bonus = 0
 
         if self.army_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
-            Decision.button_sound_army.play()
+            SOUND.button_sound_army.play()
             player.wyb = False
             player.camera_stop = False
             player.army_count += 10 + player.army_count_bonus
@@ -770,7 +846,7 @@ class Decision:
             player.field_bonus = 0
 
         if self.field_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
-            Decision.button_sound_field.play()
+            SOUND.button_sound_field.play()
             player.wyb = False
             player.camera_stop = False
             player.turn_stop = True
@@ -781,8 +857,6 @@ class Decision:
 
 
 class FieldUpdate:
-    sound_diamond = pygame.mixer.Sound('music/music_ambient/diamond.mp3')
-    sound_diamond.set_volume(1.0)
 
     def __init__(self, sprites, num):
         self.sprites = sprites
@@ -791,29 +865,56 @@ class FieldUpdate:
 
 
     def start(self, player: Player):
-        if player.home % 2 == 1:
+        if player.home % 6 == 0:
+            prev_index = (player.home - 1) % self.num_sprites
+            next_index = (player.home + 1) % self.num_sprites
+            c = (player.home - self.quantity_hex - 1) % self.num_sprites
+            d = (player.home + 1 - self.quantity_hex - 1) % self.num_sprites
+            e = (player.home + self.quantity_hex - 1) % self.num_sprites
+            f = (player.home + self.quantity_hex) % self.num_sprites
+        elif player.home % 6 == 1:
             prev_index = (player.home - 1) % self.num_sprites
             next_index = (player.home + 1) % self.num_sprites
             c = (player.home - self.quantity_hex) % self.num_sprites
             d = (player.home + 1 - self.quantity_hex) % self.num_sprites
             e = (player.home + self.quantity_hex) % self.num_sprites
             f = (player.home + self.quantity_hex + 1) % self.num_sprites
-        elif player.home % 2 == 0:
+        elif player.home % 6 == 2:
             prev_index = (player.home - 1) % self.num_sprites
             next_index = (player.home + 1) % self.num_sprites
-            c = (player.home - self.quantity_hex - 1) % self.num_sprites
-            d = (player.home + 1 - self.quantity_hex - 1) % self.num_sprites
-
+            c = (player.home - self.quantity_hex) % self.num_sprites
+            d = (player.home + 1 - self.quantity_hex) % self.num_sprites
+            e = (player.home + self.quantity_hex) % self.num_sprites
+            f = (player.home + self.quantity_hex + 1) % self.num_sprites
+        elif player.home % 6 == 3:
+            prev_index = (player.home - 1) % self.num_sprites
+            next_index = (player.home + 1) % self.num_sprites
+            c = (player.home - self.quantity_hex -1 ) % self.num_sprites
+            d = (player.home + 1 - self.quantity_hex -1) % self.num_sprites
             e = (player.home + self.quantity_hex - 1) % self.num_sprites
+            f = (player.home + self.quantity_hex + 1 - 1 ) % self.num_sprites
+        elif player.home % 6 == 4:
+            prev_index = (player.home - 1) % self.num_sprites
+            next_index = (player.home + 1) % self.num_sprites
+            c = (player.home - self.quantity_hex-1) % self.num_sprites
+            d = (player.home - self.quantity_hex) % self.num_sprites
+            e = (player.home + self.quantity_hex-1) % self.num_sprites
             f = (player.home + self.quantity_hex) % self.num_sprites
+        elif player.home % 6 == 5:
+            prev_index = (player.home - 1) % self.num_sprites
+            next_index = (player.home + 1) % self.num_sprites
+            c = (player.home - self.quantity_hex) % self.num_sprites
+            d = (player.home + 1 - self.quantity_hex) % self.num_sprites
+            e = (player.home + self.quantity_hex) % self.num_sprites
+            f = (player.home + self.quantity_hex + 1) % self.num_sprites
 
         if not self.sprites[prev_index].zajete and self.sprites[player.home].player == player.player_name:
-            FieldUpdate.sound_diamond.play()
+            SOUND.sound_diamond.play()
             self.sprites[prev_index].field_add = True
             self.sprites[prev_index].playerable += [player.player_name]
 
         if not self.sprites[next_index].zajete and self.sprites[player.home].player == player.player_name:
-            FieldUpdate.sound_diamond.play()
+            SOUND.sound_diamond.play()
             self.sprites[next_index].field_add = True
             self.sprites[next_index].playerable += [player.player_name]
 
@@ -1061,6 +1162,11 @@ class EventMenagment:
         self.events = []
         self.results = []
         self.placeholder = "texture/Events/ruiny_event.png"
+        self.ruiny = "texture/Events/ruiny.png"
+        self.turniej = "texture/Events/turniej.png"
+        self.turniej_final = "texture/Events/turniej_final.png"
+        self.turniej_przygotowanie_img = "texture/Events/turniej_przygotowania.png"
+
         self.turniej_udzial_chance = 0
 
     def start_event_list(self):
@@ -1068,12 +1174,12 @@ class EventMenagment:
         najemnicy = Event(self.screen, opis_najemnicy, "texture/Events/najemnicy_img.png", 3, select_najemnicy,
                           "Najemnicy", self, 200, 50, "Najemnicy")
         self.events.append(najemnicy)
-        ruiny = Event(self.screen, opis_ruiny, self.placeholder, 2, select_ruiny, "Ruiny", self, 0, 25, "Ruiny")
+        ruiny = Event(self.screen, opis_ruiny, self.ruiny, 2, select_ruiny, "Ruiny", self, 0, 25, "Ruiny")
         self.events.append(ruiny)
-        eliksir = Event(self.screen, opis_eliksir, self.placeholder, 3, select_eliksir, "Eliksir", self, 200, 0,
+        eliksir = Event(self.screen, opis_eliksir, "texture/Events/eliksir", 3, select_eliksir, "Eliksir", self, 200, 0,
                         "Wędrowiec i Eliksir")
         self.events.append(eliksir)
-        turniej = Event(self.screen, opis_turniej, self.placeholder, 3, select_turniej, "Turniej", self, 100, 1,
+        turniej = Event(self.screen, opis_turniej, self.turniej, 3, select_turniej, "Turniej", self, 100, 1,
                         "Turniej Rycerski")
         self.events.append(turniej)
 
@@ -1110,14 +1216,7 @@ class EventMenagment:
 
 
 class Event:
-    sound_horn = pygame.mixer.Sound('music/music_ambient/horn.mp3')
-    sound_horn.set_volume(1.0)
-    sound_sword = pygame.mixer.Sound('music/music_ambient/sword.mp3')
-    sound_sword.set_volume(1.0)
-    sound_coin = pygame.mixer.Sound('music/music_ambient/coin.mp3')
-    sound_coin.set_volume(1.0)
-    sound_slice = pygame.mixer.Sound('music/music_ambient/slice.mp3')
-    sound_slice.set_volume(1.0)
+    
 
     def __init__(self, ekran: pygame.Surface, opis: str, grafika, ilosc_opcji: int, opisy_opcji: str, funkcja: str,
                  managment: EventMenagment, gold_min, army_min, nazwa):
@@ -1133,7 +1232,7 @@ class Event:
         self.army_min = army_min
 
     def execute(self):
-        Event.sound_horn.play()
+        SOUND.sound_horn.play()
         Render = EventRender(self.ekran, self.opis, self.grafika, self.nazwa)
         Render.draw()
         self.Choose = EventOptions(self.ilosc_opcji, self.opisy_opcji, self.ekran)
@@ -1144,7 +1243,7 @@ class Event:
     def Najemnicy(self, managment):
 
         if self.Wybor == 1:
-            Event.sound_slice.play()
+            SOUND.sound_slice.play()
             x = random.randint(0, 99)
             if x < 60:
                 self.managment.player.gold_count += 100  # Zabij ich
@@ -1159,7 +1258,7 @@ class Event:
                 managment.add_result(Result)
 
         if self.Wybor == 2:
-            Event.sound_coin.play()
+            SOUND.sound_coin.play()
             self.managment.player.gold_count -= 200  # Zaplać im
             self.managment.player.army_count += 100
 
@@ -1177,7 +1276,7 @@ class Event:
 
     def najemnicy_thief(self, managment):
         if self.Wybor == 0:
-            Event.sound_slice.play()
+            SOUND.sound_slice.play()
             self.managment.player.army_count -= 100
             self.managment.player.gold_count -= 50
 
@@ -1256,7 +1355,7 @@ class Event:
             Result = EventResults(opis, self.ekran, self.managment)
             managment.add_result(Result)
             turniej_przygotowanie = Event(managment.screen, opis_turniej_przygotowanie,
-                                          "texture/Events/najemnicy_img.png", 3,
+                                          managment.turniej_przygotowanie_img, 3,
                                           select_turniej_przygotowanie,
                                           "turniej_przygotowanie", managment, 300, 0, "Przygotowanie do Turnieju")
             managment.events.append(turniej_przygotowanie)
@@ -1285,7 +1384,7 @@ class Event:
             managment.add_result(Result)
 
             turniej_udzial = Event(managment.screen, opis_turniej_udzial,
-                                   "texture/Events/najemnicy_img.png", 1,
+                                   managment.turniej_final, 1,
                                    select_turniej_udzial,
                                    "turniej_udzial", managment, 0, 50, "Rozpoczęcię Turnieju !")
             managment.events.append(turniej_udzial)

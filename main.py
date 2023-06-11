@@ -1,20 +1,29 @@
+import configparser
 import zipfile
 from graphics import MapGenerator
 from gameplay import*
 from menu import *
+
 import pygame
 from pygame.locals import *
 import sys
 import os
 
 # config
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 720
+config = configparser.ConfigParser()
+config.read('settings.ini')
+SCREEN_WIDTH = int(config.get('Ustawienia', 'width'))
+SCREEN_HEIGHT = int(config.get('Ustawienia', 'height'))
+FULLSCREEN_SWITCH = True if config.get('Ustawienia','fullscreen') == 'True' else False
+MUSIC_VOLUME = int(config.get('Ustawienia','volume'))/100
+SOUND_VOLUME = int(config.get('Ustawienia','sound'))/100
+
+
 clock = pygame.time.Clock()
 res = (SCREEN_WIDTH, SCREEN_HEIGHT)
 frame_rate = 60
 animation_frame_interval = 5
-flags = DOUBLEBUF #| pygame.FULLSCREEN
+flags = DOUBLEBUF | (pygame.FULLSCREEN if FULLSCREEN_SWITCH else 0)
 screen = pygame.display.set_mode(res, flags, 32)
 max_tps = 6000
 
@@ -23,14 +32,14 @@ if not os.path.exists(folder_path):
     os.makedirs(folder_path)
 
 pygame.init()
-pygame.display.set_caption("Filds of Fame")
+pygame.display.set_caption("Fields of Fame")
 icon_image = pygame.image.load('texture/icon.png')
 pygame.display.set_icon(icon_image)
 
 fps_on = True
 pygame.mixer.music.load("music/main.mp3")
 pygame.mixer.music.play(-1)
-pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.set_volume(MUSIC_VOLUME)
 
 
 def fps():
@@ -47,40 +56,42 @@ class Game:
         pygame.init()
         while not Menu.new_game :
             self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
-
-
+        
+        self.pause_menu = MenuPause(screen,SCREEN_WIDTH/4,SCREEN_HEIGHT/1.5)
+        self.okno1 = Okno(500,300)
 
         # budynki
         allbuilding1 = [
-            BuildingItem("Targowisko","Targowisko (+20 złota na turę)",'buddynki_targowisko.png',100,10,10),
-            BuildingItem("Karczma","Karczma (+ 10 złota na ture)",'buddynki_karczma_krita.png',50,10,10),
-            BuildingItem("Koszary","Koszary (+20 wojska na turę)",'buddynki_koszary_krita.png',50,10,10),
-            BuildingItem("Kowal","Kowal  (+10 wojska na turę)",'boddynki_kowal.png',50,10,10),
-            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 50, 10, 10),
+            BuildingItem("Targowisko","Targowisko (+20 złota na turę)",'buddynki_targowisko.png',300,20,0),
+            BuildingItem("Karczma","Karczma (+ 10 złota na ture)",'buddynki_karczma_krita.png',100,10,0),
+            BuildingItem("Koszary","Koszary (+20 wojska na turę)",'buddynki_koszary_krita.png',300,0,20),
+            BuildingItem("Kowal","Kowal  (+10 wojska na turę)",'boddynki_kowal.png',100,10,0),
+            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
+            BuildingItem("Bank", "TEST 101  (+100000 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
         ]
         allbuilding2 = [
-            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 100, 10, 10),
-            BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 50, 10, 10),
-            BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 50, 10, 10),
-            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 50, 10, 10),
-            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 50, 10, 10),
+            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 300, 20, 0),
+            BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 100, 10, 0),
+            BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 300, 0, 20),
+            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 100, 10, 0),
+            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
         ]
         allbuilding3 = [
-            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 100, 10, 10),
-            BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 50, 10, 10),
-            BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 50, 10, 10),
-            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 50, 10, 10),
-            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 50, 10, 10),
+            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 300, 20, 0),
+            BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 100, 10, 0),
+            BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 300, 0, 20),
+            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 100, 10, 0),
+            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
         ]
         allbuilding4 = [
-            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 100, 10, 10),
-            BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 50, 10, 10),
-            BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 50, 10, 10),
-            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 50, 10, 10),
-            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 50, 10, 10),
+            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 300, 20, 0),
+            BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 100, 10, 0),
+            BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 300, 0, 20),
+            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 100, 10, 0),
+            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
         ]
 
-        self.allbuildingList = [allbuilding1,allbuilding2,allbuilding3,allbuilding4]
+        self.allbuildingList = [allbuilding1, allbuilding2, allbuilding3, allbuilding4]
 
         self.size = self.start_menu.MAP_SIZE
         self.Fog = self.start_menu.SWITCH_FOG
@@ -110,14 +121,14 @@ class Game:
             self.allplayers.append(Player(name,self.PlayerNation[x]))
             x += 1
 
-        self.map = MapGenerator(self.size, self.size, screen, self.camera,self.allplayers)
-
+        self.map = MapGenerator(self.size, self.size, screen,\
+                                 self.camera,self.allplayers)
+        self.start = True
         self.map.texture()
         self.map.generate()
         self.alldec = []
-        #NOWE ####################
-        self.start = True
-        ##########################
+
+
 
         for i in range(Player.MAX):
             self.alldec.append(Decision(screen,self.map,self.allplayers[i]))
@@ -144,12 +155,9 @@ class Game:
         self.currentdec = self.alldec[Player.ID]
 
 
-
-
         self.music_on = 1
         self.resource = ResourceSell(screen,self.currentplayer)
         self.loadmenu = LoadMenu(screen, self)
-        self.savemenu = SaveMenu2(screen, self)
 
         Buildings = []
         for i in range(30):
@@ -162,16 +170,27 @@ class Game:
         global fps_on
         POZ = pygame.mouse.get_pos()
         for event in pygame.event.get():
+            if MenuPause.Active ==True:
+                self.pause_menu.handle_event(event)
+            if Okno.active:
+                if self.okno1.window_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
+                    Okno.active = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    MenuPause.Active = True
+                    BuildingMenu.active = False
+                    ResourceSell.active = False
+                    
             if event.type == pygame.QUIT:
                     sys.exit(0)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F5:
                     fps_on = not fps_on
             if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
                 if self.music_on == 1:
-                    pygame.mixer.music.set_volume(0.0)
+                    pygame.mixer.music.set_volume(0.0*MUSIC_VOLUME)
                     self.music_on = 0
                 elif self.music_on == 0:
-                    pygame.mixer.music.set_volume(1.0)
+                    pygame.mixer.music.set_volume(1.0*MUSIC_VOLUME)
                     self.music_on = 1
             if SaveMenu.active:
                 self.newSaveM.handle_event(event,self)
@@ -192,8 +211,7 @@ class Game:
                     if self.sd.button_resource_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
                         ResourceSell.active = True
         press = pygame.key.get_pressed()
-        if press[pygame.K_ESCAPE]:
-            Menu.status = True
+        
         if press[pygame.K_s]:
             # self.save_game()
             print(f"{Camera.camera_x } {Camera.camera_y }")
@@ -277,8 +295,8 @@ class Game:
                 self.loadmenu.update()
             while SaveMenu.active:
                 screen.fill((128, 0, 0))
-                self.handle_events()
                 self.newSaveM.draw_menu()
+                self.handle_events()
 
                 pygame.display.flip()
                 clock.tick(max_tps)
@@ -293,18 +311,18 @@ class Game:
             self.currentmenu = self.allbuildingmenu[Player.ID]
             self.currentdec = self.alldec[Player.ID]
             screen.fill((255, 255, 255))
+
             self.handle_events()
             self.camera.mouse(self.size)
             self.camera.keybord(self.size)
             self.map.Draw(SCREEN_WIDTH, SCREEN_HEIGHT)
             self.map.fog_draw(self.Fog, SCREEN_WIDTH, SCREEN_HEIGHT)
 
-            # NOWE ####
             if self.start:
                 for i in self.allplayers:
                     i.castle_nation(self.map.allhex)
                 self.start = False
-            # NOWE ####
+
 
             if self.currentplayer.field_status:
                 self.currentdec.fchoice.draw()
@@ -331,14 +349,17 @@ class Game:
             self.klepsydra1.nation(self.currentplayer)
             self.klepsydra1.draw(self.currentplayer)
 
-            if not BuildingMenu.active:
-                if not Stats.wyb:
-                    if not self.currentplayer.wyb:
-                        self.klepsydra1.turn(self.currentplayer)
-                    if self.currentplayer.wyb and self.currentevent.results == []:
-                        self.currentdec.draw(self.currentplayer)
+            if not BuildingMenu.active and not ResourceSell.active and not MenuPause.Active:
+                if not self.currentplayer.wyb:
+                    self.klepsydra1.turn(self.currentplayer)
+                if self.currentplayer.wyb and self.currentevent.results == []:
+                    self.currentdec.draw(self.currentplayer)
             self.timer.update()
-
+            if MenuPause.Active:
+                Stats.camera_stop = True
+                self.pause_menu.draw()
+            if Okno.active:
+                self.okno1.draw(screen,self.currentplayer)
             fps()
             pygame.display.flip()
             clock.tick(max_tps)

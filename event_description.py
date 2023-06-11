@@ -91,7 +91,20 @@ warior_staty = "\n\n" \
 
 
 
-nomad = "podróżnicy"
+nomad = "\n Chagan Pustynny Wędrowiec jest" \
+        "\n przywódcą koczowniczego plemienia"\
+        "\n które przemierza pustkowia w" \
+        "\n poszukiwaniu zasobów i schronienia."\
+        "\n Zjednoczył on wszystkie koczownice" \
+        "\n plemiona i postanowił założył swoje" \
+        "\n młode państwo\n\n\n" \
+        "\n Nomadowie cenia sobie wolność" \
+        "\n przygodę i lojalnosć" \
+        "\n a także bardzo szanują" \
+        "\n swoją tradycję i kulturę" \
+        "" \
+
+
 
 nomad_staty = "\n\n" \
                  "  Startowe złoto : 0\n\n" \
@@ -106,7 +119,38 @@ nomad_staty = "\n\n" \
               " zdobycia\n  2 pól w jednej turzę\n"
 
 
-architekt = "budowniczowie"
+architekt = " Królestwo posiada największe i\n" \
+            " najwspanialsze miasta na całym " \
+            "\n kontynencie. To właśnie w nim" \
+            "\n urodziła się Aurora, młoda " \
+            "\n następczyni tronu. Aurora," \
+            "\n już od najmłodszych lat była" \
+            "\n pełna wizji i kreatywności," \
+            "\n zawsze marzyła ona o " \
+            "\n ,wybudowaniu cudów które " \
+            "\n zadziwią świat. Spędzała" \
+            "\n długie godziny nad swoim stołem" \
+            "\n projektowym, rysując wspaniałe " \
+            "\n plany i rozwiązania" \
+            "\n architektoniczne. Jej " \
+            "\n umiejętność łączenia estetyki" \
+            "\n  z funkcjonalnością sprawia," \
+            "\n że każdy z jej projektów był " \
+            "\n połączeniem piękna i praktyczności." \
+            "\n W wyniku tragicznej śmierci swojego ," \
+            "\n ojca Aurora została koronowana \n na królową." \
+            "\n\n" \
+            "\n Aurora, z oddaniem i determinacją, " \
+            "\n przyjęła swoje obowiązki,mając " \
+            "\n jednocześnie jasną wizję rozwoju " \
+            "\n i rozbudowy swojego królestwa." \
+            "\n\n Królowa Aurora jest niezłomna w " \
+            "\n dążeniu do realizacji swojej wizji." \
+            "\n Ma ona za cel, żeby królestwo stało" \
+            "\n się oazą majestatu architektonicznej" \
+            "\n i symbolem światowej renomy." \
+            "" \
+            " "
 
 architekt_staty = "\n\n" \
                  "  Startowe złoto : 50\n\n" \
@@ -205,6 +249,9 @@ opis_turniej_udzial = "\nWielki turniej rycerski na śmierć i życie własnie s
 select_turniej_udzial = ["Zaczynajmy ! "]
 
 
+
+
+
 result_turniej_udzial = ["Po wielu godzinach cieżkich zmagań\n"
                               "turniej dobiegł końca,nasz zawodnik\n"
                               "zatriumfował ! Niespodziewanie\n"
@@ -242,3 +289,7 @@ result_turniej_udzial = ["Po wielu godzinach cieżkich zmagań\n"
                             "zdecydowanie spadło a nasi obywatele\n"
                             "są wkurzeni\n\n"
                             "Tracisz 50 wojska"]
+
+
+
+# Nowy evencior

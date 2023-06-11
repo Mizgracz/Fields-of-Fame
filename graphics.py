@@ -23,7 +23,7 @@ class Hex(pygame.sprite.Sprite):
         self.texture_index = tex_id
         if self.number in Player.use_castle:
             self.zajete = True
-            self.texture_index = -1
+            self.texture_index =-1
         self.texture = self.texturing(self.group)
         self.rodzaj = self.surowiec()  # self.czy_to_surowiec()
         self.rodzaj_surowca_var = None
@@ -40,15 +40,12 @@ class Hex(pygame.sprite.Sprite):
         return self.texture
 
     def texturing(self, group):
-
-        #### NOWE ########
         if self.texture_index ==-4:
             return group.castle_nomad_surface
         if self.texture_index ==-5:
             return group.castle_arhitect
         if self.texture_index ==-6:
             return group.castle_warior
-
 
         if self.texture_index ==-1:
             return group.castle_surface
@@ -153,10 +150,10 @@ class MapGenerator(pygame.sprite.Group):
         self.hex_zajete_surface3 = pygame.image.load("texture/hex/hex_zajete_pole3.png").convert_alpha()
         self.hex_zajete_surface4 = pygame.image.load("texture/hex/hex_zajete_pole4.png").convert_alpha()
         # self.hex_zajete_surfaceNIE = pygame.image.load("texture/hex/hex_zajete_pole.png").convert_alpha()
-        self.hex_zajete_surface1.set_alpha(140)
-        self.hex_zajete_surface2.set_alpha(140)
-        self.hex_zajete_surface3.set_alpha(140)
-        self.hex_zajete_surface4.set_alpha(180)
+        self.hex_zajete_surface1.set_alpha(100)
+        self.hex_zajete_surface2.set_alpha(100)
+        self.hex_zajete_surface3.set_alpha(100)
+        self.hex_zajete_surface4.set_alpha(100)
 
         # Mgla wojny
         self.fog_surface = pygame.image.load("texture/hex/fog.png").convert_alpha()
@@ -218,7 +215,7 @@ class MapGenerator(pygame.sprite.Group):
         self.num_hex_right_side = self.num_hex_x
         self.all_zajete_surface = {}
         self.players= players
-        zajete = [
+        self.zajete = [
             self.hex_zajete_surface1,
             self.hex_zajete_surface2,
             self.hex_zajete_surface3,
@@ -233,7 +230,7 @@ class MapGenerator(pygame.sprite.Group):
             if self.players[x].nacja == "nomadzi":
                 t = 1
 
-            self.all_zajete_surface[f'{self.players[x].player_name}'] = zajete[t]
+            self.all_zajete_surface[f'{self.players[x].player_name}'] = self.zajete[t]
         
         self.allhex = {}
         self.alltex = {}
