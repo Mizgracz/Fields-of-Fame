@@ -1131,7 +1131,7 @@ class SideMenu:
         y = 67
         for i in range(len(player.surowce_ilosc)):
             self.surowce_staty(x, y, f"{player.surowce_ilosc[i][2]} {player.surowce_ilosc[i][1]}")
-            self.surowce_icons[i] = pygame.transform.scale(self.surowce_icons[i], (21, 30))
+            self.surowce_icons[i] = pygame.transform.scale(self.surowce_icons[i], (21, 25))
             self.screen.blit(self.surowce_icons[i], (x - 30, y))
             y += 30
 

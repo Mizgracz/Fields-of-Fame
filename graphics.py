@@ -196,16 +196,16 @@ class MapGenerator(pygame.sprite.Group):
         
 
         self.elements = [((self.grass_surface, 1), 20), ((self.grass2_surface, 2), 20), ((self.grass3_surface, 3), 20),
-                         ((self.forest_surface, 4), 15), ((self.mountain_surface, 5), 4), ((self.water_surface, 6), 3),
-                         ((self.water2_surface, 7), 1), ((self.water3_surface, 8), 1),
+                         ((self.forest_surface, 4), 20), ((self.mountain_surface, 5), 4), ((self.water_surface, 6), 3),
+                         ((self.water2_surface, 7), 1), ((self.water3_surface, 8), 0.1),
                          ((self.willage_surface, 10), 0.7), ((self.mountain_pass_surface, 11), 2),
                          ((self.mountain2_surface, 12), 4),
                          ((self.forest_full_surface, 13), 0), ((self.forest3_surface, 14), 8),
                          ((self.forest4_surface, 15), 8),
-                         ((self.castle_surface, 16), 0.7), ((self.clay, 17), 0.3), ((self.mine_diamonds, 18), 0.1),
-                         ((self.fish_port, 19), 0.8), ((self.sawmill, 20), 0.5), ((self.grain, 21), 0.65),
-                         ((self.mine_rocks, 22), 0.3), ((self.mine_iron, 23), 0.3), ((self.mine_gold, 24), 0.3),
-                         ((self.ruin,-2),0.9),((self.oboz_chuliganuw,-3),1)]
+                         ((self.castle_surface, 16), 0.7), ((self.clay, 17), 0.6), ((self.mine_diamonds, 18), 0.1),
+                         ((self.fish_port, 19), 0.7), ((self.sawmill, 20), 0), ((self.grain, 21), 1),
+                         ((self.mine_rocks, 22), 0.5), ((self.mine_iron, 23), 0.4), ((self.mine_gold, 24), 0.2),
+                         ((self.ruin,-2),0.4),((self.oboz_chuliganuw,-3),0.5)]
 
         self.fog_element = [(self.fog_surface, 99), 100]
         self.num_hex_x = numx
