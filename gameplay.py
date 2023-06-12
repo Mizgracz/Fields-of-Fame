@@ -85,6 +85,7 @@ class Player:
         else:
             Player.ID += 1
         Player.start_turn = False
+
     def set_data(self,player_name,home,home_x,home_y,
                  nacja,wyb,turn_stop,field_status,
                  camera_stop,player_hex_status,
@@ -522,16 +523,16 @@ class Camera:
 
     def keybord(self, mapsize):
         press = pygame.key.get_pressed()
-        if press[pygame.K_RIGHT]:
+        if press[pygame.K_RIGHT] or press[pygame.K_d]:
             if Camera.camera_x > 1640 - (mapsize * 130) + 1110:
                 Camera.camera_x -= 5
-        if press[pygame.K_LEFT]:
+        if press[pygame.K_LEFT] or press[pygame.K_a]:
             if Camera.camera_x < 1600:
                 Camera.camera_x += 5
-        if press[pygame.K_DOWN]:
+        if press[pygame.K_DOWN] or press[pygame.K_s]:
             if Camera.camera_y > (-152 * mapsize / 2) - (75 * mapsize / 2) + 825:
                 Camera.camera_y -= 5
-        if press[pygame.K_UP]:
+        if press[pygame.K_UP] or press[pygame.K_w]:
             if Camera.camera_y < - 20:
                 Camera.camera_y += 5
 
@@ -656,11 +657,13 @@ class Hourglass:
         self.screen = screen
         self.hourglass_rect = pygame.Rect(10, SCREEN_HEIGHT - 190, 173, 184)
         self.nation_color = "red"
-
+        self.action = pygame.transform.smoothscale(pygame.image.load("texture/ui/klepsydra/dostepna_akcja.png").convert(),(173,37))
         # Load animation frames
         self.path_to_images = f"texture/ui/klepsydra/klepsydra_{self.nation_color}"
 
-
+        self.action_rect = self.action.get_rect()
+        self.action_rect.midbottom = self.hourglass_rect.midtop
+        self.action_rect.y -= 8
 
         self.animation_frames = []
         for file_name in sorted(os.listdir(self.path_to_images)):
@@ -704,6 +707,11 @@ class Hourglass:
 
 
     def draw(self,player):
+
+        if not player.confirm:
+            self.screen.blit(self.action,self.action_rect)
+
+
         self.screen.blit(self.animation_frames[self.frame_index], self.hourglass_rect)
         if player.nacja == "wojownicy":
             self.nation_color = "red"
@@ -1654,8 +1662,8 @@ class Resource:
         self.count = 0
         self.player = player
         self.graphics = graphics
-        self.up_arrow = up_arrow
-        self.down_arrow = down_arrow
+        self.up_arrow = pygame.transform.smoothscale(up_arrow,(100/5,250/6.5))
+        self.down_arrow = pygame.transform.smoothscale(down_arrow,(100/5,250/6.5))
         self.sell_button = sell_button
         self.x = 0
         self.y_add = 0
@@ -1669,12 +1677,12 @@ class Resource:
         screen.blit(self.graphics, (self.x, self.y))
         screen.blit(self.prize_text, (self.x + 175, self.y + 15))
         self.up_rect = self.up_arrow.get_rect()  # Zaktualizowanie wartości self.up_rect
-        self.up_rect.topleft = (self.x + 270, self.y)  # Przesunięcie prostokąta na odpowiednie współrzędne
+        self.up_rect.topleft = (self.x + 290, self.y)  # Przesunięcie prostokąta na odpowiednie współrzędne
         screen.blit(self.up_arrow, self.up_rect.topleft)  # Rysowanie self.up_arrow zaktualizowanym prostokątem
         self.count_text = self.font.render(str(self.count), True, "white")
-        screen.blit(self.count_text, (self.x + 330, self.y + 15))
+        screen.blit(self.count_text, (self.x + 320, self.y + 15))
         self.down_rect = self.down_arrow.get_rect()
-        self.down_rect.topleft = (self.x + 320, self.y)
+        self.down_rect.topleft = (self.x + 365, self.y)
         screen.blit(self.down_arrow, self.down_rect.topleft)
 
         self.sell_rect = self.sell_button.get_rect()
