@@ -573,6 +573,23 @@ class NationConfig:
         self.clock =clock
         self.max_tps = max_tps
         self.screen_width, self.screen_height = self.screen.get_size()
+
+        self.warning_repeat = pygame.image.load("texture/main_menu/nation/repeat.png")
+
+        self.warning_no_pick = pygame.image.load("texture/main_menu/nation/no_pick.png")
+
+        self.warning_repeat_active = False
+        self.warning_no_pick_active = False
+        self.ok_button = pygame.image.load("texture/main_menu/nation/OK.png")
+        self.ok_button_HOV = pygame.image.load("texture/main_menu/nation/OK_HOVER.png")
+        self.warning_rect = self.warning_no_pick.get_rect()
+        self.warning_rect.y = SCREEN_HEIGHT/2.7
+        self.warning_rect.x = SCREEN_WIDTH/2
+
+        self.ok_button_rect = self.ok_button.get_rect()
+        self.ok_button_rect.midbottom = self.warning_rect.midbottom
+        self.ok_button_rect.y -= 20
+
         self.Background = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/menu_konfiguracji_nacje.png")
                                                        , (self.screen_width,self.screen_height))
         self.Rozpocznij = pygame.image.load("texture/main_menu/nation/Rozpocznij gre.png")
@@ -594,6 +611,12 @@ class NationConfig:
         for i in self.select_list:
             i.draw()
         self.screen.blit(self.Rozpocznij, self.Rozpocznij_rect)
+        if self.warning_no_pick_active:
+            self.screen.blit(self.warning_no_pick,self.warning_rect)
+            self.screen.blit(self.ok_button,self.ok_button_rect)
+        if self.warning_repeat_active:
+            self.screen.blit(self.warning_repeat, self.warning_rect)
+            self.screen.blit(self.ok_button, self.ok_button_rect)
 
 
     def select_start(self):
@@ -615,6 +638,21 @@ class NationConfig:
         SOUND.hover_nation("",pos,self.Rozpocznij_rect)
         if self.Rozpocznij_rect.collidepoint(pos):
             self.screen.blit(self.Rozpocznij_HOV, self.Rozpocznij_rect)
+        if self.ok_button_rect.collidepoint(pos) and (self.warning_repeat_active or self.warning_no_pick_active):
+            self.screen.blit(self.ok_button_HOV,self.ok_button_rect)
+        if self.pick != None and self.pick.nation_pick:
+            if self.pick.left_rect.collidepoint(pos):
+                self.screen.blit(self.pick.left_HOV, self.pick.left_rect)
+            else:
+                self.screen.blit(self.pick.left, self.pick.left_rect)
+
+
+            if self.pick.right_rect.collidepoint(pos):
+                self.screen.blit(self.pick.right_HOV, self.pick.right_rect)
+            else:
+
+                self.screen.blit(self.pick.right, self.pick.right_rect)
+
         for event in self.event:
 
             if event.type == pygame.QUIT:
@@ -624,7 +662,23 @@ class NationConfig:
 
                 if self.Rozpocznij_rect.collidepoint(pos) and NationConfig.Active == True:
                     SOUND.button_sound.play()
-                    return "new_game"
+                    repeat = False
+                    all_pick = True
+
+                    for i in self.select_list:
+                        if not i.active:
+                            all_pick = False
+                            self.warning_no_pick_active = True
+
+                    if all_pick:
+                        for i in range(len(self.select_list)-1):
+                            if self.select_list[i].selected == self.select_list[i+1].selected:
+                                repeat = True
+                                self.warning_repeat_active = True
+
+                    if not repeat and all_pick:
+                       return "new_game"
+
 
                 for i in self.select_list:
 
@@ -641,6 +695,7 @@ class NationConfig:
                         pass
                     else:
                         i.nation_pick = False
+
                 if self.pick != None:
                     if self.pick.left_rect.collidepoint(pos):
                         SOUND.button_sound.play()
@@ -664,6 +719,15 @@ class NationConfig:
                         SOUND.button_sound.play()
                         self.pick.opis_select = 1
 
+
+                if self.ok_button_rect.collidepoint(pos):
+                    SOUND.button_sound.play()
+                    self.warning_repeat_active = False
+                    self.warning_no_pick_active = False
+
+                if self.warning_repeat_active or self.warning_no_pick_active:
+                    for i in self.select_list:
+                        i.nation_pick = False
 
     def run(self):
 
@@ -731,6 +795,12 @@ class NationSelect:
         self.right = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/arrow_right.png"),
                                                  (83 / (100 / 75), 374 / (100 / 75)))
 
+        self.right_HOV =  pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/right_HOV.png"),
+                                                 (83 / (100 / 75), 374 / (100 / 75)))
+
+        self.left_HOV = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/left_HOV.png"),
+                                                 (83 / (100 / 75), 374 / (100 / 75)))
+
         self.screen = screen
         self.nation_pick = False
         self.font = pygame.font.Font(None, 32)
@@ -769,16 +839,16 @@ class NationSelect:
         self.left_rect.y = self.wladcy_rect.height /2
         self.right_rect.x = self.opis_rect.x + self.opis_rect.width + 20
         self.right_rect.y = self.left_rect.y
-
+        self.active = False
 
     def draw(self):
        self.screen.blit(self.box_texture, self.box_rect)
        self.screen.blit(self.name, self.name_rect)
        if self.nation_pick:
+           self.active = True
            self.box_texture = self.box_color_lists[self.selected]
            self.screen.blit(self.opis, self.opis_rect)
-           self.screen.blit(self.left, self.left_rect)
-           self.screen.blit(self.right, self.right_rect)
+
            self.screen.blit((self.font_wladcy.render(self.wladcy[self.selected], True, (255, 255, 255))), (self.wladcy_rect))
            self.opis_draw()
            if self.opis_select == 0:
