@@ -85,13 +85,14 @@ class Player:
         else:
             Player.ID += 1
         Player.start_turn = False
+
     def set_data(self,player_name,home,home_x,home_y,
                  nacja,wyb,turn_stop,field_status,
                  camera_stop,player_hex_status,
                  atack_stop,attack_fail,gold_count,
                  army_count,terrain_count,turn_count,
                  army_count_bonus,gold_count_bonus,
-                 clay,mine_diamonds,mine_rocks,mine_iron,mine_gold,fish_port,sawmill,grain,
+                 clay,mine_diamonds,mine_rocks,mine_iron,mine_gold,fish_port,grain,
                  resource_sell_bonus,field_bonus,building_buy_bonus,licznik,barbarian_bonus,crypt_bonus,new_pick,
                  MAX_PLAYER,ID_PLAYER,USE_CASTLE,CASTLE_HEX):
         
@@ -522,16 +523,16 @@ class Camera:
 
     def keybord(self, mapsize):
         press = pygame.key.get_pressed()
-        if press[pygame.K_RIGHT]:
+        if press[pygame.K_RIGHT] or press[pygame.K_d]:
             if Camera.camera_x > 1640 - (mapsize * 130) + 1110:
                 Camera.camera_x -= 5
-        if press[pygame.K_LEFT]:
+        if press[pygame.K_LEFT] or press[pygame.K_a]:
             if Camera.camera_x < 1600:
                 Camera.camera_x += 5
-        if press[pygame.K_DOWN]:
+        if press[pygame.K_DOWN] or press[pygame.K_s]:
             if Camera.camera_y > (-152 * mapsize / 2) - (75 * mapsize / 2) + 825:
                 Camera.camera_y -= 5
-        if press[pygame.K_UP]:
+        if press[pygame.K_UP] or press[pygame.K_w]:
             if Camera.camera_y < - 20:
                 Camera.camera_y += 5
 
@@ -608,8 +609,7 @@ class Timer:
         hours = int(elapsed_time // 3600)
         minutes = int((elapsed_time % 3600) // 60)
         seconds = int(elapsed_time % 60)
-        if minutes % 1 == 0 and not minutes == 0 and seconds == 0:
-            self.autosave_game()
+        
 
         # Draw the timer text
         timer_text = self.font_timer.render('{:02d}:{:02d}:{:02d}'.format(hours, minutes, seconds), True,
@@ -618,35 +618,7 @@ class Timer:
         text_rect = timer_text.get_rect(center=self.timer_box.center)
         self.screen.blit(timer_text, text_rect)
 
-    def autosave_game(self):
-        import gameplay
-        print('SaveGame')
-
-        folder_path = "save"
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-
-        with open('save/map.csv', 'w') as savefile:
-            savefile.write('x;y;number;texture_index;zajete\n')
-            for h in self.game.map.sprites():
-                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.zajete}')
-                savefile.write('\n')
-        with open('save/stats.txt', 'w') as savefile:
-
-            savefile.write(f'gold_count:{Stats.gold_count}\n')
-            savefile.write(f'army_count:{Stats.army_count}\n')
-            savefile.write(f'player_hex_status:{Stats.player_hex_status}\n')
-            savefile.write(f'army_count_bonus:{Stats.army_count_bonus}\n')
-            savefile.write(f'gold_count_bonus:{Stats.gold_count_bonus}\n')
-            savefile.write(f'turn_count:{Stats.turn_count}\n')
-
-        pygame.time.Clock().tick(1)
-        with zipfile.ZipFile("save/AutoSave.zip", "w") as zip:
-            zip.write("save/stats.txt")
-            zip.write("save/map.csv")
-        os.remove("save/stats.txt")
-        os.remove("save/map.csv")
-        pass
+   
 
 
 class Hourglass:
@@ -656,11 +628,13 @@ class Hourglass:
         self.screen = screen
         self.hourglass_rect = pygame.Rect(10, SCREEN_HEIGHT - 190, 173, 184)
         self.nation_color = "red"
-
+        self.action = pygame.transform.smoothscale(pygame.image.load("texture/ui/klepsydra/dostepna_akcja.png").convert(),(173,37))
         # Load animation frames
         self.path_to_images = f"texture/ui/klepsydra/klepsydra_{self.nation_color}"
 
-
+        self.action_rect = self.action.get_rect()
+        self.action_rect.midbottom = self.hourglass_rect.midtop
+        self.action_rect.y -= 8
 
         self.animation_frames = []
         for file_name in sorted(os.listdir(self.path_to_images)):
@@ -704,6 +678,11 @@ class Hourglass:
 
 
     def draw(self,player):
+
+        if not player.confirm:
+            self.screen.blit(self.action,self.action_rect)
+
+
         self.screen.blit(self.animation_frames[self.frame_index], self.hourglass_rect)
         if player.nacja == "wojownicy":
             self.nation_color = "red"
@@ -786,7 +765,7 @@ class Hourglass:
             self.last_frame_time = current_time
 
 
-
+# poprawic
 class Decision:
     def __init__(self, screen: pygame.Surface, map, player):
 
@@ -1042,6 +1021,7 @@ class FieldChoice:
                                                       i.polozenie_hex_y + Camera.camera_y])
 
 
+# jeszcze surowce
 class SideMenu:
 
     def __init__(self, screen: pygame.Surface):
@@ -1050,7 +1030,7 @@ class SideMenu:
         self.SCREEN_HEIGHT = screen.get_size()[1]
         ########
         FONT_SIZE = 18
-        FONT_NAME = 'fonts/timesnewroman.ttf'
+        FONT_NAME = 'timesnewroman'
         self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
         ########
         self.texture_main = "texture/ui/side_bar/blue/sideUI.png"
@@ -1061,19 +1041,23 @@ class SideMenu:
         self.texture_main_yellow = "texture/ui/side_bar/yellow/sideUI.png"
         self.texture_main_purple = "texture/ui/side_bar/purple/sideUI.png"
 
-        self.main_surfarce = pygame.image.load(self.texture_main).convert_alpha()
-        self.main_surface_red = pygame.image.load(self.texture_main_red).convert_alpha()
-        self.main_surface_yellow = pygame.image.load(self.texture_main_yellow).convert_alpha()
-        self.main_surface_purple = pygame.image.load(self.texture_main_purple).convert_alpha()
+        self.main_surfarce = pygame.transform.smoothscale(
+            pygame.image.load(self.texture_main).convert_alpha(),(SCREEN_WIDTH*0.20,SCREEN_HEIGHT-30))
+        self.main_surface_red = pygame.transform.smoothscale(
+            pygame.image.load(self.texture_main_red).convert_alpha(),(SCREEN_WIDTH*0.20,SCREEN_HEIGHT-30))
+        self.main_surface_yellow = pygame.transform.smoothscale(
+        pygame.image.load(self.texture_main_yellow).convert_alpha(),(SCREEN_WIDTH*0.20,SCREEN_HEIGHT-30))
+        self.main_surface_purple = pygame.transform.smoothscale(
+            pygame.image.load(self.texture_main_purple).convert_alpha(),(SCREEN_WIDTH*0.20,SCREEN_HEIGHT-30))
 
         self.button_surfarce = pygame.transform.smoothscale(
-            pygame.image.load(self.texture_button_build).convert_alpha(), (236, 68))
+            pygame.image.load(self.texture_button_build).convert_alpha(), (SCREEN_WIDTH*0.185,SCREEN_HEIGHT*0.094))
         self.button_resource_surfarce = pygame.transform.smoothscale(
-            pygame.image.load(self.texture_button_resource).convert_alpha(), (236, 68))
+            pygame.image.load(self.texture_button_resource).convert_alpha(), (SCREEN_WIDTH*0.185,SCREEN_HEIGHT*0.094))
 
-        self.main_rect = self.main_surfarce.get_rect(topleft=(self.SCREEN_WIDTH - 256, 30))
-        self.button_rect = self.button_surfarce.get_rect(topleft=(self.SCREEN_WIDTH - 246, 258 + 100))
-        self.button_resource_rect = self.button_surfarce.get_rect(topleft=(self.SCREEN_WIDTH - 246, 258))
+        self.main_rect = self.main_surfarce.get_rect(topleft=(SCREEN_WIDTH - self.main_surfarce.get_width(), 30))
+        self.button_resource_rect = self.button_surfarce.get_rect(topleft=(SCREEN_WIDTH - SCREEN_WIDTH*0.193, SCREEN_HEIGHT*0.395))
+        self.button_rect = self.button_surfarce.get_rect(topleft=(SCREEN_WIDTH - SCREEN_WIDTH*0.193, SCREEN_HEIGHT*0.36 + SCREEN_HEIGHT*0.138))
         self.screen = screen
 
         #####
@@ -1102,22 +1086,25 @@ class SideMenu:
         self.surowce_icons.append(self.iron_icon_surface)
         self.surowce_icons.append(self.gold_icon_surface)
         self.surowce_icons.append(self.fish_icon_surface)
+        self.surowce_icons.append(self.wood_icon_surface)
         self.surowce_icons.append(self.cereal_icon_surface)
 
         ####
-        self.main_surface = pygame.Surface((256, self.SCREEN_HEIGHT - 30), pygame.SRCALPHA)
+        self.main_surface = pygame.Surface((SCREEN_WIDTH*0.20,SCREEN_HEIGHT-30), pygame.SRCALPHA)
         self.main_surface.blit(self.main_surfarce, (0, 0))
-        self.main_surface.blit(self.button_surfarce, (10, 335))
-        self.main_surface.blit(self.button_resource_surfarce, (10, 253))
+        self.main_surface.blit(self.button_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.48))
+        self.main_surface.blit(self.button_resource_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.37))
 
-        self.main_surface_red.blit(self.button_surfarce, (10, 335))
-        self.main_surface_red.blit(self.button_resource_surfarce, (10, 253))
+        self.main_surface_red.blit(self.button_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.48))
+        self.main_surface_red.blit(self.button_resource_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.37))
 
-        self.main_surface_yellow.blit(self.button_surfarce, (10, 335))
-        self.main_surface_yellow.blit(self.button_resource_surfarce, (10, 253))
+        self.main_surface_yellow.blit(self.button_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.48))
+        self.main_surface_yellow.blit(self.button_resource_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.37))
 
-        self.main_surface_purple.blit(self.button_surfarce, (10, 335))
-        self.main_surface_purple.blit(self.button_resource_surfarce, (10, 253))
+        self.main_surface_purple.blit(self.button_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.48))
+        self.main_surface_purple.blit(self.button_resource_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.37))
+
+        ####
 
     def surowce_staty(self, x: int, y: int, tekst: str):
         self.tekst = tekst
@@ -1135,6 +1122,9 @@ class SideMenu:
             self.screen.blit(self.surowce_icons[i], (x - 30, y))
             y += 30
 
+
+
+
     def draw(self, player: Player):
         if player.nacja == "budowniczowie":
             self.screen.blit(self.main_surface, self.main_rect)
@@ -1144,6 +1134,7 @@ class SideMenu:
             self.screen.blit(self.main_surface_red, self.main_rect)
         if player.nacja == "nomadzi":
             self.screen.blit(self.main_surface_yellow, self.main_rect)
+
         self.surowce_staty(self.SCREEN_WIDTH - 190, 47, f"{player.player_name}:")
         self.surowce_staty_blituj(player)
 
@@ -1547,11 +1538,11 @@ class EventResults:
 
     def execute(self):
         self.managment.player.turn_stop = True
-        screen_x, screen_y = self.screen.get_size()
+        screen_x, screen_y = SCREEN_WIDTH,SCREEN_HEIGHT
         background_rect = self.background_result.get_rect()
         background_x = (screen_x - background_rect.width) // 2
         background_y = (screen_y - background_rect.height) // 2
-        self.rect = pygame.draw.rect(self.screen, "red", (background_x + 30, background_y * 4.23, 369, 50))
+        self.rect = pygame.draw.rect(self.screen, "red", (background_x + background_rect.width*0.059, background_y+background_rect.height*0.80, 369, 50),2)
         self.screen.blit(self.background_result, (background_x, background_y))
 
         odstep = -60
@@ -1621,17 +1612,27 @@ class ResourceSell:
         self.Resource_List.append(fish)
         grain = Resource(20, self.grain_texture, self.up_arrow, self.down_arrow, self.button, self.player)
         self.Resource_List.append(grain)
-
+        
+        self.close_button = pygame.Surface((40,35))
+        self.close_button.fill((200,128,128))
+        self.close_button_rect = pygame.Rect(0,0,40,35)
     def draw(self):
         if ResourceSell.active:
             background_rect = self.background.get_rect()
+
             background_rect.center = self.screen_rect.center
             self.screen.blit(self.background, background_rect)
+            
+            self.close_button_rect = pygame.Rect(0,0,40,35)
+            self.close_button_rect.top = background_rect.top+25
+            self.close_button_rect.right = background_rect.right-25
+            self.screen.blit(self.close_button, self.close_button_rect)
+            pygame.draw.rect(self.screen,'#ff0000',self.close_button_rect,2)
             for i in range(len(self.Resource_List)):
                 self.Resource_List[i].player = self.player
 
             for i in range(len(self.Resource_List)):
-                self.Resource_List[i].draw(self.screen, 300, 150 + 60 * i)
+                self.Resource_List[i].draw(self.screen, background_rect.left+ 25, background_rect.top+77 + 60 * i)
                 self.Resource_List[i].check()
 
 
@@ -1647,8 +1648,8 @@ class Resource:
         self.count = 0
         self.player = player
         self.graphics = graphics
-        self.up_arrow = up_arrow
-        self.down_arrow = down_arrow
+        self.up_arrow = pygame.transform.smoothscale(up_arrow,(100/5,250/6.5))
+        self.down_arrow = pygame.transform.smoothscale(down_arrow,(100/5,250/6.5))
         self.sell_button = sell_button
         self.x = 0
         self.y_add = 0
@@ -1662,12 +1663,12 @@ class Resource:
         screen.blit(self.graphics, (self.x, self.y))
         screen.blit(self.prize_text, (self.x + 175, self.y + 15))
         self.up_rect = self.up_arrow.get_rect()  # Zaktualizowanie wartości self.up_rect
-        self.up_rect.topleft = (self.x + 270, self.y)  # Przesunięcie prostokąta na odpowiednie współrzędne
+        self.up_rect.topleft = (self.x + 290, self.y)  # Przesunięcie prostokąta na odpowiednie współrzędne
         screen.blit(self.up_arrow, self.up_rect.topleft)  # Rysowanie self.up_arrow zaktualizowanym prostokątem
         self.count_text = self.font.render(str(self.count), True, "white")
-        screen.blit(self.count_text, (self.x + 330, self.y + 15))
+        screen.blit(self.count_text, (self.x + 320, self.y + 15))
         self.down_rect = self.down_arrow.get_rect()
-        self.down_rect.topleft = (self.x + 320, self.y)
+        self.down_rect.topleft = (self.x + 365, self.y)
         screen.blit(self.down_arrow, self.down_rect.topleft)
 
         self.sell_rect = self.sell_button.get_rect()

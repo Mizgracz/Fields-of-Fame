@@ -39,7 +39,7 @@ pygame.display.set_icon(icon_image)
 fps_on = True
 pygame.mixer.music.load("music/main.mp3")
 pygame.mixer.music.play(-1)
-pygame.mixer.music.set_volume(MUSIC_VOLUME)
+pygame.mixer.music.set_volume(0)
 
 
 def fps():
@@ -54,6 +54,7 @@ def fps():
 class Game:
     def __init__(self):
         pygame.init()
+        self.screen = screen
         while not Menu.new_game :
             self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
         
@@ -123,8 +124,6 @@ class Game:
 
         self.map = MapGenerator(self.size, self.size, screen,\
                                  self.camera,self.allplayers)
-        #
-        #
         self.start = True
         self.map.texture()
         self.map.generate()
@@ -159,12 +158,17 @@ class Game:
 
         self.music_on = 1
         self.resource = ResourceSell(screen,self.currentplayer)
-        self.loadmenu = LoadMenu(screen, self)
+        
 
-        Buildings = []
-        for i in range(30):
-            Buildings.append(Item())
-        self.newSaveM = SaveMenu(screen,Buildings,SCREEN_WIDTH,SCREEN_HEIGHT)
+        SaveSlot = []
+        SaveSlot2 = []
+        for i in range(10):
+            SaveSlot.append(ItemSave())
+        for i in range(10):
+            SaveSlot2.append(ItemLoad())
+        
+        self.newSaveM = SaveMenu(screen,SaveSlot,SCREEN_WIDTH,SCREEN_HEIGHT)
+        self.loadmenu = LoadMenu(screen,SaveSlot2,SCREEN_WIDTH,SCREEN_HEIGHT)
 
 
 
@@ -199,6 +203,8 @@ class Game:
                     self.music_on = 1
             if SaveMenu.active:
                 self.newSaveM.handle_event(event,self)
+            if LoadMenu.active:
+                self.loadmenu.handle_event(event,self)
             else:
                 if BuildingMenu.active:
                     self.currentmenu.handle_event(event,self.currentplayer)
@@ -213,7 +219,7 @@ class Game:
                     if self.sd.button_resource_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
                         ResourceSell.active = False
                 else:
-                    if self.sd.button_resource_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.sd.button_resource_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN and not BuildingMenu.active:
                         ResourceSell.active = True
         press = pygame.key.get_pressed()
         
@@ -223,85 +229,21 @@ class Game:
         if press[pygame.K_HOME]:
             Camera.player_camera_update(self.currentplayer)
 
-
-
-    def save_game(self):
-        folder_path = "save"
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-            print(f"Folder {folder_path} został utworzony.")
-
-        with open('save/map.csv', 'w') as savefile:
-            savefile.write('x;y;number;texture_index;verticles\n')
-            for h in self.map.sprites():
-                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index}')
-                savefile.write('\n')
-        with open('save/stats.txt', 'w') as savefile:
-
-            savefile.write(f'gold_count:{Stats.gold_count}\n')
-            savefile.write(f'army_count:{Stats.army_count}\n')
-            savefile.write(f'player_hex_status:{Stats.player_hex_status}\n')
-            savefile.write(f'army_count_bonus:{Stats.army_count_bonus}\n')
-            savefile.write(f'gold_count_bonus:{Stats.gold_count_bonus}\n')
-            savefile.write(f'turn_count:{Stats.turn_count}\n')
-        pygame.time.Clock().tick(1)
-        with zipfile.ZipFile("save/QSave.zip", "w") as zip:
-            zip.write("save/stats.txt")
-            zip.write("save/map.csv")
-        os.remove("save/stats.txt")
-        os.remove("save/map.csv")
-        pass
-        import gameplay
-        print('LoadGame')
-        import csv
-        with zipfile.ZipFile("save/QSave.zip", "r") as zip:
-            zip.extractall()
-        with open('save/map.csv', 'r') as savefile:
-            csvfile = csv.reader(savefile, delimiter=';')
-            i = -1
-            for row in csvfile:
-                if i != -1:
-                    self.map.allhex["hex", i].polozenie_hex_x = int(row[0])
-                    self.map.allhex["hex", i].polozenie_hex_y = int(row[1])
-                    self.map.allhex["hex", i].number = int(row[2])
-                    self.map.allhex["hex", i].texture_index = int(row[3])
-                    self.map.allhex["hex", i].zajete = (row[4])
-                    self.map.allhex['hex', i].update_texture()
-                i += 1
-
-            pass
-        with open('save/stats.txt', 'r') as savefile:
-            # csvfile = csv.reader(savefile,delimiter=':')
-            stats, col2 = [], []
-            for line in savefile:
-                stats += [line.strip().split(":")]
-
-            gameplay.build_stauts = bool(stats[0][1])
-            gameplay.build = bool(stats[1][1])
-            gameplay.gold_count = int(stats[2][1])
-            gameplay.army_count = int(stats[3][1])
-            gameplay.terrain_count = int(stats[4][1])
-            gameplay.wyb = bool(stats[5][1])
-            gameplay.player_hex_status = bool(stats[6][1])
-            gameplay.army_count_bonus = int(stats[7][1])
-            gameplay.gold_count_bonus = int(stats[8][1])
-            gameplay.turn_count = int(stats[9][1])
-
-        pygame.time.Clock().tick(1)
-        os.remove("save/stats.txt")
-        os.remove("save/map.csv")
-        pass
-
     def run(self):
 
         while True:
             while Menu.status:
                 self.start_menu.run()
-            while LoadMenu.status:
-                self.loadmenu.draw()
-                self.loadmenu.update()
+            while MenuSettings.Active:
+                self.start_menu.options.draw()
+            while LoadMenu.active:
+                screen.fill((128, 128, 128))
+                self.loadmenu.draw_menu()
+                self.handle_events()
+                pygame.display.flip()
+                clock.tick(max_tps)
             while SaveMenu.active:
-                screen.fill((128, 0, 0))
+                screen.fill((128, 50, 128))
                 self.newSaveM.draw_menu()
                 self.handle_events()
 
@@ -324,7 +266,6 @@ class Game:
             self.camera.keybord(self.size)
             self.map.Draw(SCREEN_WIDTH, SCREEN_HEIGHT)
             self.map.fog_draw(self.Fog, SCREEN_WIDTH, SCREEN_HEIGHT)
-
 
             if self.start:
                 for i in self.allplayers:
@@ -356,7 +297,6 @@ class Game:
             self.resource.draw()
             self.klepsydra1.nation(self.currentplayer)
             self.klepsydra1.draw(self.currentplayer)
-            self.map.draw_text_box(self.Fog)
 
             if not BuildingMenu.active and not ResourceSell.active and not MenuPause.Active:
                 if not self.currentplayer.wyb:
