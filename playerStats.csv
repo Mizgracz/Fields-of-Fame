@@ -1,2 +1,3 @@
-player_name;home;nacja;wyb;turn_stop;field_status;camera_stop;player_hex_status;gold_count;army_count;terrain_count;turn_count;army_count_bonus;gold_count_bonus;clay;mine_diamonds;mine_rocks;mine_iron;mine_gold;fish_port;sawmill;grain;
-Player 1;548;None;False;False;False;False;False;0;0;1;1;0;0;0;0;0;0;0;0;0;0;
+player_name;home;home_x;home_y;nacja;wyb;turn_stop;field_status;camera_stop;player_hex_status;atack_stop;attack_fail;gold_count;army_count;terrain_count;turn_count;army_count_bonus;gold_count_bonus;clay;mine_diamonds;mine_rocks;mine_iron;mine_gold;fish_port;sawmill;grain;resource_sell_bonus;field_bonus;building_buy_bonus;licznik;barbarian_bonus;crypt_bonus;new_pick;
+Player 1;685;1610;2508;kupcy;False;False;False;False;False;False;False;50;20;1;1;0;10;0;0;0;0;0;0;0;0;30;False;0;0;0;0;True;
+Player 2;548;-600;2052;kupcy;False;False;False;False;False;False;False;50;20;1;1;0;10;0;0;0;0;0;0;0;0;30;False;0;0;0;0;True;
