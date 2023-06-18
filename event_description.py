@@ -95,14 +95,17 @@ nomad = "\n Chagan Pustynny Wędrowiec jest" \
         "\n przywódcą koczowniczego plemienia"\
         "\n które przemierza pustkowia w" \
         "\n poszukiwaniu zasobów i schronienia."\
-        "\n Zjednoczył on wszystkie koczownice" \
-        "\n plemiona i postanowił założył swoje" \
-        "\n młode państwo\n\n\n" \
+        "\n Zjednoczył on wszystkie koczowniczę" \
+        "\n plemiona i postanowił założył nowe" \
+        "\n młode państwo Ferrokhan \n\n\n" \
         "\n Nomadowie cenia sobie wolność" \
         "\n przygodę i lojalnosć" \
         "\n a także bardzo szanują" \
         "\n swoją tradycję i kulturę" \
-        "" \
+        "\n\n\n\n\n Celem Chagana jest stworzenie\n" \
+        " ogromnego imperium z którym każdy \n" \
+        " się będzie liczył i zdobycie jak\n" \
+        " największej ilości ziemi " \
 
 
 
@@ -134,7 +137,7 @@ architekt = " Królestwo posiada największe i\n" \
             "\n plany i rozwiązania" \
             "\n architektoniczne. Jej " \
             "\n umiejętność łączenia estetyki" \
-            "\n  z funkcjonalnością sprawia," \
+            "\n z funkcjonalnością sprawia," \
             "\n że każdy z jej projektów był " \
             "\n połączeniem piękna i praktyczności." \
             "\n W wyniku tragicznej śmierci swojego ," \
@@ -160,7 +163,7 @@ architekt_staty = "\n\n" \
                  "  Przychód wojska na turę : 10\n\n\n\n\n\n\n" \
                  "  Dodatkowe Premie :\n\n" \
                  "  Wszystkie Buddynki tańszę o\n" \
-                 "  20%\n\n"
+                 "  30%\n\n"
 
 
 nation_opis_list = [merchant,warior,nomad,architekt]

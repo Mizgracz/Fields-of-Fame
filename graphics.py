@@ -133,7 +133,25 @@ class Hex(pygame.sprite.Sprite):
         for k in range(len(self.group.surowce_lista)):
             if self.texture == self.group.surowce_lista[k][0]:
                 return self.group.surowce_lista[k][1]
-
+   
+    def data_update(self,polozenie_hex_x,polozenie_hex_y,number,
+                    obwodka,zajete,odkryte,field_add,texture_index,
+                    rodzaj,rodzaj_surowca_var,player,playerable,
+                    atack):
+       self.polozenie_hex_x = polozenie_hex_x
+       self.polozenie_hex_y = polozenie_hex_y
+       self.number = number
+       self.obwodka = obwodka
+       self.zajete = zajete
+       self.odkryte = odkryte
+       self.field_add = field_add
+       self.texture_index = texture_index
+       self.rodzaj = rodzaj
+       self.rodzaj_surowca_var = rodzaj_surowca_var
+       self.player = player
+       self.playerable = playerable
+       self.atack = atack
+       self.update_texture()
 
 class MapGenerator(pygame.sprite.Group):
     
@@ -196,8 +214,8 @@ class MapGenerator(pygame.sprite.Group):
         
 
         self.elements = [((self.grass_surface, 1), 20), ((self.grass2_surface, 2), 20), ((self.grass3_surface, 3), 20),
-                         ((self.forest_surface, 4), 20), ((self.mountain_surface, 5), 4), ((self.water_surface, 6), 3),
-                         ((self.water2_surface, 7), 1), ((self.water3_surface, 8), 0.1),
+                         ((self.forest_surface, 4), 20), ((self.mountain_surface, 5), 4), ((self.water_surface, 6), 0),
+                         ((self.water2_surface, 7), 0), ((self.water3_surface, 8), 0.1),
                          ((self.willage_surface, 10), 0.7), ((self.mountain_pass_surface, 11), 2),
                          ((self.mountain2_surface, 12), 4),
                          ((self.forest_full_surface, 13), 0), ((self.forest3_surface, 14), 8),
@@ -291,6 +309,30 @@ class MapGenerator(pygame.sprite.Group):
             self.players[i].home_x = self.allhex["hex", Player.use_castle[i]].polozenie_hex_x
             self.players[i].home_y = self.allhex["hex", Player.use_castle[i]].polozenie_hex_y
 
+    def set_allrect(self,i,x,y,w,h):
+        self.allrect['hex',i] = pygame.Rect(x,y,w,h)
+        self.allmask['hex', i] = pygame.mask.from_surface(self.allhex["hex", i].texture)
+        
+        pass
+
+    def new_hex_create(self,size):
+        self.allhex = {}
+        licz = 0
+        przesuniecie_x = 0
+        przesuniecie_y = 0
+        for j in range(size):  # tworzenie hexów (jako nowy obiekt) nadawanie im położenia
+            x = -1640
+            y = j * 152
+            for i in range(size):
+
+                self.allhex["hex", licz] = Hex((x + przesuniecie_x), (y + przesuniecie_y), licz, self, False, False,False,False,-1)
+                licz += 1
+
+            if j % 2 != 0:
+                przesuniecie_x = 0
+            else:
+                przesuniecie_x += -65
+            przesuniecie_y += -38
 
     def Draw(self, width:int, height:int):  # wyświetlanie mapy na ekranie
 
@@ -457,8 +499,221 @@ class MapGenerator(pygame.sprite.Group):
                     self.allhex["hex", corner_bottom_left_neighbor_index].odkryte = True
                     corner_botton_right_neighbor_index = (i + 1 - self.num_hex_side * 2) % self.num_hex_all
                     self.allhex["hex", corner_botton_right_neighbor_index].odkryte = True
+    def draw_text_box(self, Fog:bool):
+        if Fog is False:
+            pos = pygame.mouse.get_pos()
+            is_collision1 = False
+            is_collision2 = False
+            is_collision3 = False
+            is_collision4 = False
+            is_collision5 = False
+            is_collision6 = False
+            is_collision7 = False
+            is_collision8 = False
+            is_collision9 = False
+            is_collision10 = False
+            is_collision11 = False
+            is_collision12 = False
+            is_collision13 = False
+            is_collision14 = False
+            is_collision15 = False
+            is_collision16 = False
+            is_collision17 = False
+            is_collision18 = False
+            is_collision19 = False
+            is_collision20 = False
+            is_collision21 = False
+
+            for c, rect in self.allrect.items():
+                hex_obj = self.allhex[c]  # Get the corresponding hex object
+                texture_index = hex_obj.texture_index  # Get the texture index of the hex object
+
+                if texture_index in [1, 2, 3]:
+                    if rect.collidepoint(*pos):
+                        is_collision1 = True
+                        break
+                elif texture_index in [4, 13, 14, 15, 16]:
+                    if rect.collidepoint(*pos):
+                        is_collision2 = True
+                        break
+                elif texture_index in [5, 11, 12]:
+                    if rect.collidepoint(*pos):
+                        is_collision3 = True
+                        break
+                elif texture_index in [6, 7, 8]:
+                    if rect.collidepoint(*pos):
+                        is_collision4 = True
+                        break
+                elif texture_index in [9]:
+                    if rect.collidepoint(*pos):
+                        is_collision5 = True
+                        break
+                elif texture_index in [10]:
+                    if rect.collidepoint(*pos):
+                        is_collision6 = True
+                        break
+                elif texture_index in [17]:
+                    if rect.collidepoint(*pos):
+                        is_collision7 = True
+                        break
+                elif texture_index in [18]:
+                    if rect.collidepoint(*pos):
+                        is_collision8 = True
+                        break
+                elif texture_index in [19]:
+                    if rect.collidepoint(*pos):
+                        is_collision9 = True
+                        break
+                elif texture_index in [20]:
+                    if rect.collidepoint(*pos):
+                        is_collision10 = True
+                        break
+                elif texture_index in [21]:
+                    if rect.collidepoint(*pos):
+                        is_collision11 = True
+                        break
+                elif texture_index in [22]:
+                    if rect.collidepoint(*pos):
+                        is_collision12 = True
+                        break
+                elif texture_index in [23]:
+                    if rect.collidepoint(*pos):
+                        is_collision13 = True
+                        break
+                elif texture_index in [24]:
+                    if rect.collidepoint(*pos):
+                        is_collision14 = True
+                        break
+                elif texture_index in [99]:
+                    if rect.collidepoint(*pos):
+                        is_collision15 = True
+                        break
+                elif texture_index in [-1]:
+                    if rect.collidepoint(*pos):
+                        is_collision16 = True
+                        break
+                elif texture_index in [-2]:
+                    if rect.collidepoint(*pos):
+                        is_collision17 = True
+                        break
+                elif texture_index in [-3]:
+                    if rect.collidepoint(*pos):
+                        is_collision18 = True
+                        break
+                elif texture_index in [-4]:
+                    if rect.collidepoint(*pos):
+                        is_collision19 = True
+                        break
+                elif texture_index in [-5]:
+                    if rect.collidepoint(*pos):
+                        is_collision20 = True
+                        break
+                elif texture_index in [-6]:
+                    if rect.collidepoint(*pos):
+                        is_collision21 = True
+                        break
+
+            if is_collision1:
+                self.text_in_the_box = "TRAWA"
+                self.text_color = (255, 255, 255)
+            elif is_collision2:
+                self.text_in_the_box = "LAS"
+                self.text_color = (255, 255, 255)
+            elif is_collision3:
+                self.text_in_the_box = "GÓRA"
+                self.text_color = (255, 255, 255)
+            elif is_collision4:
+                self.text_in_the_box = "WODA"
+                self.text_color = (255, 255, 255)
+            elif is_collision5:
+                self.text_in_the_box = "ZBOŻE"
+                self.text_color = (255, 255, 255)
+            elif is_collision6:
+                self.text_in_the_box = "WIOSKA: \nkiedy zajęta\nzwiększa przychód  \nzłota o 10"
+                self.text_color = (255, 255, 255)
+            elif is_collision7:
+                self.text_in_the_box = "GLINA: \npole z surowcem  \ndodaje glinę"
+                self.text_color = (255, 255, 255)
+            elif is_collision8:
+                self.text_in_the_box = "KOPALNIA DIAMENTÓW: \npole z surowcem , \ndodaje diamenty"
+                self.text_color = (255, 255, 255)
+            elif is_collision9:
+                self.text_in_the_box = "PORT RYBNY: \npole z surowcem , \ndodaje ryby"
+                self.text_color = (255, 255, 255)
+            elif is_collision10:
+                self.text_in_the_box = "TARTAK: \njest możliwym \npolem do zajęcia, \ndodaje drewno"
+                self.text_color = (255, 255, 255)
+            elif is_collision11:
+                self.text_in_the_box = "ZBOŻE: \npole z surowcem  \ndodaje zboże"
+                self.text_color = (255, 255, 255)
+            elif is_collision12:
+                self.text_in_the_box = "KOPALNIA KAMIENI: \npole z surowcem  \ndodaje kamień"
+                self.text_color = (255, 255, 255)
+            elif is_collision13:
+                self.text_in_the_box = "KOPALNIA ŻELAZA: \npole z surowcem  \ndodaje żelazo"
+                self.text_color = (255, 255, 255)
+            elif is_collision14:
+                self.text_in_the_box = "KOPALNIA ZŁOTA:  \npole z surowcem \ndodaje złoto"
+                self.text_color = (255, 255, 255)
+            elif is_collision15:
+                self.text_in_the_box = ""  # Mgła
+                self.text_color = (255, 255, 255)
+            elif is_collision16:
+                self.text_in_the_box = "Zamek Luminaris"
+                self.text_color = (255, 255, 255)
+            elif is_collision17:
+                self.text_in_the_box = "KRYPTA: \n(Pole z walką)\nmożna przeszukać \nnagrody za wygraną"
+                self.text_color = (255, 255, 255)
+            elif is_collision18:
+                self.text_in_the_box = "OBÓZ BARBARZYŃCÓW: \n(Pole z walką)\nmożna zatakować \ni splądrować \nnagroda za pokonanie"  # Text to display
+                self.text_color = (255, 255, 255)
+            elif is_collision19:
+                self.text_in_the_box = "Obóz Nomadów"
+                self.text_color = (255, 255, 255)
+            elif is_collision20:
+                self.text_in_the_box = "Zamek Aurory"
+                self.text_color = (255, 255, 255)
+            elif is_collision21:
+                self.text_in_the_box = "Zamek Andorath"
+                self.text_color = (255, 255, 255)
+            else:
+                self.text_in_the_box = ""
+                self.text_color = (0, 0, 0)
+
+            FONT_SIZE = 24
+            FONT_NAME = 'fonts/PirataOne-Regular.ttf'
+            self.text_font = pygame.font.Font(FONT_NAME, FONT_SIZE)
+
+            self.text_box_color = (197, 122, 36)  # Kolor pola tekstowego (RGB)
+            self.text_box_width = self.screen.get_width() * 0.185  # Szerokość pola tekstowego
+            self.text_box_height = self.screen.get_height() * 0.374  # Wysokość pola tekstowego
+            self.text_box_rect = pygame.Rect(
+                self.screen.get_width() * 0.993 - self.text_box_width,
+                self.screen.get_height() * 0.615,
+                self.text_box_width,
+                self.text_box_height
+            )
 
 
+            lines = self.text_in_the_box.split("\n")
+            line_surfaces = []
+            line_heights = []
 
 
+            for line in lines:
+                line_surface = self.text_font.render(line, True, self.text_color)
+                line_surfaces.append(line_surface)
+                line_heights.append(line_surface.get_height())
 
+
+            text_x = self.text_box_rect.x + (
+                        self.text_box_rect.width - max([surface.get_width() for surface in line_surfaces])) // 2
+            text_y = self.text_box_rect.y + (self.text_box_rect.height - sum(line_heights)) // 2
+
+
+            pygame.draw.rect(self.screen, self.text_box_color, self.text_box_rect, 2)
+
+
+            for line_surface, line_height in zip(line_surfaces, line_heights):
+                self.screen.blit(line_surface, (text_x, text_y))
+                text_y += line_height

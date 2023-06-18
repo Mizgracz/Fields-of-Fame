@@ -1,5 +1,5 @@
 import configparser
-import sys, os ,csv
+import sys, os ,csv,pickle
 import zipfile
 import random
 from event_description import *
@@ -292,7 +292,7 @@ class Menu:
                     SOUND.button_sound.play()
 
 
-                    print("new game")
+                    # print("new game")
                     return 'new_game'
 
 
@@ -310,20 +310,22 @@ class Menu:
 
                 elif self.load_rect.collidepoint(pos)  and not self.config1.Active:
                     SOUND.button_sound.play()
+                    
+                    LoadMenu.active = True
                     Menu.status = False
-                    print('load')
+                    # print('load')
                     return 'load_game'
                 elif self.save_rect.collidepoint(pos)  and not self.config1.Active:
                     Menu.status = False
 
-                    print('save')
+                    # print('save')
                     return 'save_game'
                 elif self.option_rect.collidepoint(pos)  and not self.config1.Active:
                     SOUND.button_sound.play()
                     MenuSettings.Active = True
                     Menu.status = False
 
-                    print("OPCJE")
+                    # print("OPCJE")
 
                     return 'game_options'
 
@@ -424,7 +426,7 @@ class InputBox:
         if event.type == pygame.KEYDOWN:
             if self.active:
                 if event.key == pygame.K_RETURN:
-                    print(self.text)
+                    # print(self.text)
 
                     self.active = False
                 elif event.key == pygame.K_BACKSPACE:
@@ -473,20 +475,10 @@ class NumberBox:
         self.font_buttons = pygame.font.SysFont(None, 32)
 
     def draw(self):
-        # pygame.draw.rect(self.screen, (200, 200, 200), self.rect)
+        
         text = self.font.render(str(self.value), True, (255, 255, 255))
         text_rect = text.get_rect(center=self.rect.center)
         self.screen.blit(text, text_rect)
-
-        # pygame.draw.rect(self.screen, (150, 150, 150), self.button_inc)
-        # text_plus = self.font_buttons.render("+", True, (0, 0, 0))
-        # self.text_plus_rect = text_plus.get_rect(center=self.button_inc.center)
-        # self.screen.blit(text_plus, self.text_plus_rect)
-
-        # pygame.draw.rect(self.screen, (150, 150, 150), self.button_dec)
-        # text_minus = self.font_buttons.render("-", True, (0, 0, 0))
-        # self.text_minus_rect = text_minus.get_rect(center=self.button_dec.center)
-        # self.screen.blit(text_minus, self.text_minus_rect)
 
     def increment(self):
         if self.value < self.max:
@@ -671,10 +663,14 @@ class NationConfig:
                             self.warning_no_pick_active = True
 
                     if all_pick:
-                        for i in range(len(self.select_list)-1):
-                            if self.select_list[i].selected == self.select_list[i+1].selected:
-                                repeat = True
-                                self.warning_repeat_active = True
+                        for i in range(len(self.select_list) - 1):
+                            for j in range(i + 1, len(self.select_list)):
+                                if self.select_list[i].selected == self.select_list[j].selected:
+                                    repeat = True
+                                    self.warning_repeat_active = True
+                                    break
+                            if repeat:
+                                break
 
                     if not repeat and all_pick:
                        return "new_game"
@@ -806,45 +802,63 @@ class NationSelect:
         self.font = pygame.font.Font(None, 32)
         self.font_wladcy = pygame.font.Font(None, 42)
         self.name = self.font.render(name, True, (255, 255, 255))
+        self.name_pick = self.font.render(name,True,(13, 207, 1))
         self.wladcy = ["Godfrey Ametystowy Władca","Gunnvald Pogromca Barbarzynców","Chagan Pustynny Monarcha","Aurora Budownicza Cudów"]
         self.opis_select = 0
         self.selected = 0
         # ustawienie
+
         self.screen_width, self.screen_height = self.screen.get_size()
         self.box_rect.x = x + (start_width - self.box_rect.width) / 2
         self.box_rect.y = y
+
         self.name_rect = self.box_rect.copy()
         self.name_rect.x += 10
         self.name_rect.y += 10
+
+
+        
+        self.left_rect = self.left.get_rect()
+        self.right_rect = self.right.get_rect()
+        
+        
+        self.left_rect.left = SCREEN_WIDTH*0.35
+        self.left_rect.y =(SCREEN_HEIGHT-self.left_rect.height)/2
+
         self.nation_rect = self.merchant.get_rect()
-        self.nation_rect.x = self.screen_width/2.45
-        self.nation_rect.y = self.screen_height * 0.20
+        self.nation_rect.left = self.left_rect.right + self.right_rect.width/8
+        self.nation_rect.y = (SCREEN_HEIGHT-self.nation_rect.height)/2
+
+        self.wladcy_rect = self.nation_rect.copy()
+        self.wladcy_rect.y -= 80
+        self.wladcy_rect.centerx = self.nation_rect.centerx
+
         self.opis_rect = self.opis.get_rect()
-        self.opis_rect.x = self.screen_width/1.365
-        self.opis_rect.y = self.screen_height * 0.20
+        self.opis_rect.left = self.nation_rect.right + self.right_rect.width/4
+        self.opis_rect.y = (SCREEN_HEIGHT-self.opis_rect.height)/2
+
         self.opis_box_rect = self.opis_box.get_rect()
         self.opis_box_rect.x = self.opis_rect.x
         self.opis_box_rect.y = self.opis_rect.y
+
         self.opis_text_rect = self.opis_rect.copy()
         self.opis_text_rect.y += self.opis_box_rect.height + 10
+        
         self.statystki_box_rect = self.statystki_box.get_rect()
         self.statystki_box_rect.x = self.opis_rect.x + self.opis_box_rect.width
         self.statystki_box_rect.y = self.opis_rect.y
-        self.wladcy_rect = self.nation_rect.copy()
-        self.wladcy_rect.y -= 80
-        self.wladcy_rect.x += self.wladcy_rect.x/3.4
-        self.left_rect = self.left.get_rect()
-        self.right_rect = self.right.get_rect()
-        self.left_rect.x = self.wladcy_rect.width +48
-        self.left_rect.y = self.wladcy_rect.height /2
-        self.right_rect.x = self.opis_rect.x + self.opis_rect.width + 20
-        self.right_rect.y = self.left_rect.y
+        
+
+        self.right_rect.left = self.opis_rect.right + self.right_rect.width/2
+        self.right_rect.y = (SCREEN_HEIGHT-self.right_rect.height)/2
+        
         self.active = False
 
     def draw(self):
        self.screen.blit(self.box_texture, self.box_rect)
-       self.screen.blit(self.name, self.name_rect)
+
        if self.nation_pick:
+           self.screen.blit(self.name_pick, self.name_rect)
            self.active = True
            self.box_texture = self.box_color_lists[self.selected]
            self.screen.blit(self.opis, self.opis_rect)
@@ -871,7 +885,8 @@ class NationSelect:
 
            if self.selected == 3:
                self.screen.blit(self.budowniczowie, self.nation_rect)
-
+       else:
+           self.screen.blit(self.name, self.name_rect)
     def opis_draw(self):
 
         if self.opis_select == 0:
@@ -1374,254 +1389,11 @@ class Config:
 
 
 
-#################################################################################################################
-
-class LoadMenu(object):
-    """docstring for LoadMenu"""
-    scroll = 0
-    status = False
-
-    def __init__(self, screen, GAME):
-        super(LoadMenu, self).__init__()
-        self.game = GAME
-
-        self.MOUSE_Y = 0
-        self.allItem = []
-        self.screen = screen
-
-        self.WINDOW_SIZE = self.screen.get_size()
-        self.background_texture = pygame.Surface(self.WINDOW_SIZE)
-        self.SCROLL_SURFACE = pygame.Surface((30, self.screen.get_size()[1] * 0.25))
-        self.SCROLL_SURFACE.fill((0, 0, 0))
-        self.SCROLL_RECT = pygame.Rect(0, 0, 0, 0)
-        self.SCROLL_RECT.topleft = (self.screen.get_size()[0] - 30, 0)
-        self.SCROLL_RECT.size = (30, self.screen.get_size()[1] * 0.25)
-        self.RECT = pygame.Rect(self.WINDOW_SIZE[0] - 30, 0, 30, self.screen.get_size()[1] * 0.25)
-        self.RECT.centery = self.screen.get_size()[1] * 0.25 / 2
-
-        self.background_texture.fill('#00101f')
-        ###CZYTAJ ILOŚĆ PLIKÓW PLIKI / 3
-        self.folder_path = 'save/'
-        self.ILOSC_PLIKOW = len(
-            [f for f in os.listdir(self.folder_path) if os.path.isfile(os.path.join(self.folder_path, f))])
-        x = self.ILOSC_PLIKOW / 4.5
-        if x < 1:
-            x = 1
-            pass
-        self.x = x
-        #### ZAOKRĄGLIĆ W GURE
-        self.window = pygame.Surface((self.WINDOW_SIZE[0], self.WINDOW_SIZE[1] * x), pygame.SRCALPHA)
-
-        self.on_bar = False
-        self.mouse_diff = 0
-        self.y_axis = 0
-        self.change_y = 0
-
-        bar_height = int((self.WINDOW_SIZE[1] - 40) / (self.window.get_size()[1] / (self.WINDOW_SIZE[1] * 1.0)))
-        self.bar_rect = pygame.Rect(self.WINDOW_SIZE[0] - 40, 20, 40, bar_height)
-        self.bar_up = pygame.Rect(self.WINDOW_SIZE[0] - 20, 0, 20, 20)
-        self.bar_down = pygame.Rect(self.WINDOW_SIZE[0] - 20, self.WINDOW_SIZE[1] - 20, 20, 20)
-
-        self.scroll_length = self.WINDOW_SIZE[1] - self.bar_rect.height - 40
-
-        self.close_sur = pygame.image.load('texture/ui/load_menu/CheckBoxFalse.png')
-        self.close_sur = pygame.transform.scale(self.close_sur, (50, 50))
-
-        self.close_rect = self.close_sur.get_rect(topleft=(self.WINDOW_SIZE[0] - 100, 50))
-        self.update()
-
-    def update(self):
-        self.allItem = []
-        self.ILOSC_PLIKOW = len(
-            [f for f in os.listdir(self.folder_path) if os.path.isfile(os.path.join(self.folder_path, f))])
-        x = self.ILOSC_PLIKOW / 4.5
-        if x < 1:
-            x = 1
-            pass
-        #### ZAOKRĄGLIĆ W GURE
-        self.window = pygame.Surface((self.WINDOW_SIZE[0], self.WINDOW_SIZE[1] * x), pygame.SRCALPHA)
-        from os import listdir
-        from os.path import isfile, join
-        mypath = 'save/'
-        onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-        for i in range(self.ILOSC_PLIKOW):
-            self.allItem += [LoadItem(f'{onlyfiles[i]}', self.window, i)]
-        pass
-
-    def handle_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit(0)
-
-        if pygame.mouse.get_pressed()[0]:
-
-            pos = pygame.mouse.get_pos()
-            if self.close_rect.collidepoint(pos):
-                print('EXIT')
-                if Menu.resume == False:
-                    Menu.status = True
-                LoadMenu.status = False
-                pygame.time.Clock().tick(3)
-            if self.bar_rect.collidepoint(pos):
-                self.mouse_diff = pos[1] - self.bar_rect.y
-                self.on_bar = True
-            elif self.bar_up.collidepoint(pos):
-                self.change_y = 10
-            elif self.bar_down.collidepoint(pos):
-                self.change_y = -10
-        else:
-            self.change_y = 0
-            self.on_bar = False
-
-        PRESS = pygame.mouse.get_pressed()[0]
-        POS = pygame.mouse.get_pos()
-        self.MOUSE_Y = pygame.mouse.get_pos()[1]
-        for item in self.allItem:
-            if item.rect_del.collidepoint(POS) and PRESS:
-                item.remove()
-                self.update()
-                pygame.time.Clock().tick(3)
-            if item.rect_item.collidepoint(POS) and PRESS:
-                self.load_game(item.tmpID)
-                LoadMenu.status = False
-                pygame.time.Clock().tick(3)
-        # if self.RECT.collidepoint(pygame.mouse.get_pos()) :
-
-    def load_game(self, index):
-        from gameplay import Stats
-        print('LoadGame')
-        import csv, zipfile
-        Menu.resume = True
-        with zipfile.ZipFile(f"save/{self.allItem[index].name}", "r") as zip:
-            zip.extractall()
-        with open(f'save/map.csv', 'r') as savefile:
-            csvfile = csv.reader(savefile, delimiter=';')
-            i = -1
-            for row in csvfile:
-                if i != -1:
-                    self.game.map.allhex["hex", i].polozenie_hex_x = int(row[0])
-                    self.game.map.allhex["hex", i].polozenie_hex_y = int(row[1])
-                    self.game.map.allhex["hex", i].number = int(row[2])
-                    self.game.map.allhex["hex", i].texture_index = int(row[3])
-                    self.game.map.allhex['hex', i].zajete = True if (row[4]) == 'True' else False
-                    self.game.map.allhex['hex', i].update_texture()
-
-                i += 1
-
-            pass
-        with open(f'save/stats.txt', 'r') as savefile:
-            # csvfile = csv.reader(savefile,delimiter=':')
-            stats = []
-            for line in savefile:
-                stats += [line.strip().split(":")]
-            print(stats)
-
-            Stats.gold_count = int(stats[0][1])
-            Stats.army_count = int(stats[1][1])
-            Stats.terrain_count = int(stats[2][1])
-            Stats.army_count_bonus = int(stats[3][1])
-            Stats.gold_count_bonus = int(stats[4][1])
-            Stats.turn_count = int(stats[5][1])
-            print(Stats.gold_count, Stats.army_count, Stats.terrain_count, Stats.wyb, Stats.player_hex_status,
-                  Stats.army_count_bonus, Stats.gold_count_bonus, Stats.turn_count)
-        pygame.time.Clock().tick(1)
-        os.remove(f"save/stats.txt")
-        os.remove(f"save/map.csv")
-        self.update()
-        pygame.time.Clock().tick(3)
-        pass
-
-    def draw(self):
-
-        self.handle_events()
-        self.screen.blit(self.background_texture, (0, 0))
-
-        self.y_axis += self.change_y
-
-        if self.y_axis > 0:
-            self.y_axis = 0
-        elif (self.y_axis + self.window.get_size()[1]) < self.WINDOW_SIZE[1]:
-            self.y_axis = self.WINDOW_SIZE[1] - self.window.get_size()[1]
-
-        height_diff = self.window.get_size()[1] - self.WINDOW_SIZE[1]
-        if height_diff == 0:
-            height_diff = 1
-        bar_half_lenght = self.bar_rect.height / 2 + 20
-        if self.on_bar:
-            pos = pygame.mouse.get_pos()
-            self.bar_rect.y = pos[1] - self.mouse_diff
-            if self.bar_rect.top < 20:
-                self.bar_rect.top = 20
-            elif self.bar_rect.bottom > (self.WINDOW_SIZE[1] - 20):
-                self.bar_rect.bottom = self.WINDOW_SIZE[1] - 20
-            if self.x == 1:
-                self.y_axis = 0
-            else:
-                self.y_axis = int(
-                    height_diff / (self.scroll_length * 1.0) * (self.bar_rect.centery - bar_half_lenght) * -1)
-            self.scroll = self.y_axis
-        else:
-            self.bar_rect.centery = self.scroll_length / (height_diff * 1.0) * (self.y_axis * -1) + bar_half_lenght
-        for i in self.allItem:
-            i.update()
-            i.drawItem()
-
-        pygame.draw.rect(self.screen, (255, 255, 0), self.bar_rect)
-        self.screen.blit(self.window, (0, self.scroll))
-        self.screen.blit(self.close_sur, self.close_rect)
-        pygame.display.flip()
-
-
-class LoadItem(object):
-    _ID_ = 0
-    """docstring for Item"""
-
-    def __init__(self, name, screen: pygame.Surface, tmpID):
-        FONT_SIZE = 25
-        FONT_NAME = 'timesnewroman'
-        font_text = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
-        super(LoadItem, self).__init__()
-        self.screen = screen
-        self.name = name
-        self.tmpID = tmpID
-        self.WIDTH = self.screen.get_size()[0] // 2
-        self.HEIGHT = 100
-        self.item_surface = pygame.image.load('texture/ui/load_menu/opis.png')
-        self.item_surface = pygame.transform.scale(self.item_surface, (self.WIDTH, self.HEIGHT))
-
-        self.del_surface = pygame.image.load('texture/ui/load_menu/CheckBoxFalse.png')
-        self.del_surface = pygame.transform.scale(self.del_surface, (90, 90))
-
-        self.rect_item = pygame.Rect(self.WIDTH / 2, 150 * self.tmpID + 50 + LoadMenu.scroll, self.WIDTH, 100)
-        self.rect_del = pygame.Rect(self.WIDTH / 2 - 5, 150 * self.tmpID + 50 + LoadMenu.scroll + 5, 90, 90)
-
-        self.rect_del.right = self.rect_item.right
-        self.rect_item = pygame.Rect(self.WIDTH / 2, 150 * self.tmpID + 50 + LoadMenu.scroll, self.WIDTH - 100, 100)
-
-        self.font_opis = font_text.render((f'{self.tmpID + 1}. {self.name}'), True, (255, 0, 0))
-
-    def remove(self):
-        os.remove(f"save/{self.name}")
-        pass
-
-    def drawItem(self):
-        description_surf = pygame.Surface(self.item_surface.get_size(),
-                                          pygame.SRCALPHA)
-        description_surf.blit(self.font_opis, (10, 10))
-        self.item_surface.blit(description_surf, (10, 5))
-        self.screen.blit(self.item_surface, self.rect_item)
-        self.screen.blit(self.del_surface, self.rect_del)
-
-    def update(self):
-        self.rect_item.top = 150 * self.tmpID + 50 + LoadMenu.scroll
-        self.rect_del.top = 150 * self.tmpID + 50 + LoadMenu.scroll + 5
-
-#################################################################################################################
 class BuildingItem:
     itemId = 0
     offset_x = 0
     offset_y = 0
-
+    item_width = 0.47*SCREEN_WIDTH
     def __init__(self, name: str, description: str, image: pygame.Surface, cost: int, gold_buff: int, army_buff: int):
         self.available = True
         BuildingItem.itemId += 1
@@ -1635,12 +1407,12 @@ class BuildingItem:
         self.army_buff = army_buff
         self.gold_buff = gold_buff
 
-        self.font_surface = self.FONT.render(f"{self.name} - {self.cost} $", True, (255, 255, 255))
-        self.background = pygame.Surface((600 - 2, 100 - 2))
-        self.background = pygame.transform.scale(pygame.image.load('texture/ui/building/opis.png').convert_alpha(),
-                                                 (600 - 2, 100 - 2))
+
+        self.background = pygame.Surface((BuildingItem.item_width, 100 - 2))
+        self.background = pygame.transform.smoothscale(pygame.image.load('texture/ui/building/opis.png').convert_alpha(),
+                                                 (BuildingItem.item_width, 100 - 2))
         # self.background.fill((128,128,128))
-        self.itemsurf = pygame.Surface((600, 100), pygame.SRCALPHA)
+        self.itemsurf = pygame.Surface((BuildingItem.item_width, 100), pygame.SRCALPHA)
 
         self.description = description
 
@@ -1694,6 +1466,7 @@ class BuildingItem:
     def draw(self, window, x, y):
         # Wyświetlanie g
         # rafiki przedmiotu na określonych współrzędnych
+        self.font_surface = self.FONT.render(f"{self.name} - {self.cost} $", True, (255, 255, 255))
         self.itemsurf.blit(self.background, (1, 1))
         self.itemsurf.blit(self.image, (5, 5))
         self.itemsurf.blit(self.font_surface, (self.image.get_width() + 9, 7))
@@ -1718,7 +1491,7 @@ class BuildingItem:
             player.gold_count_bonus += self.gold_buff
             return True
         else:
-            print('Brak złota')
+            # print('Brak złota')
             return False
 
         pass
@@ -1732,6 +1505,7 @@ class BuildingMenu:
 
         BuildingItem.offset_x = menux
         BuildingItem.offset_y = menuy
+        BuildingItem.item_width  = menu_width
 
         self.window = window
         self.menu_items = items  # Przykładowa lista przedmiotów w menu
@@ -1742,6 +1516,7 @@ class BuildingMenu:
         self.item_spacing = 20  # Odstęp między przedmiotami
 
         self.background = pygame.Surface((menu_width, menu_height - 25), pygame.SRCALPHA)
+        
         self.background = pygame.transform.scale(
             pygame.image.load('texture/ui/building/budynki_tlo.png').convert_alpha(), (menu_width, menu_height - 25))
         # self.background.fill('#002200')
@@ -1762,10 +1537,27 @@ class BuildingMenu:
 
         self.scrollbar_x = self.menu_x + self.background.get_width() - self.scrollbar_width - self.scrollbar_margin
 
+
+
+        self.background_upbar = pygame.Surface((menu_width+16, 60), pygame.SRCALPHA)
+
+        self.background_upbar_rect = self.background_upbar.get_rect(topleft=(self.menu_x - 25, self.menu_y - 25-self.background_upbar.get_height()))
+
+        
+        self.close_button = pygame.transform.smoothscale(pygame.image.load('texture/ui/building/zamknij_okno_button.png'),(40,35))
+
+
+        self.close_button_rect = self.close_button.get_rect()
+        self.close_button_rect.top = self.background_upbar_rect.top +20
+        self.close_button_rect.right = self.background_upbar_rect.right
+
+
     def draw_menu(self):
 
         # Rysowanie menu (inne elementy pominięte dla uproszczenia)
         self.window.blit(self.background, (self.menu_x - 25, self.menu_y - 25))
+        self.window.blit(self.background_upbar,self.background_upbar_rect)
+        self.window.blit(self.close_button,self.close_button_rect)
         for i, item in enumerate(self.menu_items):
             item_y = 0 + self.scrollbar_margin + (i - self.menu_top_item_index) * (
                         self.menu_item_height + self.item_spacing)
@@ -1800,6 +1592,9 @@ class BuildingMenu:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Kliknięcie lewym przyciskiem myszy
                 mouse_pos = pygame.mouse.get_pos()
+
+                if self.close_button_rect.collidepoint(mouse_pos):
+                    BuildingMenu.active = False
                 for i, item in enumerate(self.menu_items):
                     item_y = 0 + self.scrollbar_margin + (i - self.menu_top_item_index) * \
                              (self.menu_item_height + self.item_spacing)
@@ -1810,10 +1605,13 @@ class BuildingMenu:
                         1] < BuildingItem.offset_y + self.background.get_height():
                         if item.button_action(player, self.menu_items):
                             self.background = pygame.transform.scale(
-                                pygame.image.load('texture/ui/building/opis_tlo.png').convert_alpha(),
+                                pygame.image.load('texture/ui/building/budynki_tlo.png').convert_alpha(),
                                 (self.menu_width, self.menu_height - 25))
                             ALPHA = 0.85
                             self.background.set_alpha(255 * ALPHA)
+                            # Draw the scrollbar thumb
+                            pygame.draw.rect(self.window, (255, 170, 20),
+                         (self.scrollbar_x, self.thumb_y, self.scrollbar_width, self.thumb_height))
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_WHEELUP:  # Scroll up
@@ -1857,38 +1655,43 @@ class BuildingMenu:
                             (thumb_position / max_thumb_position) * (len(self.menu_items) - self.menu_items_per_page))
 
 
-class Item:
+class ItemSave:
     itemId = 0
     
-    def __init__(self, name:str="Item ",description:str="Wylogowywanie się z życia jest Ok :P "*100, image:pygame.Surface=None, cost:int=0):
+    def __init__(self, name:str="",description:str="Zapis gry nr ", image:pygame.Surface=None, cost:int=0):
         self.available = True
-        Item.itemId += 1
-        self.item_id = Item.itemId
+        ItemSave.itemId += 1
+        self.item_id = ItemSave.itemId
         self.name = name + str(self.item_id)
         self.image = pygame.Surface((90, 90))
         self.image.fill('#ff00ff')
 
-        self.FONT = pygame.font.SysFont(None, 30)
+        self.FONT = pygame.font.Font('fonts/PirataOne-Regular.ttf', 24)
         self.cost = random.randint(10,100)
-        self.font_surface = self.FONT.render(f"{self.name} - {self.cost} $", True, (0, 0, 0))
+        # self.font_surface = self.FONT.render(f"ID) {self.item_id}", True, (0, 0, 0))
         self.background = pygame.Surface((pygame.display.get_window_size()[0]/2,100-2))
         self.background.fill((128,128,128))
         self.itemsurf = pygame.Surface((pygame.display.get_window_size()[0]/2-2,100),pygame.SRCALPHA)
 
-        self.description = description
+        self.description = description+str(self.item_id)
 
 
-        self.button_rect = pygame.Rect(self.itemsurf.get_width() - 110, self.itemsurf.get_height() // 4 - 15, 100, 30)
-        self.button_rect2 = pygame.Rect(self.itemsurf.get_width() - 110, self.itemsurf.get_height() // 2 + 15, 100, 30)
-        self.button_text = self.FONT.render("DELETE", True, (255, 255, 255))
+        self.remove_rect = pygame.Rect(self.itemsurf.get_width() - 110, self.itemsurf.get_height() // 4 - 15, 100, 30)
+        self.load_rect = pygame.Rect(self.itemsurf.get_width() - 110, self.itemsurf.get_height() // 2 + 15, 100, 30)
+        self.button_text = self.FONT.render("SAVE", True, (255, 255, 255))
+        self.button_text2 = self.FONT.render("REMOVE", True, (255, 255, 255))
 
         self.image_width = self.image.get_width()
-        self.decssurf_width = self.itemsurf.get_width() - self.image_width - self.button_rect.width-25
+        self.decssurf_width = self.itemsurf.get_width() - self.image_width - self.remove_rect.width-25
 
         self.decssurf = pygame.Surface((self.decssurf_width, 91), pygame.SRCALPHA)
 
-        self.button_image = pygame.Surface((self.button_rect.width,self.button_rect.height),SRCALPHA)
-        self.button_image.fill('#000000')
+        self.button_image = pygame.Surface((self.remove_rect.width,self.remove_rect.height),SRCALPHA)
+        gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
+        if not os.path.exists(gameinfo_file):
+            self.button_image.fill('#000000')
+        else:
+            self.button_image.fill('#00aa90')
 
 
         self.draw_text(self.decssurf,self.description,self.FONT,(0,0,0),self.decssurf.get_rect())
@@ -1927,131 +1730,28 @@ class Item:
     def draw(self, window, x, y):
         # Wyświetlanie g self.menu_width/2
         # rafiki przedmiotu na określonych współrzędnych
+        gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
+        if not os.path.exists(gameinfo_file):
+            self.button_image.fill('#000000')
+        else:
+            self.button_image.fill('#00aa90')
+
         self.itemsurf.blit(self.background,(1,1))
         self.itemsurf.blit(self.image,(5,5))
-        self.itemsurf.blit(self.font_surface, (self.image.get_width()+9, 7))
+        # self.itemsurf.blit(self.font_surface, (self.image.get_width()+9, 7))
         self.itemsurf.blit(self.decssurf,(100,0))
         
 
-        self.itemsurf.blit(self.button_image,self.button_rect)
-        self.itemsurf.blit(self.button_image,self.button_rect2)
+        self.itemsurf.blit(self.button_image,self.remove_rect)
+        self.itemsurf.blit(self.button_image,self.load_rect)
 
 
-        self.itemsurf.blit(self.button_text, (self.button_rect.x + 10, self.button_rect.y + 8))
+        self.itemsurf.blit(self.button_text, (self.remove_rect.x + 10, self.remove_rect.y ))
+        self.itemsurf.blit(self.button_text2, (self.load_rect.x + 10, self.load_rect.y))
 
         window.blit(self.itemsurf, (x, y))
     # from main import Game
     # def button_action(self,game:Game):
-    def button_action(self,game):
-
-
-        from gameplay import Player
-        self.button_image.fill('#00ff00')
-        self.button_text = self.FONT.render("click", True, (255, 255, 255))
-
-        
-
-        with open('gameinfo.bin', 'rb') as f:
-            game.size = int(f.readline().decode().rstrip('\n'))
-            game.PlayerCount = int(f.readline().decode().rstrip('\n'))
-            game.Fog = True if str(f.readline().decode().rstrip('\n')) == 'True' else False
-            ID = int(f.readline().decode().rstrip('\n'))
-            MAX = int(f.readline().decode().rstrip('\n'))
-            castle_hex = eval(f.readline().decode().rstrip('\n'))
-            use_castle = eval(f.readline().decode().rstrip('\n'))
-        game.allplayers = []
-        for _ in range(game.PlayerCount):
-            game.allplayers.append(Player('tmp','tmp'))
-        with open('playerStats.csv', 'r',encoding='utf-8') as csvfile:
-            reader = csv.reader(csvfile, delimiter=';')
-            next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
-            i = 0 
-            for row in reader:
-                player_name = row[0]
-                home = int(row[1])
-                home_x = int(row[2])
-                home_y = int(row[3])
-                nacja = row[4]
-                wyb = True if (row[5]) == 'True' else False
-                turn_stop = True if (row[6]) == 'True' else False
-                field_status = True if (row[7]) == 'True' else False
-                camera_stop = True if (row[8]) == 'True' else False
-                player_hex_status = True if (row[9]) == 'True' else False
-                atack_stop = True if (row[10]) == 'True' else False
-                attack_fail = True if (row[11]) == 'True' else False
-                gold_count = int(row[12])
-                army_count = int(row[13])
-                terrain_count = int(row[14])
-                turn_count = int(row[15])
-                army_count_bonus = int(row[16])
-                gold_count_bonus = int(row[17])
-                clay = int(row[18])
-                mine_diamonds = int(row[19])
-                mine_rocks = int(row[20])
-                mine_iron = int(row[21])
-                mine_gold = int(row[22])
-                fish_port = int(row[23])
-                sawmill = int(row[24])
-                grain = int(row[25])
-                resource_sell_bonus = int(row[26])
-                field_bonus = True if (row[27]) == 'True' else False
-                building_buy_bonus = int(row[28])
-                licznik = int(row[29])
-                barbarian_bonus = True if (row[30]) == 'True' else False
-                crypt_bonus = True if (row[31]) == 'True' else False
-                new_pick = True if (row[32]) == 'True' else False
-                game.allplayers[i].set_data(player_name, home, home_x, home_y, nacja, wyb, turn_stop, field_status, camera_stop, player_hex_status,
-                     atack_stop, attack_fail, gold_count, army_count, terrain_count, turn_count, army_count_bonus, gold_count_bonus,
-                     clay, mine_diamonds, mine_rocks, mine_iron, mine_gold, fish_port, sawmill, grain, resource_sell_bonus,
-                     field_bonus, building_buy_bonus, licznik, barbarian_bonus, crypt_bonus, new_pick, MAX, ID,
-                use_castle, castle_hex)
-                # Wykonaj operacje na odczytanych danych
-                # np. przypisz je do obiektów Player, wyświetl, itp.
-
-
-                
-                
-        game.map.num_hex_x = game.size
-        game.map.num_hex_y = game.size
-        game.map.num_hex_all = game.size * game.size
-        game.map.num_hex_side = game.map.num_hex_y
-        game.map.num_hex_right_side = game.map.num_hex_x
-        game.map.all_zajete_surface = {}
-        game.map.players = game.allplayers
-        for x in range(Player.MAX):
-            t = 2
-            if game.map.players[x].nacja == "wojownicy":
-                t = 0
-            if game.map.players[x].nacja == "nomadzi":
-                t = 1
-            if game.map.players[x].nacja == "kupcy":
-                t = 3
-
-            game.map.all_zajete_surface[f'{game.map.players[x].player_name}'] = game.map.zajete[t]
-        with open('hexmap.csv', 'r',encoding='utf-8') as csvfile:
-            reader = csv.reader(csvfile, delimiter=';')
-            next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
-            i = 0 
-            for row in reader:
-                game.map.allhex['hex',i].polozenie_hex_x = int(row[0])
-                game.map.allhex['hex',i].polozenie_hex_y = int(row[1])
-                game.map.allhex['hex',i].number = int(row[2])
-                game.map.allhex['hex',i].obwodka = True if row[3] == 'True' else False
-                game.map.allhex['hex',i].zajete = True if row[4] == 'True' else False
-                game.map.allhex['hex',i].odkryte = True if row[5] == 'True' else False
-                game.map.allhex['hex',i].field_add = True if row[6] == 'True' else False
-                game.map.allhex['hex',i].texture_index = int(row[7])
-                game.map.allhex['hex',i].rodzaj = row[8]
-                game.map.allhex['hex',i].rodzaj_surowca_var = row[9]
-                game.map.allhex['hex',i].player = (row[10])  # Odczytanie jako listy, używając funkcji eval()
-                game.map.allhex['hex',i].playerable = eval(row[11])  # Odczytanie jako listy, używając funkcji eval()
-                game.map.allhex['hex',i].atack = eval(row[12])  # Odczytanie jako listy, używając funkcji eval()
-                game.map.allhex['hex',i].texturing(game.map)
-                i+=1
-
-        pass
-    # from main import Game
-    # def button_action2(self,game_data:Game):
     def button_action2(self,game_data):
         
         save_game_data = game_data
@@ -2060,8 +1760,8 @@ class Item:
         game_data.allbuildingmenu]
         # print(tmp)
 
-        with open('gameinfo.bin', 'wb') as f:
-            from gameplay import Player
+        with open('save/gameinfo.bin', 'wb') as f:
+            from gameplay import Player,Camera
             f.write(str(game_data.size).encode() + b'\n')
             f.write(str(game_data.PlayerCount).encode() + b'\n')
             f.write(str(game_data.Fog).encode() + b'\n')
@@ -2069,10 +1769,12 @@ class Item:
             f.write(str(Player.MAX).encode() + b'\n')
             f.write(str(Player.castle_hex).encode() + b'\n')
             f.write(str(Player.use_castle).encode() + b'\n')
+            f.write(str(Camera.camera_x).encode() + b'\n')
+            f.write(str(Camera.camera_y).encode() + b'\n')
+        
 
-            
         # Save Map
-        with open('hexmap.csv', 'w',encoding='utf-8') as f:
+        with open('save/hexmap.csv', 'w',encoding='utf-8') as f:
             f.write('x;y;number;obwodka;zajete;odkryte;fild_add;textureID;rodzaj;rodzaj_surowca_var;player;playerable;atack\n')
             for hexagon in range(len(save_game_data.map.allhex)):
                 f.write(str(save_game_data.map.allhex['hex',hexagon].polozenie_hex_x)+';')
@@ -2089,7 +1791,16 @@ class Item:
                 f.write(str(save_game_data.map.allhex['hex',hexagon].playerable)+';')
                 f.write(str(save_game_data.map.allhex['hex',hexagon].atack)+';')
                 f.write('\n')
-        with open('playerStats.csv', 'w',encoding='utf-8') as f:
+        with open('save/HexRect.csv', 'w',encoding='utf-8') as f:
+            f.write('x;y;w;h\n')
+            for hexagon in range(len(save_game_data.map.allrect)):
+                f.write(str(save_game_data.map.allrect['hex',hexagon].x)+';')
+                f.write(str(save_game_data.map.allrect['hex',hexagon].y)+';')
+                f.write(str(save_game_data.map.allrect['hex',hexagon].w)+';')
+                f.write(str(save_game_data.map.allrect['hex',hexagon].h)+';')
+                f.write('\n')
+        
+        with open('save/playerStats.csv', 'w',encoding='utf-8') as f:
             f.write('player_name;home;home_x;home_y;nacja;wyb;turn_stop;field_status;camera_stop;player_hex_status;atack_stop;attack_fail;gold_count;army_count;terrain_count;turn_count;army_count_bonus;gold_count_bonus;')
             for surowiec in save_game_data.allplayers[0].surowce_ilosc:
                 f.write(str(surowiec[0])+';')
@@ -2126,25 +1837,58 @@ class Item:
                 f.write(str(player.crypt_bonus)+';')
                 f.write(str(player.new_pick)+';')
                 f.write('\n')
-                
-    
-    
         
-        
-        self.button_text = self.FONT.render("Owned", True, (255, 255, 255))
+        import pickle
+
+        # Otwórz pliki wejściowe
+        with open('save/gameinfo.bin', 'rb') as file_gameinfo, \
+            open('save/playerStats.csv', 'r') as file_playerStats, \
+            open('save/HexRect.csv', 'r') as file_HexRect, \
+            open('save/hexmap.csv', 'r') as file_hexmap:
+
+            # Wczytaj dane z plików
+            gameinfo_data = file_gameinfo.read()
+            playerStats_data = file_playerStats.read()
+            HexRect_data = file_HexRect.read()
+            hexmap_data = file_hexmap.read()
+
+            # Połącz dane w jeden słownik
+            data = {
+                'gameinfo': gameinfo_data,
+                'playerStats': playerStats_data,
+                'HexRect': HexRect_data,
+                'hexmap': hexmap_data
+            }
+
+            # Zapisz dane w pliku binarnym
+            with open(f'save/save_{self.name}.bin', 'wb') as file_combined:
+                pickle.dump(data, file_combined)
+
+            data = None
+            from os import remove
+
+            # Usuń pliki
+        remove('save/gameinfo.bin')
+        remove('save/playerStats.csv')
+        remove('save/HexRect.csv')
+        remove('save/hexmap.csv')
+    
         pass
+    def button_action(self,game):
+        
+        gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
+        if not os.path.exists(gameinfo_file):
+            return 0
+        
+            # Usuń pliki
+        os.remove(f'save/save_{self.name}.bin')
 
-    def print_info(self):
-        print("Item ID:", self.item_id)
-        print("Name:", self.name)
-        print("Cost:", self.cost)
-        print("Description:", self.description)
-        print("------------------------")
-
+    
+        pass
 
 class SaveMenu:
     active = False
-    def __init__(self, window:pygame.Surface, items:list[Item], menu_width:int, menu_height:int):
+    def __init__(self, window:pygame.Surface, items:list[ItemSave], menu_width:int, menu_height:int):
         self.window = window
         self.menu_items = items  # Przykładowa lista przedmiotów w menu
         self.menu_width = menu_width
@@ -2165,12 +1909,13 @@ class SaveMenu:
         self.menu_y = 0  # Set the desired y-coordinate of the menu
 
         self.back_rect = pygame.Rect(self.scrollbar_x-200,50,150,50)
+        self.backtext = pygame.font.Font('fonts/PirataOne-Regular.ttf',30).render("BACK",True,(0,0,0))
         self.scrollbar_rect = pygame.Rect(0,0,0,0)
     def draw_menu(self):
         # Rysowanie menu (inne elementy pominięte dla uproszczenia)
         
         pygame.draw.rect(self.window,(255,255,0),self.back_rect)
-
+        self.window.blit(self.backtext,self.back_rect)
         for i, item in enumerate(self.menu_items):
             item_y = self.menu_y + self.scrollbar_margin + (i - self.menu_top_item_index) * (self.menu_item_height + self.item_spacing)
             item_rect = pygame.Rect(self.menu_width/4, item_y, self.menu_width/2, self.menu_item_height)
@@ -2196,17 +1941,17 @@ class SaveMenu:
             if event.button == 1:  # Kliknięcie lewym przyciskiem myszy
                 mouse_pos = pygame.mouse.get_pos()
                 for i, item in enumerate(self.menu_items):
-                    item_y = item.button_rect.y + self.scrollbar_margin + (i - self.menu_top_item_index) * \
+                    item_y = item.remove_rect.y + self.scrollbar_margin + (i - self.menu_top_item_index) * \
                         (self.menu_item_height + self.item_spacing)
-                    item_rect = pygame.Rect(item.button_rect.x+offset, item_y, item.button_rect.width, item.button_rect.height)
-                    item_rect2 = pygame.Rect(item.button_rect2.x+offset, item_y+item.button_rect.height *2, item.button_rect2.width, item.button_rect2.height)
+                    item_rect = pygame.Rect(item.remove_rect.x+offset, item_y, item.remove_rect.width, item.remove_rect.height)
+                    item_rect2 = pygame.Rect(item.load_rect.x+offset, item_y+item.remove_rect.height *2, item.load_rect.width, item.load_rect.height)
                     
                     
                     if self.back_rect.collidepoint(mouse_pos):
                         SaveMenu.active = False
                     if item_rect.collidepoint(mouse_pos)and item.available:
                         item.button_action2(game)
-                        print('removed')
+                        # print('removed')
                     if item_rect2.collidepoint(mouse_pos)and item.available:
                         item.button_action(game)
                         
@@ -2250,7 +1995,587 @@ class SaveMenu:
                             # Calculate the corresponding menu top item index
                             self.menu_top_item_index = int((thumb_position / max_thumb_position) * (len(self.menu_items) - self.menu_items_per_page))
 
+class ItemLoad:
+    itemId = 0
+    
+    def __init__(self, name:str="",description:str="Zapis gry nr ", image:pygame.Surface=None, cost:int=0):
+        self.available = True
+        ItemLoad.itemId += 1
+        self.item_id = ItemLoad.itemId
+        self.name = name + str(self.item_id)
+        self.image = pygame.Surface((90, 90))
+        self.image.fill((255, 170, 20))
 
+        self.FONT = pygame.font.Font('fonts/PirataOne-Regular.ttf', 24)
+        self.cost = random.randint(10,100)
+        # self.font_surface = self.FONT.render(f"ID) {self.item_id}", True, (0, 0, 0))
+        self.background = pygame.Surface((pygame.display.get_window_size()[0]/2.1,100-2))
+        self.background.fill((0, 55, 107))
+        self.itemsurf = pygame.Surface((pygame.display.get_window_size()[0]/2-2,100),pygame.SRCALPHA)
+
+        self.description = description+str(self.item_id)
+
+
+        self.remove_rect = pygame.Rect(self.itemsurf.get_width() - 130, (self.itemsurf.get_height()-60) // 2 , 100, 60)
+        self.load_rect = pygame.Rect(self.itemsurf.get_width() - 130, (self.itemsurf.get_height()-60) // 2 , 100, 60)
+        self.load_rect.right = self.remove_rect.left-30
+        self.remove_txt = self.FONT.render("REMOVE", True, (255, 255, 255))
+        self.load_txt = self.FONT.render("LOAD", True, (255, 255, 255))
+
+        self.image_width = self.image.get_width()
+        self.decssurf_width = self.itemsurf.get_width() - self.image_width - self.remove_rect.width-25
+
+        self.decssurf = pygame.Surface((self.decssurf_width, 91), pygame.SRCALPHA)
+
+        self.button_image = pygame.Surface((self.remove_rect.width,self.remove_rect.height),SRCALPHA)
+        gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
+        if not os.path.exists(gameinfo_file):
+            self.button_image.fill('#000000')
+        else:
+            self.button_image.fill('#00aa90')
+
+
+        self.draw_text(self.decssurf,self.description,self.FONT,(0,0,0),self.decssurf.get_rect())
+    def split_text(self,text:str, font:pygame.font, surface_width:int):
+        words = text.split()
+        lines = []
+        current_line = words[0]
+        for word in words[1:]:
+            test_line = current_line + " " + word
+            if font.size(test_line)[0] <= surface_width:
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word
+        lines.append(current_line)
+        return lines
+
+    def draw_text(self,surface:pygame.Surface, text:str, font, color:pygame.Color, rect:pygame.Rect):
+        lines = self.split_text(text, font, rect.width)
+        rect.y+=8+font.size("Tg")[1] 
+        
+        line_height = font.size("Tg")[1]  # Wysokość jednej linii tekstu
+        
+        max_lines = rect.height // line_height  # Maksymalna liczba linii, która zmieści się w wysokości powierzchni
+        if len(lines) > max_lines:
+            lines = lines[:max_lines-1]
+            lines[-1] += " ..."  # Dodanie elips na końcu ostatniej linii
+    
+        y = rect.y
+        for line in lines:
+            text_surface = font.render(line, True, color)
+            surface.blit(text_surface, (rect.x, y))
+            y += line_height
+
+
+    def draw(self, window, x, y):
+        # Wyświetlanie g self.menu_width/2
+        # rafiki przedmiotu na określonych współrzędnych
+        
+        gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
+        if not os.path.exists(gameinfo_file):
+            self.button_image.fill('#000000')
+        else:
+            self.button_image.fill('#00aa90')
+        self.itemsurf.blit(self.background,(1,1))
+        self.itemsurf.blit(self.image,(5,5))
+        # self.itemsurf.blit(self.font_surface, (self.image.get_width()+9, 7))
+        self.itemsurf.blit(self.decssurf,(100,0))
+        
+
+        self.itemsurf.blit(self.button_image,self.remove_rect)
+        self.itemsurf.blit(self.button_image,self.load_rect)
+
+
+        self.itemsurf.blit(self.remove_txt, (self.remove_rect.x + 15, self.remove_rect.y+15 ))
+        self.itemsurf.blit(self.load_txt, (self.load_rect.x + 30, self.load_rect.y+15))
+
+        window.blit(self.itemsurf, (x, y))
+    
+    def button_action(self,game):
+        import time
+        
+        gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
+        if not os.path.exists(gameinfo_file):
+            return 0
+        with open(f'save/save_{self.name}.bin', 'rb') as file_combined:
+            # Wczytaj dane
+            data = pickle.load(file_combined)
+
+        # Odzyskaj dane z słownika
+        gameinfo_data = data['gameinfo']
+        playerStats_data = data['playerStats']
+        HexRect_data = data['HexRect']
+        hexmap_data = data['hexmap']
+
+        # Wykonaj odpowiednie operacje na danych...
+        with open('save/gameinfo.bin', 'wb') as file_gameinfo:
+            file_gameinfo.write(gameinfo_data)
+
+        with open('save/playerStats.csv', 'w') as file_playerStats:
+            file_playerStats.write(playerStats_data)
+
+        with open('save/HexRect.csv', 'w') as file_HexRect:
+            file_HexRect.write(HexRect_data)
+
+        with open('save/hexmap.csv', 'w') as file_hexmap:
+            file_hexmap.write(hexmap_data)
+
+        from gameplay import Player,Camera
+        self.button_image.fill('#00aa90')
+        
+        with open('save/gameinfo.bin', 'rb') as f:
+            game.size = int(f.readline().decode().rstrip('\n'))
+            game.PlayerCount = int(f.readline().decode().rstrip('\n'))
+            game.Fog = True if str(f.readline().decode().rstrip('\n')) == 'True' else False
+            ID = int(f.readline().decode().rstrip('\n'))
+            MAX = int(f.readline().decode().rstrip('\n'))
+            castle_hex = eval(f.readline().decode().rstrip('\n'))
+            use_castle = eval(f.readline().decode().rstrip('\n'))
+            Camera.camera_x = int(f.readline().decode().rstrip('\n'))
+            Camera.camera_y = int(f.readline().decode().rstrip('\n'))
+        game.allplayers = []
+        time.sleep(1)
+        for _ in range(game.PlayerCount):
+            game.allplayers.append(Player('tmp','tmp'))
+        with open('save/playerStats.csv', 'r',encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile, delimiter=';')
+            next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
+            i = 0 
+            for row in reader:
+                player_name = row[0]
+                home = int(row[1])
+                home_x = int(row[2])
+                home_y = int(row[3])
+                nacja = row[4]
+                wyb = True if (row[5]) == 'True' else False
+                turn_stop = True if (row[6]) == 'True' else False
+                field_status = True if (row[7]) == 'True' else False
+                camera_stop = True if (row[8]) == 'True' else False
+                player_hex_status = True if (row[9]) == 'True' else False
+                atack_stop = True if (row[10]) == 'True' else False
+                attack_fail = True if (row[11]) == 'True' else False
+                gold_count = int(row[12])
+                army_count = int(row[13])
+                terrain_count = int(row[14])
+                turn_count = int(row[15])
+                army_count_bonus = int(row[16])
+                gold_count_bonus = int(row[17])
+                clay = int(row[18])
+                mine_diamonds = int(row[19])
+                mine_rocks = int(row[20])
+                mine_iron = int(row[21])
+                mine_gold = int(row[22])
+                fish_port = int(row[23])
+                grain = int(row[24])
+                resource_sell_bonus = int(row[25])
+                field_bonus = True if (row[26]) == 'True' else False
+                building_buy_bonus = int(row[27])
+                licznik = int(row[28])
+                barbarian_bonus = True if (row[29]) == 'True' else False
+                crypt_bonus = True if (row[30]) == 'True' else False
+                new_pick = True if (row[31]) == 'True' else False
+                game.allplayers[i].set_data(player_name, home, home_x, home_y, nacja, wyb, turn_stop, field_status, camera_stop, player_hex_status,
+                     atack_stop, attack_fail, gold_count, army_count, terrain_count, turn_count, army_count_bonus, gold_count_bonus,
+                     clay, mine_diamonds, mine_rocks, mine_iron, mine_gold, fish_port, grain, resource_sell_bonus,
+                     field_bonus, building_buy_bonus, licznik, barbarian_bonus, crypt_bonus, new_pick, MAX, ID,
+                use_castle, castle_hex)
+                i+=1
+                # Wykonaj operacje na odczytanych danych
+                # np. przypisz je do obiektów Player, wyświetl, itp.
+                LoadMenu.active = False
+        time.sleep(1)
+        
+                
+                
+        game.map.num_hex_x = game.size
+        game.map.num_hex_y = game.size
+        game.map.num_hex_all = game.size * game.size
+        game.map.num_hex_side = game.map.num_hex_y
+        game.map.num_hex_right_side = game.map.num_hex_x
+        game.map.all_zajete_surface = {}
+
+        
+
+        game.map.players = game.allplayers
+        for x in range(Player.MAX):
+            t = 2
+            if game.map.players[x].nacja == "wojownicy":
+                t = 0
+            if game.map.players[x].nacja == "nomadzi":
+                t = 1
+            if game.map.players[x].nacja == "kupcy":
+                t = 3
+
+            game.map.all_zajete_surface[f'{game.map.players[x].player_name}'] = game.map.zajete[t]
+        
+        
+        game.alldec = []
+        
+
+        game.allevents = []
+        game.allbuildingmenu =[]
+        from gameplay import Decision
+        for i in range(Player.MAX):
+            game.alldec.append(Decision(game.screen,game.map,game.allplayers[i]))
+        for p in range(len(game.allplayers)):
+            game.alldec[p].fupdate.start(game.allplayers[p])
+
+        from gameplay import EventMenagment
+        for e in range(len(game.allplayers)):
+            game.allevents.append(EventMenagment(game.screen, game.allplayers[e]))
+            game.allevents[e].start_event_list()
+            game.allbuildingmenu.append(BuildingMenu(game.screen,game.allbuildingList[e],SCREEN_WIDTH/2,
+                                                     500,int(0.25*SCREEN_WIDTH),int(0.2*SCREEN_HEIGHT)))
+            if game.allplayers[e].nacja == "kupcy":
+                for i in game.allbuildingList[e]:
+                    i.cost = i.cost - int(i.cost/100 * 30)
+
+        game.currentplayer = game.allplayers[Player.ID]
+        game.currentevent = game.allevents[Player.ID]
+        game.currentmenu = game.allbuildingmenu[Player.ID]
+        game.currentdec = game.alldec[Player.ID]
+        
+        # game.map.allhex = {}
+        # game.map.allhex['hex',i] =  Hex((polozenie_hex_x), (polozenie_hex_y), i, game.map, False, False,False,False,-1)
+        import time
+        time.sleep(1)
+        gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
+        if not os.path.exists(gameinfo_file):
+            return 0
+        with open(f'save/save_{self.name}.bin', 'rb') as file_combined:
+            # Wczytaj dane
+            data = pickle.load(file_combined)
+
+        # Odzyskaj dane z słownika
+        gameinfo_data = data['gameinfo']
+        playerStats_data = data['playerStats']
+        HexRect_data = data['HexRect']
+        hexmap_data = data['hexmap']
+
+        # Wykonaj odpowiednie operacje na danych...
+        with open('save/gameinfo.bin', 'wb') as file_gameinfo:
+            file_gameinfo.write(gameinfo_data)
+
+        with open('save/playerStats.csv', 'w') as file_playerStats:
+            file_playerStats.write(playerStats_data)
+
+        with open('save/HexRect.csv', 'w') as file_HexRect:
+            file_HexRect.write(HexRect_data)
+
+        with open('save/hexmap.csv', 'w') as file_hexmap:
+            file_hexmap.write(hexmap_data)
+
+        from gameplay import Player,Camera
+        self.button_image.fill('#00aa90')
+        
+        with open('save/gameinfo.bin', 'rb') as f:
+            game.size = int(f.readline().decode().rstrip('\n'))
+            game.PlayerCount = int(f.readline().decode().rstrip('\n'))
+            game.Fog = True if str(f.readline().decode().rstrip('\n')) == 'True' else False
+            ID = int(f.readline().decode().rstrip('\n'))
+            MAX = int(f.readline().decode().rstrip('\n'))
+            castle_hex = eval(f.readline().decode().rstrip('\n'))
+            use_castle = eval(f.readline().decode().rstrip('\n'))
+            Camera.camera_x = int(f.readline().decode().rstrip('\n'))
+            Camera.camera_y = int(f.readline().decode().rstrip('\n'))
+        game.allplayers = []
+        time.sleep(1)
+        for _ in range(game.PlayerCount):
+            game.allplayers.append(Player('tmp','tmp'))
+        with open('save/playerStats.csv', 'r',encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile, delimiter=';')
+            next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
+            i = 0 
+            for row in reader:
+                player_name = row[0]
+                home = int(row[1])
+                home_x = int(row[2])
+                home_y = int(row[3])
+                nacja = row[4]
+                wyb = True if (row[5]) == 'True' else False
+                turn_stop = True if (row[6]) == 'True' else False
+                field_status = True if (row[7]) == 'True' else False
+                camera_stop = True if (row[8]) == 'True' else False
+                player_hex_status = True if (row[9]) == 'True' else False
+                atack_stop = True if (row[10]) == 'True' else False
+                attack_fail = True if (row[11]) == 'True' else False
+                gold_count = int(row[12])
+                army_count = int(row[13])
+                terrain_count = int(row[14])
+                turn_count = int(row[15])
+                army_count_bonus = int(row[16])
+                gold_count_bonus = int(row[17])
+                clay = int(row[18])
+                mine_diamonds = int(row[19])
+                mine_rocks = int(row[20])
+                mine_iron = int(row[21])
+                mine_gold = int(row[22])
+                fish_port = int(row[23])
+                
+                grain = int(row[24])
+                resource_sell_bonus = int(row[25])
+                field_bonus = True if (row[26]) == 'True' else False
+                building_buy_bonus = int(row[27])
+                licznik = int(row[28])
+                barbarian_bonus = True if (row[29]) == 'True' else False
+                crypt_bonus = True if (row[30]) == 'True' else False
+                new_pick = True if (row[30]) == 'True' else False
+                game.allplayers[i].set_data(player_name, home, home_x, home_y, nacja, wyb, turn_stop, field_status, camera_stop, player_hex_status,
+                     atack_stop, attack_fail, gold_count, army_count, terrain_count, turn_count, army_count_bonus, gold_count_bonus,
+                     clay, mine_diamonds, mine_rocks, mine_iron, mine_gold, fish_port, grain, resource_sell_bonus,
+                     field_bonus, building_buy_bonus, licznik, barbarian_bonus, crypt_bonus, new_pick, MAX, ID,
+                use_castle, castle_hex)
+                i+=1
+                # Wykonaj operacje na odczytanych danych
+                # np. przypisz je do obiektów Player, wyświetl, itp.
+
+        time.sleep(1)
+                
+                
+        game.map.num_hex_x = game.size
+        game.map.num_hex_y = game.size
+        game.map.num_hex_all = game.size * game.size
+        game.map.num_hex_side = game.map.num_hex_y
+        game.map.num_hex_right_side = game.map.num_hex_x
+        game.map.all_zajete_surface = {}
+
+        
+
+        game.map.players = game.allplayers
+        for x in range(Player.MAX):
+            t = 2
+            if game.map.players[x].nacja == "wojownicy":
+                t = 0
+            if game.map.players[x].nacja == "nomadzi":
+                t = 1
+            if game.map.players[x].nacja == "kupcy":
+                t = 3
+
+            game.map.all_zajete_surface[f'{game.map.players[x].player_name}'] = game.map.zajete[t]
+        
+        
+        game.alldec = []
+        
+
+        game.allevents = []
+        game.allbuildingmenu =[]
+        from gameplay import Decision
+        for i in range(Player.MAX):
+            game.alldec.append(Decision(game.screen,game.map,game.allplayers[i]))
+        for p in range(len(game.allplayers)):
+            game.alldec[p].fupdate.start(game.allplayers[p])
+
+        from gameplay import EventMenagment
+        for e in range(len(game.allplayers)):
+            game.allevents.append(EventMenagment(game.screen, game.allplayers[e]))
+            game.allevents[e].start_event_list()
+            game.allbuildingmenu.append(BuildingMenu(game.screen,game.allbuildingList[e],SCREEN_WIDTH/2,
+                                                     500,int(0.25*SCREEN_WIDTH),int(0.2*SCREEN_HEIGHT)))
+            if game.allplayers[e].nacja == "kupcy":
+                for i in game.allbuildingList[e]:
+                    i.cost = i.cost - int(i.cost/100 * 30)
+
+        game.currentplayer = game.allplayers[Player.ID]
+        game.currentevent = game.allevents[Player.ID]
+        game.currentmenu = game.allbuildingmenu[Player.ID]
+        game.currentdec = game.alldec[Player.ID]
+        
+        # game.map.allhex = {}
+        # game.map.allhex['hex',i] =  Hex((polozenie_hex_x), (polozenie_hex_y), i, game.map, False, False,False,False,-1)
+        from graphics import Hex
+        with open('save/hexmap.csv', 'r',encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile, delimiter=';')
+            next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
+            i = 0 
+            for row in reader:
+                polozenie_hex_x= int(row[0])
+                polozenie_hex_y= int(row[1])
+                number= int(row[2])
+                obwodka = True if row[3] == 'True' else False
+                zajete = True if row[4] == 'True' else False
+                odkryte  = True if row[5] == 'True' else False
+                field_add   = True if row[6] == 'True' else False
+                texture_index = int(row[7])
+                rodzaj= row[8]
+                rodzaj_surowca_var = row[9]
+                player= (row[10])  # Odczytanie jako listy, używając funkcji eval()
+                playerable = eval(row[11])  # Odczytanie jako listy, używając funkcji eval()
+                atack = eval(row[12])  # Odczytanie jako listy, używając funkcji eval()
+                
+                game.map.allhex['hex',i].data_update(polozenie_hex_x,polozenie_hex_y,number,
+                    obwodka,zajete,odkryte,field_add,texture_index,
+                    rodzaj,rodzaj_surowca_var,player,playerable,
+                    atack)
+                i+=1
+        time.sleep(1)
+        # ###########
+        
+        with open('save/HexRect.csv', 'r',encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile, delimiter=';')
+            next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
+            i = 0 
+            for row in reader:
+                x= int(row[0])
+                y= int(row[1])
+                w= int(row[2])
+                h= int(row[3])
+                game.map.set_allrect(i,x,y,w,h)
+                i+=1
+        time.sleep(1)
+
+        os.remove('save/gameinfo.bin')
+        os.remove('save/hexmap.csv')
+        os.remove('save/HexRect.csv')
+        os.remove('save/playerStats.csv')
+        
+
+        pass
+
+    def button_action2(self):
+        gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
+        if not os.path.exists(gameinfo_file):
+            return 0
+        os.remove(f'save/save_{self.name}.bin')
+        pass
+
+class LoadMenu:
+    active = False
+
+    def __init__(self, window: pygame.Surface, items: list[ItemLoad], menu_width: int, menu_height: int):
+        self.window = window
+        self.menu_items = items  # Przykładowa lista przedmiotów w menu
+        self.menu_width = menu_width
+        self.menu_height = menu_height
+        self.menu_item_height = 100
+        self.menu_top_item_index = 0
+        self.item_spacing = 20  # Odstęp między przedmiotami
+
+        # Scrollbar settings
+        self.scrollbar_width = 16
+        self.scrollbar_margin = 8
+        self.scrollbar_x = self.window.get_width() - self.scrollbar_width - self.scrollbar_margin
+        self.scrollbar_y = self.scrollbar_margin
+        self.scrollbar_height = self.window.get_height() - self.scrollbar_margin * 2
+
+        self.menu_items_per_page = (self.menu_height - self.scrollbar_margin * 2) // (
+                    self.menu_item_height + self.item_spacing)
+        self.menu_x = 0  # Set the desired x-coordinate of the menu
+        self.menu_y = 0  # Set the desired y-coordinate of the menu
+
+        self.back_rect = pygame.Rect(self.scrollbar_x - 200, 50, 150, 50)
+        self.backtext = pygame.font.Font('fonts/PirataOne-Regular.ttf', 30).render("BACK", True, (0, 0, 0))
+        self.scrollbar_rect = pygame.Rect(255, 0, 255, 0)
+
+        # Load the images
+        self.left_side_art = pygame.image.load('texture/ui/load_menu/heroine_left.png')
+        self.left_side_art = pygame.transform.scale(self.left_side_art, (350, 720))
+        self.right_side_art = pygame.image.load('texture/ui/load_menu/warior_right.png')
+        self.right_side_art = pygame.transform.scale(self.right_side_art, (350, 720))
+
+        # Set the initial position of the side art
+        self.left_side_rect = self.left_side_art.get_rect(topleft=(self.window.get_width() - 1320, 0))
+        self.right_side_rect = self.right_side_art.get_rect(topleft=(self.window.get_width() - 350, 0))
+
+    def draw_menu(self):
+        self.window.fill((0, 16, 31))  # Ustawia kolor tła na czarny (RGB: 0, 0, 0)
+        # Draw the left side art
+        self.window.blit(self.left_side_art, self.left_side_rect)
+
+        # Draw the right side art
+        self.window.blit(self.right_side_art, self.right_side_rect)
+
+        # Draw the rest of the menu (omitted for simplicity)
+        pygame.draw.rect(self.window, (255, 170, 20), self.back_rect)
+        self.window.blit(self.backtext, self.back_rect)
+        for i, item in enumerate(self.menu_items):
+            item_y = self.menu_y + self.scrollbar_margin + (i - self.menu_top_item_index) * (
+                    self.menu_item_height + self.item_spacing)
+            item_rect = pygame.Rect(self.menu_width / 4, item_y, self.menu_width / 2.1, self.menu_item_height)
+            if item_rect.collidepoint(pygame.mouse.get_pos()):
+                # Zaznaczony przedmiot
+                pygame.draw.rect(self.window, (192, 192, 255), item_rect)
+            pygame.draw.rect(self.window, (255, 170, 20), item_rect, 1)
+
+            item.draw(self.window, item_rect.x, item_y)
+
+        # Scrollbar
+        pygame.draw.rect(self.window, (0, 28, 56),
+                         (self.scrollbar_x, self.scrollbar_y, self.scrollbar_width, self.scrollbar_height))
+        self.scrollbar_rect = pygame.Rect(self.scrollbar_x, self.scrollbar_y, self.scrollbar_width,
+                                           self.scrollbar_height)
+        # Calculate the position and height of the scrollbar thumb
+        self.thumb_height = self.scrollbar_height / len(self.menu_items) * self.menu_items_per_page
+        self.thumb_y = self.scrollbar_y + (self.menu_top_item_index / len(self.menu_items)) * self.scrollbar_height
+
+        # Draw the scrollbar thumb
+        pygame.draw.rect(self.window, (255, 170, 20), (self.scrollbar_x, self.thumb_y, self.scrollbar_width,
+                                                       self.thumb_height))
+
+    def handle_event(self, event, game):
+        offset = self.menu_width / 4
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:  # Kliknięcie lewym przyciskiem myszy
+                mouse_pos = pygame.mouse.get_pos()
+                for i, item in enumerate(self.menu_items):
+                    item_y = item.remove_rect.y + self.scrollbar_margin + (i - self.menu_top_item_index) * (
+                            self.menu_item_height + self.item_spacing)
+                    item_rect = pygame.Rect(item.remove_rect.x + offset, item_y, item.remove_rect.width,
+                                            item.remove_rect.height)
+                    item_rect2 = pygame.Rect(item.load_rect.x + offset, item_y, item.load_rect.width,
+                                             item.load_rect.height)
+
+                    if self.back_rect.collidepoint(mouse_pos):
+                        LoadMenu.active = False
+                    if item_rect.collidepoint(mouse_pos) and item.available:
+                        item.button_action2()
+
+                    if item_rect2.collidepoint(mouse_pos) and item.available:
+                        # print(item.name)
+                        self.window.fill('#000000')
+                        item.button_action(game)
+                        pygame.time.Clock().tick(2)
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == pygame.BUTTON_WHEELUP:  # Scroll up
+                if self.menu_top_item_index > 0:
+                    self.menu_top_item_index -= 1
+            elif event.button == pygame.BUTTON_WHEELDOWN:  # Scroll down
+                if self.menu_top_item_index + self.menu_items_per_page < len(self.menu_items):
+                    self.menu_top_item_index += 1
+
+            if event.button == pygame.BUTTON_LEFT:  # Left mouse button
+                if self.scrollbar_rect.collidepoint(event.pos):  # Check if the mouse is on the scrollbar
+                    mouse_y = event.pos[1] - self.scrollbar_y
+                    thumb_position = mouse_y - self.thumb_height / 2
+                    max_thumb_position = self.scrollbar_height - self.thumb_height
+
+                    # Limit the thumb position within the scrollbar
+                    if thumb_position < 0:
+                        thumb_position = 0
+                    elif thumb_position > max_thumb_position:
+                        thumb_position = max_thumb_position
+
+                    # Calculate the corresponding menu top item index
+                    self.menu_top_item_index = int((thumb_position / max_thumb_position) * (
+                            len(self.menu_items) - self.menu_items_per_page))
+
+            elif event.type == pygame.MOUSEMOTION:
+                if event.buttons[0]:  # Left mouse button is pressed
+                    if self.scrollbar_rect.collidepoint(event.pos):  # Check if the mouse is on the scrollbar
+                        mouse_y = event.pos[1] - self.scrollbar_y
+                        thumb_position = mouse_y - self.thumb_height / 2
+                        max_thumb_position = self.scrollbar_height - self.thumb_height
+
+                        # Limit the thumb position within the scrollbar
+                        if thumb_position < 0:
+                            thumb_position = 0
+                        elif thumb_position > max_thumb_position:
+                            thumb_position = max_thumb_position
+
+                        # Calculate the corresponding menu top item index
+                        self.menu_top_item_index = int((thumb_position / max_thumb_position) * (
+                                len(self.menu_items) - self.menu_items_per_page))
 
 class MenuPause:
     Active = False
@@ -2316,4 +2641,10 @@ class MenuPause:
                 MenuPause.Active = False
                 Stats.camera_stop = False
                 SaveMenu.active = True
+        
+        if event.type == MOUSEBUTTONDOWN:
+            if self.load_rect.collidepoint(pos):
+                MenuPause.Active = False
+                Stats.camera_stop = False
+                LoadMenu.active = True
         pass

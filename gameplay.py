@@ -92,7 +92,7 @@ class Player:
                  atack_stop,attack_fail,gold_count,
                  army_count,terrain_count,turn_count,
                  army_count_bonus,gold_count_bonus,
-                 clay,mine_diamonds,mine_rocks,mine_iron,mine_gold,fish_port,sawmill,grain,
+                 clay,mine_diamonds,mine_rocks,mine_iron,mine_gold,fish_port,grain,
                  resource_sell_bonus,field_bonus,building_buy_bonus,licznik,barbarian_bonus,crypt_bonus,new_pick,
                  MAX_PLAYER,ID_PLAYER,USE_CASTLE,CASTLE_HEX):
         
@@ -135,7 +135,8 @@ class Player:
     def dopisz_surowiec(self, surowiec):
         for i in range(len(self.surowce_ilosc)):
             if surowiec == self.surowce_ilosc[i][0]:
-                self.surowce_ilosc[i][1] += 100
+                x = random.randint(1,20)
+                self.surowce_ilosc[i][1] += x
 
     def zajmij_pole(self, allrect, allmask, allhex, dec, screen, managment,quanity,all_players):
 
@@ -250,10 +251,10 @@ class Player:
 
 
                         if allhex["hex", i].rodzaj == "surowiec":
-                            print(allhex["hex", i].rodzaj_surowca_var)
+                            
                             self.dopisz_surowiec(allhex["hex", i].rodzaj_surowca_var)
                         if allhex["hex", i].rodzaj == "budynek":
-                            print("budynek")
+                            # 
                             # dodawanie bonusu do zarabiania
 
                             if allhex["hex", i].texture_index == -2:  # krypta
@@ -317,7 +318,7 @@ class Player:
                                             allhex["hex", i].update_texture()
 
                                             self.surowce_ilosc[1][1] = random.randint(0, 5)
-                                            self.surowce_ilosc[7][1] = random.randint(50, 200)
+                                            self.surowce_ilosc[6][1] = random.randint(50, 200)
                                             self.army_count -= enemy
 
                                             opis = " Udało ci się pokonać barbarzynców ! \n\n Po slądrowaniu wioski znajdujesz :\n " + str(
@@ -371,6 +372,7 @@ class Player:
                             self.turn_stop = False
                             allhex['hex', i].player = self.player_name
                             self.confirm = True
+                Decision.Active = False
 
     def castle_nation(self, allhex):
         for i in range(len(allhex)):
@@ -416,7 +418,7 @@ class Player:
 
         if self.nacja == "nomadzi":
             if self.field_bonus and self.confirm == True:
-                print("xd")
+                
                 self.field_status = True
                 self.player_hex_status = True
                 self.turn_stop = True
@@ -472,7 +474,7 @@ class Camera:
         Camera.camera_y = player.home_y * (-1) + 300
         if Camera.camera_x > 1600:
             Camera.camera_x -= (Camera.camera_x - 1600)
-            print(f"{Camera.camera_x} {Camera.camera_y}")
+            # print(f"{Camera.camera_x} {Camera.camera_y}")
 
     # end def
     def __init__(self):
@@ -485,10 +487,10 @@ class Camera:
     def mouse(self, mapsize):
 
         self.mouse_x, self.mouse_y = pygame.mouse.get_pos()
-        predkosc = 5
+        predkosc = 12
         press = pygame.key.get_pressed()
         if Stats.camera_stop is False:
-            print(Camera.camera_always_on)
+            # print(Camera.camera_always_on)
             if press[pygame.K_LCTRL] or Camera.camera_always_on:
                 if Camera.camera_x < 1600:
                     if self.mouse_x < 30:
@@ -525,16 +527,16 @@ class Camera:
         press = pygame.key.get_pressed()
         if press[pygame.K_RIGHT] or press[pygame.K_d]:
             if Camera.camera_x > 1640 - (mapsize * 130) + 1110:
-                Camera.camera_x -= 5
+                Camera.camera_x -= 10
         if press[pygame.K_LEFT] or press[pygame.K_a]:
             if Camera.camera_x < 1600:
-                Camera.camera_x += 5
+                Camera.camera_x += 10
         if press[pygame.K_DOWN] or press[pygame.K_s]:
             if Camera.camera_y > (-152 * mapsize / 2) - (75 * mapsize / 2) + 825:
-                Camera.camera_y -= 5
+                Camera.camera_y -= 9
         if press[pygame.K_UP] or press[pygame.K_w]:
             if Camera.camera_y < - 20:
-                Camera.camera_y += 5
+                Camera.camera_y += 9
 
 
 class UpBar:
@@ -609,8 +611,7 @@ class Timer:
         hours = int(elapsed_time // 3600)
         minutes = int((elapsed_time % 3600) // 60)
         seconds = int(elapsed_time % 60)
-        if minutes % 1 == 0 and not minutes == 0 and seconds == 0:
-            self.autosave_game()
+        
 
         # Draw the timer text
         timer_text = self.font_timer.render('{:02d}:{:02d}:{:02d}'.format(hours, minutes, seconds), True,
@@ -619,35 +620,7 @@ class Timer:
         text_rect = timer_text.get_rect(center=self.timer_box.center)
         self.screen.blit(timer_text, text_rect)
 
-    def autosave_game(self):
-        import gameplay
-        print('SaveGame')
-
-        folder_path = "save"
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-
-        with open('save/map.csv', 'w') as savefile:
-            savefile.write('x;y;number;texture_index;zajete\n')
-            for h in self.game.map.sprites():
-                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index};{h.zajete}')
-                savefile.write('\n')
-        with open('save/stats.txt', 'w') as savefile:
-
-            savefile.write(f'gold_count:{Stats.gold_count}\n')
-            savefile.write(f'army_count:{Stats.army_count}\n')
-            savefile.write(f'player_hex_status:{Stats.player_hex_status}\n')
-            savefile.write(f'army_count_bonus:{Stats.army_count_bonus}\n')
-            savefile.write(f'gold_count_bonus:{Stats.gold_count_bonus}\n')
-            savefile.write(f'turn_count:{Stats.turn_count}\n')
-
-        pygame.time.Clock().tick(1)
-        with zipfile.ZipFile("save/AutoSave.zip", "w") as zip:
-            zip.write("save/stats.txt")
-            zip.write("save/map.csv")
-        os.remove("save/stats.txt")
-        os.remove("save/map.csv")
-        pass
+   
 
 
 class Hourglass:
@@ -655,21 +628,19 @@ class Hourglass:
     def __init__(self, screen: pygame.Surface, frame_rate: int, animation_frame_interval: int):
         
         self.screen = screen
-        self.hourglass_rect = pygame.Rect(10, SCREEN_HEIGHT - 190, 173, 184)
+        # self.hourglass_rect = pygame.Rect(10, SCREEN_HEIGHT - 190, 173, 184)
         self.nation_color = "red"
         self.action = pygame.transform.smoothscale(pygame.image.load("texture/ui/klepsydra/dostepna_akcja.png").convert(),(173,37))
         # Load animation frames
         self.path_to_images = f"texture/ui/klepsydra/klepsydra_{self.nation_color}"
 
-        self.action_rect = self.action.get_rect()
-        self.action_rect.midbottom = self.hourglass_rect.midtop
-        self.action_rect.y -= 8
+        
 
         self.animation_frames = []
         for file_name in sorted(os.listdir(self.path_to_images)):
             if file_name.endswith(".png"):
-                image = pygame.image.load(os.path.join(self.path_to_images, file_name))
-                self.animation_frames.append(pygame.transform.scale(image, (173, 184)).convert_alpha())
+                image = pygame.transform.scale(pygame.image.load(os.path.join(self.path_to_images, file_name)).convert_alpha(),(173, 184))
+                self.animation_frames.append(pygame.transform.scale_by(image, (1)).convert_alpha())
 
 
 
@@ -678,16 +649,16 @@ class Hourglass:
         self.animation_frames_blue = []
         for file_name in sorted(os.listdir(self.path_to_images)):
             if file_name.endswith(".png"):
-                image = pygame.image.load(os.path.join(self.path_to_images, file_name))
-                self.animation_frames_blue.append(pygame.transform.scale(image, (173, 184)).convert_alpha())
+                image = pygame.transform.scale(pygame.image.load(os.path.join(self.path_to_images, file_name)).convert_alpha(),(173, 184))
+                self.animation_frames_blue.append(pygame.transform.scale_by(image, (1)).convert_alpha())
 
         self.nation_color = "purple"
         self.path_to_images = f"texture/ui/klepsydra/klepsydra_{self.nation_color}"
         self.animation_frames_purple = []
         for file_name in sorted(os.listdir(self.path_to_images)):
             if file_name.endswith(".png"):
-                image = pygame.image.load(os.path.join(self.path_to_images, file_name))
-                self.animation_frames_purple.append(pygame.transform.scale(image, (173, 184)).convert_alpha())
+                image = pygame.transform.scale(pygame.image.load(os.path.join(self.path_to_images, file_name)).convert_alpha(),(173, 184))
+                self.animation_frames_purple.append(pygame.transform.scale_by(image, (1)).convert_alpha())
 
 
         self.nation_color = "yellow"
@@ -695,9 +666,18 @@ class Hourglass:
         self.animation_frames_yellow = []
         for file_name in sorted(os.listdir(self.path_to_images)):
             if file_name.endswith(".png"):
-                image = pygame.image.load(os.path.join(self.path_to_images, file_name))
-                self.animation_frames_yellow.append(pygame.transform.scale(image, (173, 184)).convert_alpha())
+                image = pygame.transform.scale(pygame.image.load(os.path.join(self.path_to_images, file_name)).convert_alpha(),(173, 184))
+                self.animation_frames_yellow.append(pygame.transform.scale_by(image, (1)).convert_alpha())
 
+
+        
+        self.hourglass_rect = self.animation_frames_yellow[0].get_rect()
+        self.hourglass_rect.bottom = self.screen.get_rect().bottom-10
+        self.hourglass_rect.left = self.screen.get_rect().left+10
+        
+        self.action_rect = self.action.get_rect()
+        self.action_rect.midbottom = self.hourglass_rect.midtop
+        self.action_rect.y -= 8
 
 
         self.frame_index = 0
@@ -779,6 +759,7 @@ class Hourglass:
                     self.last_frame_time = pygame.time.get_ticks()
                 elif player.wyb == False:
                     player.wyb = True
+                    Decision.Active = True
                     self.next_frame()
                     self.last_frame_time = pygame.time.get_ticks()
                 
@@ -794,16 +775,19 @@ class Hourglass:
             self.last_frame_time = current_time
 
 
-
+# poprawic
 class Decision:
+    Active = False
     def __init__(self, screen: pygame.Surface, map, player):
 
         self.SCREEN_WIDTH = screen.get_size()[0] - 256
         self.SCREEN_HEIGHT = screen.get_size()[1]
-        self.background_image = pygame.image.load('texture/ui/turn/tlo_wybor.png').convert_alpha()
+        self.background_image = pygame.transform.scale_by(pygame.image.load('texture/ui/turn/tlo_wybor.png').convert_alpha(),(SCREEN_HEIGHT/720))
         self.army_button = pygame.image.load("texture/ui/turn/wojsko_button.png").convert_alpha()
         self.gold_button = pygame.image.load("texture/ui/turn/zloto_button.png").convert_alpha()
         self.field_button = pygame.image.load("texture/ui/turn/zajmij_button.png").convert_alpha()
+        self.army_button_gray = pygame.transform.smoothscale(pygame.image.load("texture/ui/turn/wojsko_button_szare.png").convert_alpha(),(297,83))
+        self.gold_button_gray = pygame.transform.smoothscale(pygame.image.load("texture/ui/turn/zloto_button_szare.png").convert_alpha(),(297,83))
         self.screen = screen
         self.map = map
 
@@ -816,7 +800,9 @@ class Decision:
 
         self.bacground_rect = self.background_image.get_rect(center=(self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2))
         self.gold_rect = self.gold_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, SCREEN_HEIGHT*0.32))
+        self.gold_rect_gray = self.gold_button_gray.get_rect(midtop=(self.SCREEN_WIDTH / 2, SCREEN_HEIGHT * 0.32))
         self.army_rect = self.army_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, SCREEN_HEIGHT*0.46))
+        self.army_rect_gray = self.army_button_gray.get_rect(midtop=(self.SCREEN_WIDTH / 2, SCREEN_HEIGHT * 0.46))
         self.field_rect = self.field_button.get_rect(midtop=(self.SCREEN_WIDTH / 2, SCREEN_HEIGHT*0.60))
 
         self.screen.blit(self.gold_button, self.gold_rect)
@@ -834,38 +820,104 @@ class Decision:
             if player.wyb:
                 player.camera_stop = True
                 self.screen.blit(self.background_image, self.bacground_rect)
-                self.screen.blit(self.gold_button, self.gold_rect)
-                self.screen.blit(self.army_button, self.army_rect)
                 self.screen.blit(self.field_button, self.field_rect)
+                if  player.gold_count_bonus == -10:
+
+                    self.screen.blit(self.gold_button_gray, self.gold_rect_gray)
+                else:
+                    self.screen.blit(self.gold_button, self.gold_rect)
+
+                if player.army_count_bonus == -10:
+                    self.screen.blit(self.army_button_gray,self.army_rect_gray)
+                else:
+                    self.screen.blit(self.army_button, self.army_rect)
+
 
     def click(self, player):
         colision = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
-        if self.gold_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
-            SOUND.button_sound_money.play()
-            player.wyb = False
-            player.camera_stop = False
-            player.gold_count += 10 + player.gold_count_bonus
-            player.confirm = True
-            player.field_bonus = 0
 
-        if self.army_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
-            SOUND.button_sound_army.play()
-            player.wyb = False
-            player.camera_stop = False
-            player.army_count += 10 + player.army_count_bonus
-            player.confirm = True
-            player.field_bonus = 0
+        if player.gold_count_bonus == -10 and player.army_count_bonus == -10:
+            if self.field_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+                SOUND.button_sound_field.play()
+                player.wyb = False
+                player.camera_stop = False
+                player.turn_stop = True
+                self.fchoice.check()
+                player.field_status = True
+                player.player_hex_status = True
+                pygame.time.Clock().tick(3)
 
-        if self.field_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
-            SOUND.button_sound_field.play()
-            player.wyb = False
-            player.camera_stop = False
-            player.turn_stop = True
-            self.fchoice.check()
-            player.field_status = True
-            player.player_hex_status = True
-            pygame.time.Clock().tick(3)
+        elif player.nacja == "nomadzi" and player.gold_count_bonus == -10:
+            
+            if self.field_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+                SOUND.button_sound_field.play()
+                player.wyb = False
+                player.camera_stop = False
+                player.turn_stop = True
+                self.fchoice.check()
+                player.field_status = True
+                player.player_hex_status = True
+                pygame.time.Clock().tick(3)
+
+            if self.army_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+                SOUND.button_sound_army.play()
+                player.wyb = False
+                player.camera_stop = False
+                player.army_count += 10 + player.army_count_bonus
+                player.confirm = True
+                player.field_bonus = 0
+                Decision.Active = False
+        elif player.nacja == "nomadzi" and player.army_count_bonus == -10:
+
+
+            if self.field_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+                SOUND.button_sound_field.play()
+                player.wyb = False
+                player.camera_stop = False
+                player.turn_stop = True
+                self.fchoice.check()
+                player.field_status = True
+                player.player_hex_status = True
+                pygame.time.Clock().tick(3)
+
+            if self.gold_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+                SOUND.button_sound_money.play()
+                player.wyb = False
+                player.camera_stop = False
+                player.gold_count += 10 + player.gold_count_bonus
+                player.confirm = True
+                player.field_bonus = 0
+                Decision.Active = False
+
+        else:
+            if self.gold_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+                SOUND.button_sound_money.play()
+                player.wyb = False
+                player.camera_stop = False
+                player.gold_count += 10 + player.gold_count_bonus
+                player.confirm = True
+                player.field_bonus = 0
+                Decision.Active = False
+
+            if self.army_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+                SOUND.button_sound_army.play()
+                player.wyb = False
+                player.camera_stop = False
+                player.army_count += 10 + player.army_count_bonus
+                player.confirm = True
+                player.field_bonus = 0
+                Decision.Active = False
+
+            if self.field_rect.collidepoint(colision) and mouse_pressed[0] and player.wyb:
+                SOUND.button_sound_field.play()
+                player.wyb = False
+                player.camera_stop = False
+                player.turn_stop = True
+                self.fchoice.check()
+                player.field_status = True
+                player.player_hex_status = True
+                pygame.time.Clock().tick(3)
 
 
 class FieldUpdate:
@@ -986,7 +1038,7 @@ class FieldUpdate:
             self.sprites[d].field_add = True
             if not player.player_name is self.sprites[d].playerable:
                 self.sprites[d].playerable += [player.player_name]
-                print(self.sprites[d].playerable)
+                # print(self.sprites[d].playerable)
 
         if not self.sprites[e].zajete :
 
@@ -1050,7 +1102,7 @@ class FieldChoice:
                                                       i.polozenie_hex_y + Camera.camera_y])
 
 
-
+# jeszcze surowce
 class SideMenu:
 
     def __init__(self, screen: pygame.Surface):
@@ -1070,19 +1122,23 @@ class SideMenu:
         self.texture_main_yellow = "texture/ui/side_bar/yellow/sideUI.png"
         self.texture_main_purple = "texture/ui/side_bar/purple/sideUI.png"
 
-        self.main_surfarce = pygame.image.load(self.texture_main).convert_alpha()
-        self.main_surface_red = pygame.image.load(self.texture_main_red).convert_alpha()
-        self.main_surface_yellow = pygame.image.load(self.texture_main_yellow).convert_alpha()
-        self.main_surface_purple = pygame.image.load(self.texture_main_purple).convert_alpha()
+        self.main_surfarce = pygame.transform.smoothscale(
+            pygame.image.load(self.texture_main).convert_alpha(),(SCREEN_WIDTH*0.20,SCREEN_HEIGHT-30))
+        self.main_surface_red = pygame.transform.smoothscale(
+            pygame.image.load(self.texture_main_red).convert_alpha(),(SCREEN_WIDTH*0.20,SCREEN_HEIGHT-30))
+        self.main_surface_yellow = pygame.transform.smoothscale(
+        pygame.image.load(self.texture_main_yellow).convert_alpha(),(SCREEN_WIDTH*0.20,SCREEN_HEIGHT-30))
+        self.main_surface_purple = pygame.transform.smoothscale(
+            pygame.image.load(self.texture_main_purple).convert_alpha(),(SCREEN_WIDTH*0.20,SCREEN_HEIGHT-30))
 
         self.button_surfarce = pygame.transform.smoothscale(
-            pygame.image.load(self.texture_button_build).convert_alpha(), (236, 68))
+            pygame.image.load(self.texture_button_build).convert_alpha(), (SCREEN_WIDTH*0.185,SCREEN_HEIGHT*0.094))
         self.button_resource_surfarce = pygame.transform.smoothscale(
-            pygame.image.load(self.texture_button_resource).convert_alpha(), (236, 68))
+            pygame.image.load(self.texture_button_resource).convert_alpha(), (SCREEN_WIDTH*0.185,SCREEN_HEIGHT*0.094))
 
-        self.main_rect = self.main_surfarce.get_rect(topleft=(self.SCREEN_WIDTH - 256, 30))
-        self.button_rect = self.button_surfarce.get_rect(topleft=(self.SCREEN_WIDTH - 246, 258 + 100))
-        self.button_resource_rect = self.button_surfarce.get_rect(topleft=(self.SCREEN_WIDTH - 246, 258))
+        self.main_rect = self.main_surfarce.get_rect(topleft=(SCREEN_WIDTH - self.main_surfarce.get_width(), 30))
+        self.button_resource_rect = self.button_surfarce.get_rect(topleft=(SCREEN_WIDTH - SCREEN_WIDTH*0.193, SCREEN_HEIGHT*0.395))
+        self.button_rect = self.button_surfarce.get_rect(topleft=(SCREEN_WIDTH - SCREEN_WIDTH*0.193, SCREEN_HEIGHT*0.36 + SCREEN_HEIGHT*0.138))
         self.screen = screen
 
         #####
@@ -1114,19 +1170,19 @@ class SideMenu:
         self.surowce_icons.append(self.cereal_icon_surface)
 
         ####
-        self.main_surface = pygame.Surface((256, self.SCREEN_HEIGHT - 30), pygame.SRCALPHA)
+        self.main_surface = pygame.Surface((SCREEN_WIDTH*0.20,SCREEN_HEIGHT-30), pygame.SRCALPHA)
         self.main_surface.blit(self.main_surfarce, (0, 0))
-        self.main_surface.blit(self.button_surfarce, (10, 335))
-        self.main_surface.blit(self.button_resource_surfarce, (10, 253))
+        self.main_surface.blit(self.button_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.48))
+        self.main_surface.blit(self.button_resource_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.37))
 
-        self.main_surface_red.blit(self.button_surfarce, (10, 335))
-        self.main_surface_red.blit(self.button_resource_surfarce, (10, 253))
+        self.main_surface_red.blit(self.button_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.48))
+        self.main_surface_red.blit(self.button_resource_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.37))
 
-        self.main_surface_yellow.blit(self.button_surfarce, (10, 335))
-        self.main_surface_yellow.blit(self.button_resource_surfarce, (10, 253))
+        self.main_surface_yellow.blit(self.button_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.48))
+        self.main_surface_yellow.blit(self.button_resource_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.37))
 
-        self.main_surface_purple.blit(self.button_surfarce, (10, 335))
-        self.main_surface_purple.blit(self.button_resource_surfarce, (10, 253))
+        self.main_surface_purple.blit(self.button_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.48))
+        self.main_surface_purple.blit(self.button_resource_surfarce, (self.main_surface.get_width()*0.04, self.main_surface.get_height()*0.37))
 
         ####
 
@@ -1138,7 +1194,7 @@ class SideMenu:
         self.screen.blit(self.font_opis_s, (x, y))
 
     def surowce_staty_blituj(self, player):
-        x = self.SCREEN_WIDTH - 210
+        x = self.SCREEN_WIDTH - self.SCREEN_WIDTH * 210/1280
         y = 67
         for i in range(len(player.surowce_ilosc)):
             self.surowce_staty(x, y, f"{player.surowce_ilosc[i][2]} {player.surowce_ilosc[i][1]}")
@@ -1161,7 +1217,6 @@ class SideMenu:
 
         self.surowce_staty(self.SCREEN_WIDTH - 190, 47, f"{player.player_name}:")
         self.surowce_staty_blituj(player)
-
 
 # EVENTY
 class EventMenagment:
@@ -1187,7 +1242,7 @@ class EventMenagment:
         self.events.append(najemnicy)
         ruiny = Event(self.screen, opis_ruiny, self.ruiny, 2, select_ruiny, "Ruiny", self, 0, 25, "Ruiny")
         self.events.append(ruiny)
-        eliksir = Event(self.screen, opis_eliksir, "texture/Events/eliksir", 3, select_eliksir, "Eliksir", self, 200, 0,
+        eliksir = Event(self.screen, opis_eliksir, "texture/Events/eliksir.png", 3, select_eliksir, "Eliksir", self, 200, 0,
                         "Wędrowiec i Eliksir")
         self.events.append(eliksir)
         turniej = Event(self.screen, opis_turniej, self.turniej, 3, select_turniej, "Turniej", self, 100, 1,
@@ -1433,8 +1488,8 @@ class Event:
     def turniej_udzial(self, managment):
         if self.Wybor == 0:
             x = random.randint(0, 100)
-            print("x = ", x)
-            print("chance add =", managment.turniej_udzial_chance)
+            # print("x = ", x)
+            # print("chance add =", managment.turniej_udzial_chance)
             if x + managment.turniej_udzial_chance > 90:
                 Result = EventResults(result_turniej_udzial[0], self.ekran, self.managment)
                 managment.add_result(Result)
@@ -1562,19 +1617,21 @@ class EventResults:
 
     def execute(self):
         self.managment.player.turn_stop = True
-        screen_x, screen_y = self.screen.get_size()
+        screen_x, screen_y = SCREEN_WIDTH,SCREEN_HEIGHT
         background_rect = self.background_result.get_rect()
         background_x = (screen_x - background_rect.width) // 2
         background_y = (screen_y - background_rect.height) // 2
-        self.rect = pygame.draw.rect(self.screen, "red", (background_x + 30, background_y * 4.23, 369, 50))
-        self.screen.blit(self.background_result, (background_x, background_y))
+        background_rect.x =background_x
+        background_rect.y =background_y
+        self.rect = pygame.draw.rect(self.screen, "red", (background_x + background_rect.width*0.059, background_y+background_rect.height*0.80, 369, 50),2)
+        self.screen.blit(self.background_result, background_rect)
 
         odstep = -60
 
         for linia in self.opis_linie:
             tekst = self.font.render(linia, True, 'white')
 
-            self.screen.blit(tekst, (background_x * 1.08, background_y * 2 + odstep))
+            self.screen.blit(tekst, (background_rect.left +35, background_rect.y +110 + odstep))
             odstep += 20
 
         collision = pygame.mouse.get_pos()
@@ -1615,6 +1672,7 @@ class ResourceSell:
         self.fish_texture = pygame.image.load("texture/ui/Resources/rybba.png")
         self.wood_texture = pygame.image.load("texture/ui/Resources/drewno.png")
         self.grain_texture = pygame.image.load("texture/ui/Resources/zboze.png")
+        self.close_button = pygame.transform.smoothscale(pygame.image.load('texture/ui/building/CheckBoxFalse.png').convert_alpha(),(40,35))
 
         self.resource_start()
 
@@ -1636,17 +1694,27 @@ class ResourceSell:
         self.Resource_List.append(fish)
         grain = Resource(20, self.grain_texture, self.up_arrow, self.down_arrow, self.button, self.player)
         self.Resource_List.append(grain)
-
+        
+        
+        
+        self.close_button_rect = pygame.Rect(0,0,40,35)
     def draw(self):
         if ResourceSell.active:
             background_rect = self.background.get_rect()
+
             background_rect.center = self.screen_rect.center
             self.screen.blit(self.background, background_rect)
+            
+            self.close_button_rect = pygame.Rect(0,0,40,35)
+            self.close_button_rect.top = background_rect.top+25
+            self.close_button_rect.right = background_rect.right-25
+            self.screen.blit(self.close_button, self.close_button_rect)
+            
             for i in range(len(self.Resource_List)):
                 self.Resource_List[i].player = self.player
 
             for i in range(len(self.Resource_List)):
-                self.Resource_List[i].draw(self.screen, 300, 150 + 60 * i)
+                self.Resource_List[i].draw(self.screen, background_rect.left+ 25, background_rect.top+77 + 60 * i)
                 self.Resource_List[i].check()
 
 
@@ -1658,7 +1726,9 @@ class Resource:
         self.ID = Resource.ID - 1
         self.prize = prize
         self.font = pygame.font.Font(None, 30)
+        self.font2 = pygame.font.SysFont("Cabri",18)
         self.prize_text = self.font.render("Cena : " + str(prize), True, "white")
+        self.bonus_text = self.font2.render("                           +30%", True, "green")
         self.count = 0
         self.player = player
         self.graphics = graphics
@@ -1672,10 +1742,15 @@ class Resource:
         self.sell_rect = self.sell_button.get_rect()
 
     def draw(self, screen, x, y):
+
+
         self.y = y
         self.x = x
         screen.blit(self.graphics, (self.x, self.y))
         screen.blit(self.prize_text, (self.x + 175, self.y + 15))
+        if self.player.nacja == "kupcy":
+            screen.blit(self.bonus_text, (self.x + 175, self.y ))
+
         self.up_rect = self.up_arrow.get_rect()  # Zaktualizowanie wartości self.up_rect
         self.up_rect.topleft = (self.x + 290, self.y)  # Przesunięcie prostokąta na odpowiednie współrzędne
         screen.blit(self.up_arrow, self.up_rect.topleft)  # Rysowanie self.up_arrow zaktualizowanym prostokątem

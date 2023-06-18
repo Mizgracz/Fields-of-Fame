@@ -25,7 +25,7 @@ frame_rate = 60
 animation_frame_interval = 5
 flags = DOUBLEBUF | (pygame.FULLSCREEN if FULLSCREEN_SWITCH else 0)
 screen = pygame.display.set_mode(res, flags, 32)
-max_tps = 6000
+max_tps = 100
 
 folder_path = "save"
 if not os.path.exists(folder_path):
@@ -54,6 +54,7 @@ def fps():
 class Game:
     def __init__(self):
         pygame.init()
+        self.screen = screen
         while not Menu.new_game :
             self.start_menu = Menu(screen, clock, max_tps)  # wyświetlanie i obsługa menu
         
@@ -62,33 +63,48 @@ class Game:
 
         # budynki
         allbuilding1 = [
+            BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 100, 10, 0),
             BuildingItem("Targowisko","Targowisko (+20 złota na turę)",'buddynki_targowisko.png',300,20,0),
-            BuildingItem("Karczma","Karczma (+ 10 złota na ture)",'buddynki_karczma_krita.png',100,10,0),
-            BuildingItem("Koszary","Koszary (+20 wojska na turę)",'buddynki_koszary_krita.png',300,0,20),
-            BuildingItem("Kowal","Kowal  (+10 wojska na turę)",'boddynki_kowal.png',100,10,0),
-            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
-            BuildingItem("Bank", "TEST 101  (+100000 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
+            BuildingItem("Bank", "Bank  (+30 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
+            BuildingItem("Szlaki Handlowe", "Szlaki Handlowe  (+50 złota na turę)", 'szlak handlowy.png', 2000, 50, 0),
+            BuildingItem("Kowal","Kowal  (+10 wojska na turę)",'boddynki_kowal.png',100,0,10),
+            BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 300, 0, 20),
+            BuildingItem("Mury", "  (+30 wojska na turę)", 'mury.png', 1000, 0, 30),
+            BuildingItem("Twierdza", "Twierdza  (+50 wojska na turę)", 'buddynki_twierdza.png', 2000, 0, 50),
+
         ]
         allbuilding2 = [
-            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 300, 20, 0),
             BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 100, 10, 0),
+            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 300, 20, 0),
+            BuildingItem("Bank", "Bank  (+30 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
+            BuildingItem("Szlaki Handlowe", "Szlaki Handlowe  (+50 złota na turę)", 'szlak handlowy.png', 2000, 50, 0),
+            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 100, 0, 10),
             BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 300, 0, 20),
-            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 100, 10, 0),
-            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
+            BuildingItem("Mury", "  (+30 wojska na turę)", 'mury.png', 1000, 0, 30),
+            BuildingItem("Twierdza", "Twierdza  (+50 wojska na turę)", 'buddynki_twierdza.png', 2000, 0, 50),
+
         ]
         allbuilding3 = [
-            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 300, 20, 0),
             BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 100, 10, 0),
+            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 300, 20, 0),
+            BuildingItem("Bank", "Bank  (+30 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
+            BuildingItem("Szlaki Handlowe", "Szlaki Handlowe  (+50 złota na turę)", 'szlak handlowy.png', 2000, 50, 0),
+            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 100, 0, 10),
             BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 300, 0, 20),
-            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 100, 10, 0),
-            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
+            BuildingItem("Mury", "  (+30 wojska na turę)", 'mury.png', 1000, 0, 30),
+            BuildingItem("Twierdza", "Twierdza  (+50 wojska na turę)", 'buddynki_twierdza.png', 2000, 0, 50),
+
         ]
         allbuilding4 = [
-            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 300, 20, 0),
             BuildingItem("Karczma", "Karczma (+ 10 złota na ture)", 'buddynki_karczma_krita.png', 100, 10, 0),
+            BuildingItem("Targowisko", "Targowisko (+20 złota na turę)", 'buddynki_targowisko.png', 300, 20, 0),
+            BuildingItem("Bank", "Bank  (+30 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
+            BuildingItem("Szlaki Handlowe", "Szlaki Handlowe  (+50 złota na turę)", 'szlak handlowy.png', 2000, 50, 0),
+            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 100, 0, 10),
             BuildingItem("Koszary", "Koszary (+20 wojska na turę)", 'buddynki_koszary_krita.png', 300, 0, 20),
-            BuildingItem("Kowal", "Kowal  (+10 wojska na turę)", 'boddynki_kowal.png', 100, 10, 0),
-            BuildingItem("Bank", "Bank  (+100 złota na turę)", 'buddynki_bank_krita.png', 1000, 100, 0),
+            BuildingItem("Mury", "  (+30 wojska na turę)", 'mury.png', 1000, 0, 30),
+            BuildingItem("Twierdza", "Twierdza  (+50 wojska na turę)", 'buddynki_twierdza.png', 2000, 0, 50),
+
         ]
 
         self.allbuildingList = [allbuilding1, allbuilding2, allbuilding3, allbuilding4]
@@ -144,7 +160,7 @@ class Game:
             self.allevents.append(EventMenagment(screen, self.allplayers[e]))
             self.allevents[e].start_event_list()
             self.allbuildingmenu.append(BuildingMenu(screen,self.allbuildingList[e],screen.get_width()/2,500,int(0.25*screen.get_width()),int(0.2*screen.get_height())))
-            if self.allplayers[e].nacja == "kupcy":
+            if self.allplayers[e].nacja == "budowniczowie":
                 for i in self.allbuildingList[e]:
                     i.cost = i.cost - int(i.cost/100 * 30)
 
@@ -157,12 +173,17 @@ class Game:
 
         self.music_on = 1
         self.resource = ResourceSell(screen,self.currentplayer)
-        self.loadmenu = LoadMenu(screen, self)
+        
 
-        Buildings = []
-        for i in range(30):
-            Buildings.append(Item())
-        self.newSaveM = SaveMenu(screen,Buildings,SCREEN_WIDTH,SCREEN_HEIGHT)
+        SaveSlot = []
+        SaveSlot2 = []
+        for i in range(10):
+            SaveSlot.append(ItemSave())
+        for i in range(10):
+            SaveSlot2.append(ItemLoad())
+        
+        self.newSaveM = SaveMenu(screen,SaveSlot,SCREEN_WIDTH,SCREEN_HEIGHT)
+        self.loadmenu = LoadMenu(screen,SaveSlot2,SCREEN_WIDTH,SCREEN_HEIGHT)
 
 
 
@@ -180,6 +201,7 @@ class Game:
                     MenuPause.Active = True
                     BuildingMenu.active = False
                     ResourceSell.active = False
+                    self.currentplayer.turn_stop = True
                     
             if event.type == pygame.QUIT:
                     sys.exit(0)
@@ -197,21 +219,26 @@ class Game:
                     self.music_on = 1
             if SaveMenu.active:
                 self.newSaveM.handle_event(event,self)
+            if LoadMenu.active:
+                self.loadmenu.handle_event(event,self)
             else:
                 if BuildingMenu.active:
                     self.currentmenu.handle_event(event,self.currentplayer)
                 if self.sd.button_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
-                    BuildingMenu.active = not BuildingMenu.active
-                    if BuildingMenu.active:
-                        Stats.camera_stop = True
-                    else:
-                        Stats.camera_stop = False
+                    if not ResourceSell.active:
+                        BuildingMenu.active = not BuildingMenu.active
+                        if BuildingMenu.active:
+                            Stats.camera_stop = True
+                        else:
+                            Stats.camera_stop = False
                     pygame.time.Clock().tick(3)
-                if ResourceSell.active == True:
+                if ResourceSell.active == True :
                     if self.sd.button_resource_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
                         ResourceSell.active = False
+                    if self.resource.close_button_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
+                        ResourceSell.active = False
                 else:
-                    if self.sd.button_resource_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.sd.button_resource_rect.collidepoint(POZ) and event.type == pygame.MOUSEBUTTONDOWN and not BuildingMenu.active:
                         ResourceSell.active = True
         press = pygame.key.get_pressed()
         
@@ -221,85 +248,21 @@ class Game:
         if press[pygame.K_HOME]:
             Camera.player_camera_update(self.currentplayer)
 
-
-
-    def save_game(self):
-        folder_path = "save"
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-            print(f"Folder {folder_path} został utworzony.")
-
-        with open('save/map.csv', 'w') as savefile:
-            savefile.write('x;y;number;texture_index;verticles\n')
-            for h in self.map.sprites():
-                savefile.write(f'{h.polozenie_hex_x};{h.polozenie_hex_y};{h.number};{h.texture_index}')
-                savefile.write('\n')
-        with open('save/stats.txt', 'w') as savefile:
-
-            savefile.write(f'gold_count:{Stats.gold_count}\n')
-            savefile.write(f'army_count:{Stats.army_count}\n')
-            savefile.write(f'player_hex_status:{Stats.player_hex_status}\n')
-            savefile.write(f'army_count_bonus:{Stats.army_count_bonus}\n')
-            savefile.write(f'gold_count_bonus:{Stats.gold_count_bonus}\n')
-            savefile.write(f'turn_count:{Stats.turn_count}\n')
-        pygame.time.Clock().tick(1)
-        with zipfile.ZipFile("save/QSave.zip", "w") as zip:
-            zip.write("save/stats.txt")
-            zip.write("save/map.csv")
-        os.remove("save/stats.txt")
-        os.remove("save/map.csv")
-        pass
-        import gameplay
-        print('LoadGame')
-        import csv
-        with zipfile.ZipFile("save/QSave.zip", "r") as zip:
-            zip.extractall()
-        with open('save/map.csv', 'r') as savefile:
-            csvfile = csv.reader(savefile, delimiter=';')
-            i = -1
-            for row in csvfile:
-                if i != -1:
-                    self.map.allhex["hex", i].polozenie_hex_x = int(row[0])
-                    self.map.allhex["hex", i].polozenie_hex_y = int(row[1])
-                    self.map.allhex["hex", i].number = int(row[2])
-                    self.map.allhex["hex", i].texture_index = int(row[3])
-                    self.map.allhex["hex", i].zajete = (row[4])
-                    self.map.allhex['hex', i].update_texture()
-                i += 1
-
-            pass
-        with open('save/stats.txt', 'r') as savefile:
-            # csvfile = csv.reader(savefile,delimiter=':')
-            stats, col2 = [], []
-            for line in savefile:
-                stats += [line.strip().split(":")]
-
-            gameplay.build_stauts = bool(stats[0][1])
-            gameplay.build = bool(stats[1][1])
-            gameplay.gold_count = int(stats[2][1])
-            gameplay.army_count = int(stats[3][1])
-            gameplay.terrain_count = int(stats[4][1])
-            gameplay.wyb = bool(stats[5][1])
-            gameplay.player_hex_status = bool(stats[6][1])
-            gameplay.army_count_bonus = int(stats[7][1])
-            gameplay.gold_count_bonus = int(stats[8][1])
-            gameplay.turn_count = int(stats[9][1])
-
-        pygame.time.Clock().tick(1)
-        os.remove("save/stats.txt")
-        os.remove("save/map.csv")
-        pass
-
     def run(self):
 
         while True:
             while Menu.status:
                 self.start_menu.run()
-            while LoadMenu.status:
-                self.loadmenu.draw()
-                self.loadmenu.update()
+            while MenuSettings.Active:
+                self.start_menu.options.draw()
+            while LoadMenu.active:
+                screen.fill((128, 128, 128))
+                self.loadmenu.draw_menu()
+                self.handle_events()
+                pygame.display.flip()
+                clock.tick(max_tps)
             while SaveMenu.active:
-                screen.fill((128, 0, 0))
+                screen.fill((128, 50, 128))
                 self.newSaveM.draw_menu()
                 self.handle_events()
 
@@ -315,7 +278,7 @@ class Game:
             self.currentevent = self.allevents[Player.ID]
             self.currentmenu = self.allbuildingmenu[Player.ID]
             self.currentdec = self.alldec[Player.ID]
-            screen.fill((255, 255, 255))
+            screen.fill((0, 0, 0))
 
             self.handle_events()
             self.camera.mouse(self.size)
@@ -336,26 +299,34 @@ class Game:
             self.currentplayer.nomad_bonus(self.currentdec.fchoice)
             self.map.odkryj_pole(self.Fog)
             self.map.colision_detection_obwodka()
-            self.currentevent.random_event()
             self.map.rysuj_obwodke_i_zajete()
-
-            self.currentevent.check_result()
+            if Okno.active:
+                if Player.MAX == 1:
+                    Okno.active =False
+                else:
+                    self.okno1.draw(screen,self.currentplayer) 
+            if not Okno.active:
+                self.currentevent.random_event()
+                self.currentevent.check_result()
 
 
             self.up_bar.draw(self.currentplayer)
+
+            
             self.sd.draw(self.currentplayer)
             if BuildingMenu.active:
                 self.currentmenu.draw_menu()
-            if not BuildingMenu.active:
+            if not BuildingMenu.active and not ResourceSell.active:
                 self.currentdec.click(self.currentplayer)
 
             self.resource.update_player(self.currentplayer)
             self.resource.draw()
             self.klepsydra1.nation(self.currentplayer)
             self.klepsydra1.draw(self.currentplayer)
+            self.map.draw_text_box(self.Fog)
 
             if not BuildingMenu.active and not ResourceSell.active and not MenuPause.Active:
-                if not self.currentplayer.wyb:
+                if not self.currentplayer.wyb and not self.currentplayer.turn_stop:
                     self.klepsydra1.turn(self.currentplayer)
                 if self.currentplayer.wyb and self.currentevent.results == []:
                     self.currentdec.draw(self.currentplayer)
@@ -363,8 +334,8 @@ class Game:
             if MenuPause.Active:
                 Stats.camera_stop = True
                 self.pause_menu.draw()
-            if Okno.active:
-                self.okno1.draw(screen,self.currentplayer)
+                self.currentplayer.turn_stop = False
+            
             fps()
             pygame.display.flip()
             clock.tick(max_tps)
