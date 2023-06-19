@@ -544,10 +544,10 @@ class UpBar:
     def __init__(self, screen: pygame.Surface):
         
         ########
-        FONT_NAME = 'timesnewroman'
+        FONT_NAME = 'Times New Roman'
         FONT_SIZE = 17
         self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
-
+        self.font2 = pygame.font.SysFont(FONT_NAME, 12)
         ########
         self.bar = pygame.Surface((SCREEN_WIDTH, 30))
         self.up_bar_surface = pygame.Surface((SCREEN_WIDTH, 30))
@@ -581,14 +581,18 @@ class UpBar:
         self.update(player)
 
     def update(self, player):
-        money_score = self.font.render("Ilość Złota: " + str(player.gold_count), True, "white")
-        army_score = self.font.render("Ilość Wojska: " + str(player.army_count), True, "white")
-        tiles_score = self.font.render("Ilość Posiadanych Pól: " + str(player.terrain_count), True, "white")
+        money_score = self.font.render(" Ilość Złota: " + str(player.gold_count), True, "white")
+        army_score = self.font.render(" Ilość Wojska: " + str(player.army_count), True, "white")
+        tiles_score = self.font.render(" Ilość Posiadanych Pól: " + str(player.terrain_count), True, "white")
         turn_score = self.font.render("Tura: " + str(player.turn_count), True, "white")
+        money_income = self.font2.render("(+" + str(player.gold_count_bonus +10) + ")", True, "white")
+        army_income =  self.font2.render("(+" + str(player.army_count_bonus +10) + ")", True, "white")
 
-        self.screen.blit(money_score, (SCREEN_WIDTH*0.017, 2))
-        self.screen.blit(army_score, (SCREEN_WIDTH*0.17, 2))
-        self.screen.blit(tiles_score, (SCREEN_WIDTH*0.32, 2))
+        self.screen.blit(money_score, (SCREEN_WIDTH*0.017, 3))
+        self.screen.blit(money_income, (SCREEN_WIDTH * 0.12, 1))
+        self.screen.blit(army_score, (SCREEN_WIDTH*0.17, 5))
+        self.screen.blit(army_income, (SCREEN_WIDTH * 0.27, 1))
+        self.screen.blit(tiles_score, (SCREEN_WIDTH*0.32, 3))
         self.screen.blit(turn_score, (SCREEN_WIDTH*0.86, 4))
 
 
@@ -1215,7 +1219,7 @@ class SideMenu:
         if player.nacja == "nomadzi":
             self.screen.blit(self.main_surface_yellow, self.main_rect)
 
-        self.surowce_staty(self.SCREEN_WIDTH - 190, 47, f"{player.player_name}:")
+        self.surowce_staty(self.SCREEN_WIDTH - 160, 44, f"{player.player_name}:")
         self.surowce_staty_blituj(player)
 
 # EVENTY
