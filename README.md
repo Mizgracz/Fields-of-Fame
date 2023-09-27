@@ -71,6 +71,8 @@ Maciej Bielenichin (Mizgracz):
 - Balance of gameplay
 - Resolution scaling
 - Making a tutorial
+
+
 Lucyferiusz: https://github.com/Lucyferiusz
 - Save and Load
 - Multiplayer gameplay
