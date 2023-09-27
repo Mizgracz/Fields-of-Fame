@@ -1,14 +1,56 @@
-# Fields of Fame
 
-Turn-based Strategy Game
+<h1 align="center">
 
-How to run ?
+<br>
 
-In the current version run the main file in the future will be an .exe file
+<p align="center">
+<img src="https://i.imgur.com/53mx1d6.png"  alt="Logo">
+</p>
+
+<br>
+
+<br>
+
+</h1>
+
+<h4 align="center">Fields Of Fame</h4>
+
+
+## Project Overview 🎉
+
+Fields of Fame is a turn-based strategy game.
+hot-seat mode for up to 4 players
 
 
 
-credits
+## Screenshots 📺
+
+<p align="center">
+    <img src="https://i.imgur.com/3bnBqMs.png" alt="Screenshot">
+</p>
+
+<p align="center">
+    <img src="https://i.imgur.com/zC7lFcn.png" alt="Screenshot">
+</p>
+
+<p align="center">
+    <img src="https://i.imgur.com/yYbHPj2.png" alt="Screenshot">
+</p>
+
+
+## How to run 💾
+
+Just open Fields of Fame.exe file or main.py using python
+
+## Tech/framework used 🔧
+
+| Tech                                                    | Description                              |
+| ------------------------------------------------------- | ---------------------------------------- |
+| [Python](X)                           |Python is a high-level, general-purpose programming language. |
+| [Pygame](X)                           | is a cross-platform set of Python modules designed for writing video games. It includes computer graphics and sound libraries designed to be used with the Python programming language.|
+
+
+## Credits :trophy:
 
 Maciej Bielenichin (Mizgracz):
 - Idea and concept of the game
@@ -64,3 +106,5 @@ During the development of this project, we used the following resources:
 - MartianMono-Regular and PirataOne-Regular fonts
 
 
+
+## License 🔱
