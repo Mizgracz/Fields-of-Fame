@@ -241,6 +241,7 @@ class MapGenerator(pygame.sprite.Group):
         ]
         for x in range(Player.MAX):
             t = 2
+
             if self.players[x].nacja == "kupcy":
                 t = 3
             if self.players[x].nacja == "wojownicy":
@@ -681,6 +682,11 @@ class MapGenerator(pygame.sprite.Group):
                 self.text_color = (0, 0, 0)
 
             FONT_SIZE = 24
+            from menu import  SCREEN_WIDTH
+            if SCREEN_WIDTH == 1920:
+                FONT_SIZE = 34
+
+
             FONT_NAME = 'fonts/PirataOne-Regular.ttf'
             self.text_font = pygame.font.Font(FONT_NAME, FONT_SIZE)
 
@@ -711,7 +717,7 @@ class MapGenerator(pygame.sprite.Group):
             text_y = self.text_box_rect.y + (self.text_box_rect.height - sum(line_heights)) // 2
 
 
-            pygame.draw.rect(self.screen, self.text_box_color, self.text_box_rect, 2)
+
 
 
             for line_surface, line_height in zip(line_surfaces, line_heights):

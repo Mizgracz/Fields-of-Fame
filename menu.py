@@ -8,7 +8,7 @@ import pygame
 
 from gameplay import *
 
-
+SAVE = False
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 MAP_SIZE = 30
@@ -25,6 +25,7 @@ SOUND_VOLUME = int(config.get('Ustawienia','sound'))/100
 flags = pygame.DOUBLEBUF | (pygame.FULLSCREEN if FULLSCREEN_SWITCH else 0)
 pygame.mixer.init()
 
+
 class SOUND:
 
     button_sound = pygame.mixer.Sound('sound/click.mp3')
@@ -40,7 +41,11 @@ class SOUND:
     sound_slice = pygame.mixer.Sound('music/music_ambient/slice.mp3')
     button_sound_save= pygame.mixer.Sound('music/music_ambient/save.mp3')
     button_sound_load = pygame.mixer.Sound('music/music_ambient/load.mp3')
+    wood_sound = pygame.mixer.Sound("music/music_ambient/wood.mp3")
+    sound_click = pygame.mixer.Sound("sound/click.mp3")
 
+
+    sound_click.set_volume(SOUND_VOLUME)
     slide_sound.set_volume(SOUND_VOLUME)
     button_sound_save.set_volume(SOUND_VOLUME)
     button_sound_load.set_volume(SOUND_VOLUME)
@@ -54,6 +59,7 @@ class SOUND:
     button_sound_money.set_volume(SOUND_VOLUME)
     button_sound_army.set_volume(SOUND_VOLUME)
     button_sound_field.set_volume(SOUND_VOLUME)
+    wood_sound.set_volume(SOUND_VOLUME)
 
     button_sound_channel = pygame.mixer.Channel(1)
     button_sound_channel2 = pygame.mixer.Channel(2)
@@ -204,7 +210,7 @@ class SOUND:
 
 class Menu:
     status = True
-    
+    SAVE_START = False
     new_game = False
     PLAYER_NATION = []
     
@@ -215,13 +221,43 @@ class Menu:
         self.clock = clock
         self.max_tps = max_tps
         Menu.status = True
-        
+
         self.font = pygame.font.Font(None, 48)
+        versize = 12
+        self.font_space_x = 100
+        self.font_space_y = 40
+
+        if SCREEN_WIDTH == 1920:
+            versize = 17
+            self.font_space_x = 110
+            self.font_space_y = 40
+
+        if SCREEN_WIDTH == 1366:
+            versize = 14
+            self.font_space_x = 100
+            self.font_space_y = 40
+        self.fontver = pygame.font.Font('fonts/MartianMono-Regular.ttf', versize)
+
+        self.textver = self.fontver.render("Ver 1.0", True, (255, 255, 255))
         self.new_game_rect = pygame.Rect(SCREEN_WIDTH / 2 - 528, SCREEN_HEIGHT / 2 +10 , 255, 55)
         self.load_rect = pygame.Rect(SCREEN_WIDTH / 2 - 528, SCREEN_HEIGHT / 2 + 85, 255, 55)
         self.option_rect = pygame.Rect(SCREEN_WIDTH / 2 - 528, SCREEN_HEIGHT / 2 + 160, 255, 55)
         self.save_rect = pygame.Rect(SCREEN_WIDTH / 2 - 528, SCREEN_HEIGHT / 2 + 120, 255, 55)
         self.quit_rect = pygame.Rect(SCREEN_WIDTH / 2 - 528, SCREEN_HEIGHT / 2 + 235, 255, 55)
+        if SCREEN_WIDTH == 1920:
+            self.new_game_rect = pygame.Rect(SCREEN_WIDTH / 2 - 728, SCREEN_HEIGHT / 2 + 10, 255, 55)
+            self.load_rect = pygame.Rect(SCREEN_WIDTH / 2 - 728, SCREEN_HEIGHT / 2 + 85, 255, 55)
+            self.option_rect = pygame.Rect(SCREEN_WIDTH / 2 - 728, SCREEN_HEIGHT / 2 + 160, 255, 55)
+            self.save_rect = pygame.Rect(SCREEN_WIDTH / 2 - 728, SCREEN_HEIGHT / 2 + 120, 255, 55)
+            self.quit_rect = pygame.Rect(SCREEN_WIDTH / 2 - 728, SCREEN_HEIGHT / 2 + 235, 255, 55)
+        if SCREEN_WIDTH == 1366:
+            self.new_game_rect = pygame.Rect(SCREEN_WIDTH / 2 - 549, SCREEN_HEIGHT / 2 + 10, 255, 55)
+            self.load_rect = pygame.Rect(SCREEN_WIDTH / 2 - 549, SCREEN_HEIGHT / 2 + 85, 255, 55)
+            self.option_rect = pygame.Rect(SCREEN_WIDTH / 2 - 549, SCREEN_HEIGHT / 2 + 160, 255, 55)
+            self.save_rect = pygame.Rect(SCREEN_WIDTH / 2 - 549, SCREEN_HEIGHT / 2 + 120, 255, 55)
+            self.quit_rect = pygame.Rect(SCREEN_WIDTH / 2 - 549, SCREEN_HEIGHT / 2 + 235, 255, 55)
+
+
         self.background_texture = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/background.png").convert(), (SCREEN_WIDTH, SCREEN_HEIGHT))
         self.new_game_button_texture = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/graj_button.png").convert_alpha(),(339 * 0.769,81*0.75))
         self.new_game_marked_button_texture = pygame.transform.smoothscale(
@@ -242,6 +278,15 @@ class Menu:
         self.PLAYER_COUNT = PLAYER_COUNT
         self.PLAYER_NAME = PLAYER_NAME
 
+        x = -11
+
+        SaveSlot2 = []
+
+        for x in range(10):
+            SaveSlot2.append(ItemLoad())
+
+        self.load = LoadMenu(self.screen,SaveSlot2,SCREEN_WIDTH,SCREEN_HEIGHT)
+        ItemLoad.itemId = 0
         self.options = MenuSettings(self.screen)
         self.run()
 
@@ -254,6 +299,15 @@ class Menu:
         for event in self.event:
             while MenuSettings.Active:
                 self.options.draw()
+            if LoadMenu.active:
+                ItemLoad.itemId = 0
+                self.load.handle_event(event, self)
+            if LoadMenu.active:
+                self.screen.fill((128,128,128))
+                self.load.draw_menu()
+
+                pygame.display.flip()
+
             pos = pygame.mouse.get_pos()
             if event.type == pygame.QUIT:
                 Menu.status = False
@@ -292,7 +346,7 @@ class Menu:
                     SOUND.button_sound.play()
 
 
-                    # print("new game")
+
                     return 'new_game'
 
 
@@ -313,52 +367,62 @@ class Menu:
                     
                     LoadMenu.active = True
                     Menu.status = False
-                    # print('load')
+
                     return 'load_game'
                 elif self.save_rect.collidepoint(pos)  and not self.config1.Active:
                     Menu.status = False
 
-                    # print('save')
+
                     return 'save_game'
                 elif self.option_rect.collidepoint(pos)  and not self.config1.Active:
                     SOUND.button_sound.play()
                     MenuSettings.Active = True
                     Menu.status = False
 
-                    # print("OPCJE")
+
 
                     return 'game_options'
 
     def draw(self):
 
         pos = pygame.mouse.get_pos()
-        self.screen.blit(self.background_texture, (0, 0))
-        if self.load_rect.collidepoint(pos):
-            self.screen.blit(self.load_marked_button_texture, self.load_rect)
-        else:
-            self.screen.blit(self.load_button_texture, self.load_rect)
+        if not self.load.active :
+            self.screen.blit(self.background_texture, (0, 0))
+            self.screen.blit(self.textver, (SCREEN_WIDTH -self.font_space_x,SCREEN_HEIGHT-self.font_space_y))
 
-        if self.option_rect.collidepoint(pos):
-            self.screen.blit(self.option_marked_button_texture, self.option_rect)
-        else:
-            self.screen.blit(self.option_button_texture, self.option_rect)
+            if self.load_rect.collidepoint(pos):
+                self.screen.blit(self.load_marked_button_texture, self.load_rect)
+            else:
+                self.screen.blit(self.load_button_texture, self.load_rect)
 
-        if self.new_game_rect.collidepoint(pos):
-            button_texture = self.new_game_marked_button_texture
-            
+            if self.option_rect.collidepoint(pos):
+                self.screen.blit(self.option_marked_button_texture, self.option_rect)
+            else:
+                self.screen.blit(self.option_button_texture, self.option_rect)
 
-        else:
-            button_texture = self.new_game_button_texture
+            if self.new_game_rect.collidepoint(pos):
+                button_texture = self.new_game_marked_button_texture
 
-        self.screen.blit(button_texture, self.new_game_rect)
 
-        if self.quit_rect.collidepoint(pos):
-            quit_texture = self.quit_marked_button_texture
-        else:
-            quit_texture = self.quit_button_texture
-        self.screen.blit(quit_texture, self.quit_rect)
+            else:
+                button_texture = self.new_game_button_texture
 
-        pygame.display.flip()
+            self.screen.blit(button_texture, self.new_game_rect)
+
+            if self.quit_rect.collidepoint(pos):
+                quit_texture = self.quit_marked_button_texture
+            else:
+                quit_texture = self.quit_button_texture
+            self.screen.blit(quit_texture, self.quit_rect)
+
+            if Menu.SAVE_START == True :
+                self.font2 = pygame.font.Font('fonts/PirataOne-Regular.ttf', 36)
+                self.screen.fill("black")
+                self.screen.blit(self.font2.render("LOADING ...", True, '#ffffff'), (
+                    (SCREEN_WIDTH - self.font2.render("LOADING ...", True, '#ffffff').get_width()) / 2,
+                    (SCREEN_HEIGHT / 2)))
+
+            pygame.display.flip()
 
     def run(self):
 
@@ -378,7 +442,7 @@ class Menu:
                 LoadMenu.status = True
                 Menu.status = False
             if choice == 'save_game':
-                SaveMenu.active = True
+                # SaveMenu.active = True
                 Menu.status = False
             if choice == 'game_options':
                 MenuSettings.Active = True
@@ -426,7 +490,7 @@ class InputBox:
         if event.type == pygame.KEYDOWN:
             if self.active:
                 if event.key == pygame.K_RETURN:
-                    # print(self.text)
+
 
                     self.active = False
                 elif event.key == pygame.K_BACKSPACE:
@@ -501,6 +565,7 @@ class NumberBox:
                 if pygame.Rect.collidepoint(self.button_inc, mouse_pos):
                     if self.value != 4:
                         PLAYER_COUNT = self.increment()
+
 
 class OptionBox():
 
@@ -763,43 +828,105 @@ class NationSelect:
         self.box_purple = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/player_box_purple.png"),
                                                 (347 / 1.2, 52 / 1.2))
 
-        self.opis_box = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/Opis_box.png"),(169/(100/75),61/(100/75)))
-        self.statystki_box = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/statystyki_box.png"),
-                                                     (169 / (100 / 75), 61 / (100 / 75)))
 
-        self.opis_box_select = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/Opis_box_select.png"),
-                                                     (169 / (100 / 75), 61 / (100 / 75)))
-        self.statystki_box_select = pygame.transform.smoothscale(
-            pygame.image.load("texture/main_menu/nation/statystyki_box_select.png"),
-            (169 / (100 / 75), 61 / (100 / 75)))
+
+
+
+        if SCREEN_WIDTH == 1920:
+            self.opis_box = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/Opis_box.png"),
+                                                         (169 / (100 / 109), 61 / (100 / 100)))
+
+            self.statystki_box = pygame.transform.smoothscale(
+                pygame.image.load("texture/main_menu/nation/statystyki_box.png"),
+                (169 / (100 / 109), 61 / (100 / 100)))
+
+            self.opis_box_select = pygame.transform.smoothscale(
+                pygame.image.load("texture/main_menu/nation/Opis_box_select.png"),
+                (169 / (100 / 109), 61 / (100 / 100)))
+
+            self.opis_box_select = pygame.transform.smoothscale(
+                pygame.image.load("texture/main_menu/nation/Opis_box_select.png"),
+                (169 / (100 / 109), 61 / (100 / 100)))
+            self.statystki_box_select = pygame.transform.smoothscale(
+                pygame.image.load("texture/main_menu/nation/statystyki_box_select.png"),
+                (169 / (100 / 109), 61 / (100 / 100)))
+
+            self.merchant = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/kupiec.png"),
+                                                         (536 / (100 / 110), 626 / (100 / 120)))
+            self.warior = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/wojownik2.png"),
+                                                       (536 / (100 / 110), 626 / (100 / 120)))
+            self.nomad = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/nomad.png"),
+                                                      (536 / (100 / 110), 626 / (100 / 120)))
+            self.budowniczowie = pygame.transform.smoothscale(
+                pygame.image.load("texture/main_menu/nation/budowniczy.png"),
+                (536 / (100 / 110), 626 / (100 / 120)))
+            self.opis = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/opis.png"),
+                                                     (336 / (100 / 110), 626 / (100 / 120)))
+
+            self.font_opis = pygame.font.Font(None, 26)
+            self.left = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/arrow_left.png"),
+                                                     (110 / (100 / 75), 374 / (100 / 100)))
+            self.right = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/arrow_right.png"),
+                                                      (110 / (100 / 75), 374 / (100 / 100)))
+
+            self.right_HOV = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/right_HOV.png"),
+                                                          (110 / (100 / 75), 374 / (100 / 100)))
+
+            self.left_HOV = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/left_HOV.png"),
+                                                         (110 / (100 / 75), 374 / (100 / 100)))
+
+
+
+
+        else:
+
+            self.opis_box = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/Opis_box.png"),(169/(100/75),61/(100/75)))
+
+            self.statystki_box = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/statystyki_box.png"),
+                                                         (169 / (100 / 75), 61 / (100 / 75)))
+
+            self.opis_box_select = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/Opis_box_select.png"),
+                                                         (169 / (100 / 75), 61 / (100 / 75)))
+            self.statystki_box_select = pygame.transform.smoothscale(
+                pygame.image.load("texture/main_menu/nation/statystyki_box_select.png"),
+                (169 / (100 / 75), 61 / (100 / 75)))
+            self.merchant = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/kupiec.png"),
+                                                         (536 / (100 / 75), 626 / (100 / 80)))
+            self.warior = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/wojownik2.png"),
+                                                       (536 / (100 / 75), 626 / (100 / 80)))
+            self.nomad = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/nomad.png"),
+                                                      (536 / (100 / 75), 626 / (100 / 80)))
+            self.budowniczowie = pygame.transform.smoothscale(
+                pygame.image.load("texture/main_menu/nation/budowniczy.png"),
+                (536 / (100 / 75), 626 / (100 / 80)))
+
+            self.opis = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/opis.png"),
+                                                     (336 / (100 / 75), 626 / (100 / 80)))
+
+            self.font_opis = pygame.font.Font(None, 20)
+            self.left = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/arrow_left.png"),
+                                                     (83 / (100 / 75), 374 / (100 / 75)))
+            self.right = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/arrow_right.png"),
+                                                      (83 / (100 / 75), 374 / (100 / 75)))
+
+            self.right_HOV = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/right_HOV.png"),
+                                                          (83 / (100 / 75), 374 / (100 / 75)))
+
+            self.left_HOV = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/left_HOV.png"),
+                                                         (83 / (100 / 75), 374 / (100 / 75)))
+
+
 
         self.box_color_lists = [self.box_purple,self.box_red,self.box_yellow,self.box_blue]
         self.box_texture = self.box
         self.box_rect = self.box.get_rect()
-        self.merchant = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/kupiec.png"),(536/(100/75),626/(100/80)))
-        self.warior = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/wojownik2.png"),(536/(100/75),626/(100/80)))
-        self.nomad = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/nomad.png"),
-                                                   (536 / (100 / 75), 626 / (100 / 80)))
-        self.budowniczowie = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/budowniczy.png"),
-                                                  (536 / (100 / 75), 626 / (100 / 80)))
 
+        self.font = pygame.font.Font(None, 32)
 
-        self.opis = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/opis.png"),(336/(100/75),626/(100/80)))
-        self.font_opis = pygame.font.Font(None, 20)
-        self.left = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/arrow_left.png"),
-                                                 (83 / (100 / 75), 374 / (100 / 75)))
-        self.right = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/arrow_right.png"),
-                                                 (83 / (100 / 75), 374 / (100 / 75)))
-
-        self.right_HOV =  pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/right_HOV.png"),
-                                                 (83 / (100 / 75), 374 / (100 / 75)))
-
-        self.left_HOV = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/nation/left_HOV.png"),
-                                                 (83 / (100 / 75), 374 / (100 / 75)))
 
         self.screen = screen
         self.nation_pick = False
-        self.font = pygame.font.Font(None, 32)
+
         self.font_wladcy = pygame.font.Font(None, 42)
         self.name = self.font.render(name, True, (255, 255, 255))
         self.name_pick = self.font.render(name,True,(13, 207, 1))
@@ -811,6 +938,9 @@ class NationSelect:
         self.screen_width, self.screen_height = self.screen.get_size()
         self.box_rect.x = x + (start_width - self.box_rect.width) / 2
         self.box_rect.y = y
+
+
+
 
         self.name_rect = self.box_rect.copy()
         self.name_rect.x += 10
@@ -828,6 +958,8 @@ class NationSelect:
         self.nation_rect = self.merchant.get_rect()
         self.nation_rect.left = self.left_rect.right + self.right_rect.width/8
         self.nation_rect.y = (SCREEN_HEIGHT-self.nation_rect.height)/2
+
+
 
         self.wladcy_rect = self.nation_rect.copy()
         self.wladcy_rect.y -= 80
@@ -848,6 +980,13 @@ class NationSelect:
         self.statystki_box_rect.x = self.opis_rect.x + self.opis_box_rect.width
         self.statystki_box_rect.y = self.opis_rect.y
         
+        if SCREEN_WIDTH == 1920:
+            self.nation_rect.y += 20
+            self.opis_rect.y += 20
+            self.statystki_box_rect.y += 20
+            self.opis_text_rect.y += 20
+            self.opis_box_rect.y += 20
+
 
         self.right_rect.left = self.opis_rect.right + self.right_rect.width/2
         self.right_rect.y = (SCREEN_HEIGHT-self.right_rect.height)/2
@@ -887,6 +1026,7 @@ class NationSelect:
                self.screen.blit(self.budowniczowie, self.nation_rect)
        else:
            self.screen.blit(self.name, self.name_rect)
+
     def opis_draw(self):
 
         if self.opis_select == 0:
@@ -895,6 +1035,8 @@ class NationSelect:
 
             for opis in opisy:
                 self.font_opis = pygame.font.Font(None, 20)
+                if SCREEN_WIDTH == 1920:
+                    self.font_opis = pygame.font.Font(None, 27)
                 self.screen.blit(self.font_opis.render(opis, True, (255, 255, 255)), (self.opis_text_rect.x, y))
                 y += self.font_opis.get_height()
         if self.opis_select == 1:
@@ -931,7 +1073,7 @@ class PlayerConfig:
         self.Player_count = Player_count
         self.input_boxes =[]
         for i in range(1,Player_count+1):
-            self.input_boxes.append(InputBox(SCREEN_WIDTH*0.46,223+(50*i),250,36))
+            self.input_boxes.append(InputBox(SCREEN_WIDTH*0.37,223+(50*i),250,36))
         self.run()
     def draw(self):
 
@@ -1027,9 +1169,11 @@ class MenuSettings:
         self.Button_Back_HOV =  pygame.transform.scale_by(pygame.image.load("texture/main_menu/config/wroc_do_menu_button.png"),0.9)
         self.Background = pygame.transform.smoothscale(pygame.image.load("texture/main_menu/config/nick_back.png"),(SCREEN_WIDTH,SCREEN_HEIGHT))
         self.zaznaczone = pygame.image.load("texture/main_menu/config/zaznaczone.png")
+        self.zaznaczone_h = pygame.image.load("texture/main_menu/config/mgla_wojny_button.png")
         self.niezaznaczone = pygame.image.load("texture/main_menu/config/niezaznaczone.png")
         self.zaznaczone_rect = self.zaznaczone.get_rect(topleft=(SCREEN_WIDTH*0.45, SCREEN_HEIGHT*0.57))
-
+        self.minus_h = pygame.image.load("texture/main_menu/config/minus_button.png").convert_alpha()
+        self.plus_h = pygame.image.load("texture/main_menu/config/plus_button.png")
         self.plus = pygame.image.load("texture/main_menu/config/plus.png")
         self.ramka_ilosc = pygame.image.load("texture/main_menu/config/ramka_ilosc.png")
         self.minus = pygame.image.load("texture/main_menu/config/minus.png")
@@ -1037,7 +1181,7 @@ class MenuSettings:
         self.mapBig = pygame.image.load("texture/main_menu/config/bigmap.png")
         self.mapMedium = pygame.image.load("texture/main_menu/config/mediummap.png")
         self.mapSmall = pygame.image.load("texture/main_menu/config/smallmap.png")
-        self.mapSmall_Rect = self.mapSmall.get_rect(topleft=(SCREEN_WIDTH*0.45, SCREEN_HEIGHT*0.27))
+        self.mapSmall_Rect = self.mapSmall.get_rect(topleft=(SCREEN_WIDTH*0.45, SCREEN_HEIGHT*0.25))
         self.mapMedium_Rect = self.mapMedium.get_rect(topleft= (self.mapSmall_Rect.right+15,self.mapSmall_Rect.top))
         self.mapBig_Rect = self.mapBig.get_rect(topleft= (self.mapMedium_Rect.right+15,self.mapSmall_Rect.top))
 
@@ -1056,8 +1200,11 @@ class MenuSettings:
         self.Button_Back_Rect = self.Button_Back.get_rect(topleft=(SCREEN_WIDTH*0.30, SCREEN_HEIGHT - 3*self.Button_Back.get_height()))
 
         self.font_file = pygame.font.Font('fonts/PirataOne-Regular.ttf', 36)
-        
+        font_name = pygame.sysfont.match_font('Arial', bold=False, italic=True)
+        self.font_info = pygame.font.Font(font_name, 22)
+
         self.text_size_screen = self.font_file.render('Rozmiar okna ', True, '#ffffff')
+        self.text_info = self.font_info.render('*Uwaga żeby zmiany rodzielczości zostały zastosowane wymagane jest zrestartowanie gry ! ', True, '#ffffff')
         self.text_volume = self.font_file.render('Muzyka', True, '#ffffff')
         self.text_fullscreen_on_off = self.font_file.render('Fullsceen', True, '#ffffff')
         self.text_sound = self.font_file.render('Dźwięk', True, '#ffffff')
@@ -1065,15 +1212,52 @@ class MenuSettings:
         self.text_1280x720 =  self.font_file.render('1280x720 ', True, '#ffffff','#000000')
         self.text_1366x768 =  self.font_file.render('1366x768 ', True, '#ffffff','#000000')
         self.text_1920x1080 =  self.font_file.render('1920x1080', True, '#ffffff','#000000')
-        
-        self.screen.blit(self.text_size_screen, (SCREEN_WIDTH*0.29, self.mapSmall_Rect.y))
+
+
         self.screen.blit(self.text_volume, (SCREEN_WIDTH*0.29, self.minus_rect.y))
         self.screen.blit(self.text_fullscreen_on_off, (SCREEN_WIDTH*0.29, self.zaznaczone_rect.y))
 
 
-        self.music_volume = NumberBox(self.screen,self.ramka_ilosc_rect.x,self.ramka_ilosc_rect.y,self.ramka_ilosc_rect.width,self.ramka_ilosc_rect.height,100,0,int(MUSIC_VOLUME*100))
-        self.sound_volume = NumberBox(self.screen,self.ramka_ilosc_rect2.x,self.ramka_ilosc_rect2.y+0,self.ramka_ilosc_rect2.width,self.ramka_ilosc_rect2.height,100,0,int(SOUND_VOLUME*100))
-        self.MapActive =[False,False,False]
+        self.music_volume = NumberBox(self.screen,self.ramka_ilosc_rect.x,self.ramka_ilosc_rect.y,self.ramka_ilosc_rect.width,self.ramka_ilosc_rect.height,10,0,int(MUSIC_VOLUME*100))
+        self.sound_volume = NumberBox(self.screen,self.ramka_ilosc_rect2.x,self.ramka_ilosc_rect2.y+0,self.ramka_ilosc_rect2.width,self.ramka_ilosc_rect2.height,10,0,int(SOUND_VOLUME*100))
+
+        # Tworzymy obiekt parsera konfiguracji
+        config = configparser.ConfigParser()
+
+        # Odczytujemy plik 'settings.ini'
+        config.read('settings.ini')
+
+
+        if 'Ustawienia' in config:
+
+            if 'width' in config['Ustawienia']:
+
+                width_value = config['Ustawienia']['width']
+
+
+                try:
+                    width_value = str(width_value)
+                except ValueError:
+                    pass
+
+
+            else:
+                print("Brak opcji 'width' w sekcji 'Ustawienia'")
+        else:
+            print("Brak sekcji 'Ustawienia' w pliku 'settings.ini'")
+
+        if width_value == "1280":
+            self.MapActive = [True, False, False]
+
+        elif width_value == "1366":
+            self.MapActive = [False, True, False]
+        elif width_value == "1920":
+            self.MapActive = [False, False, True]
+        else:
+            self.MapActive = [False, False, False]
+
+        self.info_flag = False
+
     def draw(self,):
         global FULLSCREEN_SWITCH
         global MUSIC_VOLUME
@@ -1131,7 +1315,7 @@ class MenuSettings:
 
                 if self.Button_Back_Rect.collidepoint(pos):
                     MenuSettings.Active = False
-                
+
                     
                 if self.zaznaczone_rect.collidepoint(pos):
                     FULLSCREEN_SWITCH = True if FULLSCREEN_SWITCH == False else False
@@ -1144,6 +1328,7 @@ class MenuSettings:
                     pygame.display.set_mode()
                     pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),flags)
                 if self.mapSmall_Rect.collidepoint(pos):
+                    self.info_flag = True
                     self.MapActive[0]=True
                     self.MapActive[1]=False
                     self.MapActive[2]=False
@@ -1157,6 +1342,7 @@ class MenuSettings:
                     # SCREEN_WIDTH,SCREEN_HEIGHT = 1280,720
                     # pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT),flags)
                 if self.mapMedium_Rect.collidepoint(pos):
+                    self.info_flag = True
                     self.MapActive[0]=False
                     self.MapActive[1]=True
                     self.MapActive[2]=False
@@ -1172,6 +1358,7 @@ class MenuSettings:
                     with open('settings.ini', 'w') as configfile:
                         config.write(configfile)
                 if self.mapBig_Rect.collidepoint(pos):
+                    self.info_flag = True
                     self.MapActive[0]=False
                     self.MapActive[1]=False
                     self.MapActive[2]=True
@@ -1188,47 +1375,77 @@ class MenuSettings:
                     # SCREEN_WIDTH,SCREEN_HEIGHT = 1920,1080
                     # pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT),flags)
 
-
         self.screen.blit(self.Background, (0, 0))
         if self.Button_Back_Rect.collidepoint(pos):
             self.screen.blit(self.Button_Back_HOV, self.Button_Back_Rect)
         else:
             self.screen.blit(self.Button_Back, self.Button_Back_Rect)
-        
-        self.screen.blit(self.minus, self.minus_rect)
-        self.screen.blit(self.ramka_ilosc, self.ramka_ilosc_rect)
-        self.screen.blit(self.plus, self.plus_rect)
-        
-        self.screen.blit(self.minus, self.minus_rect2)
-        self.screen.blit(self.ramka_ilosc, self.ramka_ilosc_rect2)
-        self.screen.blit(self.plus, self.plus_rect2)
 
+        if self.minus_rect.collidepoint(pos):
+            self.screen.blit(self.minus_h,self.minus_rect)
+        else:
+            self.screen.blit(self.minus, self.minus_rect)
+
+        self.screen.blit(self.ramka_ilosc, self.ramka_ilosc_rect)
+
+        if self.plus_rect.collidepoint(pos):
+            self.screen.blit(self.plus_h, self.plus_rect)
+        else:
+            self.screen.blit(self.plus, self.plus_rect)
         
+        if self.minus_rect2.collidepoint(pos):
+            self.screen.blit(self.minus_h, self.minus_rect2)
+        else:
+            self.screen.blit(self.minus, self.minus_rect2)
+
+        self.screen.blit(self.ramka_ilosc, self.ramka_ilosc_rect2)
+
+        if self.plus_rect2.collidepoint(pos):
+            self.screen.blit(self.plus_h, self.plus_rect2)
+        else:
+            self.screen.blit(self.plus, self.plus_rect2)
+
         
 
         if FULLSCREEN_SWITCH:
             self.screen.blit(self.zaznaczone, self.zaznaczone_rect)
+        elif self.zaznaczone_rect.collidepoint(pos):
+            self.screen.blit(self.zaznaczone_h, self.zaznaczone_rect)
         else:
             self.screen.blit(self.niezaznaczone, self.zaznaczone_rect)
-        self.screen.blit(self.text_1920x1080,self.mapBig_Rect)
-        self.screen.blit(self.text_1366x768,self.mapMedium_Rect)
-        self.screen.blit(self.text_1280x720,self.mapSmall_Rect)
+
+        self.res1280 = pygame.image.load("texture/main_menu/config/1280x720_button.png").convert_alpha()
+        self.res1366 = pygame.image.load("texture/main_menu/config/1366x768_button.png").convert_alpha()
+        self.res1920 = pygame.image.load("texture/main_menu/config/1920x1080_button.png").convert_alpha()
+
+        self.res1280h = pygame.image.load("texture/main_menu/config/1280x720_button_hov.png").convert_alpha()
+        self.res1366h = pygame.image.load("texture/main_menu/config/1366x768_button_hov.png").convert_alpha()
+        self.res1920h = pygame.image.load("texture/main_menu/config/1920x1080_button_hov.png").convert_alpha()
+
+        self.screen.blit(self.res1920,self.mapBig_Rect)
+        self.screen.blit(self.res1366,self.mapMedium_Rect)
+        self.screen.blit(self.res1280,self.mapSmall_Rect)
 
 
         self.music_volume.draw()
         self.sound_volume.draw()
 
-        self.screen.blit(self.text_size_screen, (SCREEN_WIDTH*0.29, self.mapSmall_Rect.y))
+        self.screen.blit(self.text_size_screen, (SCREEN_WIDTH*0.29, self.mapSmall_Rect.y+13))
         self.screen.blit(self.text_volume, (SCREEN_WIDTH*0.29, self.minus_rect.y))
         self.screen.blit(self.text_sound, (SCREEN_WIDTH*0.29, self.minus_rect2.y))
         self.screen.blit(self.text_fullscreen_on_off, (SCREEN_WIDTH*0.29, self.zaznaczone_rect.y))
 
+
+
         if self.MapActive[0]:
-            pygame.draw.rect(self.screen,"#ff0000",self.mapSmall_Rect,2)
+            self.screen.blit(self.res1280h,self.mapSmall_Rect)
         if self.MapActive[1]:
-            pygame.draw.rect(self.screen,"#ff0000",self.mapMedium_Rect,2)
+            self.screen.blit(self.res1366h,self.mapMedium_Rect)
         if self.MapActive[2]:
-            pygame.draw.rect(self.screen,"#ff0000",self.mapBig_Rect,2)
+            self.screen.blit(self.res1920h,self.mapBig_Rect)
+
+        if self.info_flag:
+            self.screen.blit(self.text_info,(SCREEN_WIDTH*0.02, SCREEN_HEIGHT*0.95))
 
 
         pygame.display.update()
@@ -1357,6 +1574,11 @@ class Config:
 
         if SWITCH_FOG:
             self.screen.blit(self.zaznaczone, self.zaznaczone_rect)
+            font = pygame.font.Font('fonts/MartianMono-Regular.ttf', 12)
+            tekst = font.render("*funkcja eksperymentalna", True, (200,0,0))
+            x = self.zaznaczone_rect.x + 70
+            y = self.zaznaczone_rect.y + 10
+            self.screen.blit(tekst, (x, y))
         else:
             if self.zaznaczone_rect.collidepoint(pos):
                 self.screen.blit(self.fog_button_HOV, self.zaznaczone_rect)
@@ -1479,19 +1701,20 @@ class BuildingItem:
 
     def button_action(self, player, items):
         if self.cost <= player.gold_count:
+            SOUND.wood_sound.play()
             items.remove(self)
             self.button_image.fill('#00ff00')
             self.available = False
             self.button_text = self.FONT.render("Owned", True, (255, 255, 255))
-            # Może sie kiedyś przyda
+
             player.gold_count += self.cost * -1
             player.army_count += 0
-            #
+
             player.army_count_bonus += self.army_buff
             player.gold_count_bonus += self.gold_buff
             return True
         else:
-            # print('Brak złota')
+
             return False
 
         pass
@@ -1562,10 +1785,7 @@ class BuildingMenu:
             item_y = 0 + self.scrollbar_margin + (i - self.menu_top_item_index) * (
                         self.menu_item_height + self.item_spacing)
             item_rect = pygame.Rect(25, item_y, self.background.get_width() - 50, self.menu_item_height)
-            if item_rect.collidepoint(pygame.mouse.get_pos()):
-                # Zaznaczony przedmiot
-                pygame.draw.rect(self.background, (192, 192, 255), item_rect)
-            pygame.draw.rect(self.background, (20, 30, 100), item_rect, 1)
+
 
             item.draw(self.background, 25, item_y)
             # self.window.blit(font_surface, (self.menu_x + 4, item_y + 2))
@@ -1664,13 +1884,13 @@ class ItemSave:
         self.item_id = ItemSave.itemId
         self.name = name + str(self.item_id)
         self.image = pygame.Surface((90, 90))
-        self.image.fill('#ff00ff')
+        self.image.fill('#83857b')
 
         self.FONT = pygame.font.Font('fonts/PirataOne-Regular.ttf', 24)
         self.cost = random.randint(10,100)
         # self.font_surface = self.FONT.render(f"ID) {self.item_id}", True, (0, 0, 0))
         self.background = pygame.Surface((pygame.display.get_window_size()[0]/2,100-2))
-        self.background.fill((128,128,128))
+        self.background.fill((242, 252, 202))
         self.itemsurf = pygame.Surface((pygame.display.get_window_size()[0]/2-2,100),pygame.SRCALPHA)
 
         self.description = description+str(self.item_id)
@@ -1678,8 +1898,8 @@ class ItemSave:
 
         self.remove_rect = pygame.Rect(self.itemsurf.get_width() - 110, self.itemsurf.get_height() // 4 - 15, 100, 30)
         self.load_rect = pygame.Rect(self.itemsurf.get_width() - 110, self.itemsurf.get_height() // 2 + 15, 100, 30)
-        self.button_text = self.FONT.render("SAVE", True, (255, 255, 255))
-        self.button_text2 = self.FONT.render("REMOVE", True, (255, 255, 255))
+        self.button_text = self.FONT.render("ZAPISZ", True, (255, 255, 255))
+        self.button_text2 = self.FONT.render("SKASUJ", True, (255, 255, 255))
 
         self.image_width = self.image.get_width()
         self.decssurf_width = self.itemsurf.get_width() - self.image_width - self.remove_rect.width-25
@@ -1687,6 +1907,7 @@ class ItemSave:
         self.decssurf = pygame.Surface((self.decssurf_width, 91), pygame.SRCALPHA)
 
         self.button_image = pygame.Surface((self.remove_rect.width,self.remove_rect.height),SRCALPHA)
+        self.button2_image = pygame.Surface((self.remove_rect.width, self.remove_rect.height), SRCALPHA)
         gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
         if not os.path.exists(gameinfo_file):
             self.button_image.fill('#000000')
@@ -1733,9 +1954,11 @@ class ItemSave:
         gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
         if not os.path.exists(gameinfo_file):
             self.button_image.fill('#000000')
+            self.button2_image.fill('#000000')
         else:
-            self.button_image.fill('#00aa90')
-
+            # self.button_image.fill('#00aa90')
+            self.button_image.fill('#7ccc62')
+            self.button2_image.fill('#c21033')
         self.itemsurf.blit(self.background,(1,1))
         self.itemsurf.blit(self.image,(5,5))
         # self.itemsurf.blit(self.font_surface, (self.image.get_width()+9, 7))
@@ -1743,7 +1966,7 @@ class ItemSave:
         
 
         self.itemsurf.blit(self.button_image,self.remove_rect)
-        self.itemsurf.blit(self.button_image,self.load_rect)
+        self.itemsurf.blit(self.button2_image,self.load_rect)
 
 
         self.itemsurf.blit(self.button_text, (self.remove_rect.x + 10, self.remove_rect.y ))
@@ -1753,12 +1976,14 @@ class ItemSave:
     # from main import Game
     # def button_action(self,game:Game):
     def button_action2(self,game_data):
-        
+
+
         save_game_data = game_data
         tmp = [game_data.allplayers,
         game_data.allevents,
         game_data.allbuildingmenu]
-        # print(tmp)
+
+        SOUND.button_sound_save.play()
 
         with open('save/gameinfo.bin', 'wb') as f:
             from gameplay import Player,Camera
@@ -1896,6 +2121,7 @@ class SaveMenu:
         self.menu_item_height = 100
         self.menu_top_item_index = 0
         self.item_spacing = 20  # Odstęp między przedmiotami
+        self.background = pygame.transform.scale(pygame.image.load("image.png"),(self.window.get_width(),self.window.get_height())).convert_alpha()
 
         # Scrollbar settings
         self.scrollbar_width = 16
@@ -1908,12 +2134,14 @@ class SaveMenu:
         self.menu_x = 0  # Set the desired x-coordinate of the menu
         self.menu_y = 0  # Set the desired y-coordinate of the menu
 
-        self.back_rect = pygame.Rect(self.scrollbar_x-200,50,150,50)
+        self.back_rect = pygame.Rect(self.scrollbar_x-100,30,80,50)
         self.backtext = pygame.font.Font('fonts/PirataOne-Regular.ttf',30).render("BACK",True,(0,0,0))
         self.scrollbar_rect = pygame.Rect(0,0,0,0)
     def draw_menu(self):
         # Rysowanie menu (inne elementy pominięte dla uproszczenia)
-        
+
+        self.window.blit(self.background,(0,0))
+
         pygame.draw.rect(self.window,(255,255,0),self.back_rect)
         self.window.blit(self.backtext,self.back_rect)
         for i, item in enumerate(self.menu_items):
@@ -1923,7 +2151,7 @@ class SaveMenu:
                 # Zaznaczony przedmiot
                 pygame.draw.rect(self.window, (192, 192, 255), item_rect)
             pygame.draw.rect(self.window, (20, 30, 100), item_rect, 1)
-            
+
             item.draw(self.window, item_rect.x, item_y)
 
         # Scrollbar
@@ -1932,7 +2160,7 @@ class SaveMenu:
         # Calculate the position and height of the scrollbar thumb
         self.thumb_height = self.scrollbar_height / len(self.menu_items) * self.menu_items_per_page
         self.thumb_y = self.scrollbar_y + (self.menu_top_item_index / len(self.menu_items)) * self.scrollbar_height
-        
+
         # Draw the scrollbar thumb
         pygame.draw.rect(self.window, (192, 192, 192), (self.scrollbar_x, self.thumb_y, self.scrollbar_width, self.thumb_height))
     def handle_event(self, event,game):
@@ -1951,7 +2179,7 @@ class SaveMenu:
                         SaveMenu.active = False
                     if item_rect.collidepoint(mouse_pos)and item.available:
                         item.button_action2(game)
-                        # print('removed')
+
                     if item_rect2.collidepoint(mouse_pos)and item.available:
                         item.button_action(game)
                         
@@ -1997,30 +2225,31 @@ class SaveMenu:
 
 class ItemLoad:
     itemId = 0
-    
-    def __init__(self, name:str="",description:str="Zapis gry nr ", image:pygame.Surface=None, cost:int=0):
+
+    def __init__(self, name:str="",description:str="   Zapis gry nr ", image:pygame.Surface=None, cost:int=0):
+        self.wordexist = True
         self.available = True
         ItemLoad.itemId += 1
         self.item_id = ItemLoad.itemId
         self.name = name + str(self.item_id)
         self.image = pygame.Surface((90, 90))
         self.image.fill((255, 170, 20))
-
+        self.save_selected = False
         self.FONT = pygame.font.Font('fonts/PirataOne-Regular.ttf', 24)
         self.cost = random.randint(10,100)
         # self.font_surface = self.FONT.render(f"ID) {self.item_id}", True, (0, 0, 0))
-        self.background = pygame.Surface((pygame.display.get_window_size()[0]/2.1,100-2))
+        self.background = pygame.Surface((pygame.display.get_window_size()[0]/2.11,100-2))
         self.background.fill((0, 55, 107))
         self.itemsurf = pygame.Surface((pygame.display.get_window_size()[0]/2-2,100),pygame.SRCALPHA)
 
         self.description = description+str(self.item_id)
 
-
-        self.remove_rect = pygame.Rect(self.itemsurf.get_width() - 130, (self.itemsurf.get_height()-60) // 2 , 100, 60)
+        self.font = pygame.font.Font('fonts/PirataOne-Regular.ttf', 36)
+        self.remove_rect = pygame.Rect(self.itemsurf.get_width() - 150, (self.itemsurf.get_height()-60) // 2 , 100, 60)
         self.load_rect = pygame.Rect(self.itemsurf.get_width() - 130, (self.itemsurf.get_height()-60) // 2 , 100, 60)
         self.load_rect.right = self.remove_rect.left-30
-        self.remove_txt = self.FONT.render("REMOVE", True, (255, 255, 255))
-        self.load_txt = self.FONT.render("LOAD", True, (255, 255, 255))
+        self.remove_txt = self.FONT.render("   USUŃ", True, (255, 255, 255))
+        self.load_txt = self.FONT.render("WCZYTAJ", True, (255, 255, 255))
 
         self.image_width = self.image.get_width()
         self.decssurf_width = self.itemsurf.get_width() - self.image_width - self.remove_rect.width-25
@@ -2034,8 +2263,8 @@ class ItemLoad:
         else:
             self.button_image.fill('#00aa90')
 
-
-        self.draw_text(self.decssurf,self.description,self.FONT,(0,0,0),self.decssurf.get_rect())
+        decsurf_rect = self.decssurf.get_rect()
+        self.draw_text(self.decssurf,self.description,self.FONT,(0,0,0),decsurf_rect)
     def split_text(self,text:str, font:pygame.font, surface_width:int):
         words = text.split()
         lines = []
@@ -2064,7 +2293,7 @@ class ItemLoad:
         y = rect.y
         for line in lines:
             text_surface = font.render(line, True, color)
-            surface.blit(text_surface, (rect.x, y))
+            surface.blit(text_surface, (rect.x + 20, y))
             y += line_height
 
 
@@ -2088,350 +2317,363 @@ class ItemLoad:
 
 
         self.itemsurf.blit(self.remove_txt, (self.remove_rect.x + 15, self.remove_rect.y+15 ))
-        self.itemsurf.blit(self.load_txt, (self.load_rect.x + 30, self.load_rect.y+15))
+        self.itemsurf.blit(self.load_txt, (self.load_rect.x + 15, self.load_rect.y+15))
 
         window.blit(self.itemsurf, (x, y))
     
     def button_action(self,game):
-        import time
-        
-        gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
-        if not os.path.exists(gameinfo_file):
-            return 0
-        with open(f'save/save_{self.name}.bin', 'rb') as file_combined:
-            # Wczytaj dane
-            data = pickle.load(file_combined)
 
-        # Odzyskaj dane z słownika
-        gameinfo_data = data['gameinfo']
-        playerStats_data = data['playerStats']
-        HexRect_data = data['HexRect']
-        hexmap_data = data['hexmap']
+        try:
+            import time
 
-        # Wykonaj odpowiednie operacje na danych...
-        with open('save/gameinfo.bin', 'wb') as file_gameinfo:
-            file_gameinfo.write(gameinfo_data)
+            gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
+            if not os.path.exists(gameinfo_file):
+                return 0
+            with open(f'save/save_{self.name}.bin', 'rb') as file_combined:
+                # Wczytaj dane
+                data = pickle.load(file_combined)
 
-        with open('save/playerStats.csv', 'w') as file_playerStats:
-            file_playerStats.write(playerStats_data)
+            # Odzyskaj dane z słownika
+            gameinfo_data = data['gameinfo']
+            playerStats_data = data['playerStats']
+            HexRect_data = data['HexRect']
+            hexmap_data = data['hexmap']
 
-        with open('save/HexRect.csv', 'w') as file_HexRect:
-            file_HexRect.write(HexRect_data)
+            # Wykonaj odpowiednie operacje na danych...
+            with open('save/gameinfo.bin', 'wb') as file_gameinfo:
+                file_gameinfo.write(gameinfo_data)
 
-        with open('save/hexmap.csv', 'w') as file_hexmap:
-            file_hexmap.write(hexmap_data)
+            with open('save/playerStats.csv', 'w') as file_playerStats:
+                file_playerStats.write(playerStats_data)
 
-        from gameplay import Player,Camera
-        self.button_image.fill('#00aa90')
-        
-        with open('save/gameinfo.bin', 'rb') as f:
-            game.size = int(f.readline().decode().rstrip('\n'))
-            game.PlayerCount = int(f.readline().decode().rstrip('\n'))
-            game.Fog = True if str(f.readline().decode().rstrip('\n')) == 'True' else False
-            ID = int(f.readline().decode().rstrip('\n'))
-            MAX = int(f.readline().decode().rstrip('\n'))
-            castle_hex = eval(f.readline().decode().rstrip('\n'))
-            use_castle = eval(f.readline().decode().rstrip('\n'))
-            Camera.camera_x = int(f.readline().decode().rstrip('\n'))
-            Camera.camera_y = int(f.readline().decode().rstrip('\n'))
-        game.allplayers = []
-        time.sleep(1)
-        for _ in range(game.PlayerCount):
-            game.allplayers.append(Player('tmp','tmp'))
-        with open('save/playerStats.csv', 'r',encoding='utf-8') as csvfile:
-            reader = csv.reader(csvfile, delimiter=';')
-            next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
-            i = 0 
-            for row in reader:
-                player_name = row[0]
-                home = int(row[1])
-                home_x = int(row[2])
-                home_y = int(row[3])
-                nacja = row[4]
-                wyb = True if (row[5]) == 'True' else False
-                turn_stop = True if (row[6]) == 'True' else False
-                field_status = True if (row[7]) == 'True' else False
-                camera_stop = True if (row[8]) == 'True' else False
-                player_hex_status = True if (row[9]) == 'True' else False
-                atack_stop = True if (row[10]) == 'True' else False
-                attack_fail = True if (row[11]) == 'True' else False
-                gold_count = int(row[12])
-                army_count = int(row[13])
-                terrain_count = int(row[14])
-                turn_count = int(row[15])
-                army_count_bonus = int(row[16])
-                gold_count_bonus = int(row[17])
-                clay = int(row[18])
-                mine_diamonds = int(row[19])
-                mine_rocks = int(row[20])
-                mine_iron = int(row[21])
-                mine_gold = int(row[22])
-                fish_port = int(row[23])
-                grain = int(row[24])
-                resource_sell_bonus = int(row[25])
-                field_bonus = True if (row[26]) == 'True' else False
-                building_buy_bonus = int(row[27])
-                licznik = int(row[28])
-                barbarian_bonus = True if (row[29]) == 'True' else False
-                crypt_bonus = True if (row[30]) == 'True' else False
-                new_pick = True if (row[31]) == 'True' else False
-                game.allplayers[i].set_data(player_name, home, home_x, home_y, nacja, wyb, turn_stop, field_status, camera_stop, player_hex_status,
-                     atack_stop, attack_fail, gold_count, army_count, terrain_count, turn_count, army_count_bonus, gold_count_bonus,
-                     clay, mine_diamonds, mine_rocks, mine_iron, mine_gold, fish_port, grain, resource_sell_bonus,
-                     field_bonus, building_buy_bonus, licznik, barbarian_bonus, crypt_bonus, new_pick, MAX, ID,
-                use_castle, castle_hex)
-                i+=1
-                # Wykonaj operacje na odczytanych danych
-                # np. przypisz je do obiektów Player, wyświetl, itp.
-                LoadMenu.active = False
-        time.sleep(1)
-        
-                
-                
-        game.map.num_hex_x = game.size
-        game.map.num_hex_y = game.size
-        game.map.num_hex_all = game.size * game.size
-        game.map.num_hex_side = game.map.num_hex_y
-        game.map.num_hex_right_side = game.map.num_hex_x
-        game.map.all_zajete_surface = {}
+            with open('save/HexRect.csv', 'w') as file_HexRect:
+                file_HexRect.write(HexRect_data)
 
-        
+            with open('save/hexmap.csv', 'w') as file_hexmap:
+                file_hexmap.write(hexmap_data)
 
-        game.map.players = game.allplayers
-        for x in range(Player.MAX):
-            t = 2
-            if game.map.players[x].nacja == "wojownicy":
-                t = 0
-            if game.map.players[x].nacja == "nomadzi":
-                t = 1
-            if game.map.players[x].nacja == "kupcy":
-                t = 3
+            from gameplay import Player,Camera
+            self.button_image.fill('#00aa90')
 
-            game.map.all_zajete_surface[f'{game.map.players[x].player_name}'] = game.map.zajete[t]
-        
-        
-        game.alldec = []
-        
+            with open('save/gameinfo.bin', 'rb') as f:
+                game.size = int(f.readline().decode().rstrip('\n'))
+                game.PlayerCount = int(f.readline().decode().rstrip('\n'))
+                game.Fog = True if str(f.readline().decode().rstrip('\n')) == 'True' else False
+                ID = int(f.readline().decode().rstrip('\n'))
+                MAX = int(f.readline().decode().rstrip('\n'))
+                castle_hex = eval(f.readline().decode().rstrip('\n'))
+                use_castle = eval(f.readline().decode().rstrip('\n'))
+                Camera.camera_x = int(f.readline().decode().rstrip('\n'))
+                Camera.camera_y = int(f.readline().decode().rstrip('\n'))
+            game.allplayers = []
+            time.sleep(1)
+            for _ in range(game.PlayerCount):
+                game.allplayers.append(Player('tmp','tmp',game.size))
+            with open('save/playerStats.csv', 'r',encoding='utf-8') as csvfile:
+                reader = csv.reader(csvfile, delimiter=';')
+                next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
+                i = 0
+                for row in reader:
+                    player_name = row[0]
+                    home = int(row[1])
+                    home_x = int(row[2])
+                    home_y = int(row[3])
+                    nacja = row[4]
+                    wyb = True if (row[5]) == 'True' else False
+                    turn_stop = True if (row[6]) == 'True' else False
+                    field_status = True if (row[7]) == 'True' else False
+                    camera_stop = True if (row[8]) == 'True' else False
+                    player_hex_status = True if (row[9]) == 'True' else False
+                    atack_stop = True if (row[10]) == 'True' else False
+                    attack_fail = True if (row[11]) == 'True' else False
+                    gold_count = int(row[12])
+                    army_count = int(row[13])
+                    terrain_count = int(row[14])
+                    turn_count = int(row[15])
+                    army_count_bonus = int(row[16])
+                    gold_count_bonus = int(row[17])
+                    clay = int(row[18])
+                    mine_diamonds = int(row[19])
+                    mine_rocks = int(row[20])
+                    mine_iron = int(row[21])
+                    mine_gold = int(row[22])
+                    fish_port = int(row[23])
+                    grain = int(row[24])
+                    resource_sell_bonus = int(row[25])
+                    field_bonus = True if (row[26]) == 'True' else False
+                    building_buy_bonus = int(row[27])
+                    licznik = int(row[28])
+                    barbarian_bonus = True if (row[29]) == 'True' else False
+                    crypt_bonus = True if (row[30]) == 'True' else False
+                    new_pick = True if (row[31]) == 'True' else False
+                    game.allplayers[i].set_data(player_name, home, home_x, home_y, nacja, wyb, turn_stop, field_status, camera_stop, player_hex_status,
+                         atack_stop, attack_fail, gold_count, army_count, terrain_count, turn_count, army_count_bonus, gold_count_bonus,
+                         clay, mine_diamonds, mine_rocks, mine_iron, mine_gold, fish_port, grain, resource_sell_bonus,
+                         field_bonus, building_buy_bonus, licznik, barbarian_bonus, crypt_bonus, new_pick, MAX, ID,
+                    use_castle, castle_hex)
+                    i+=1
+                    # Wykonaj operacje na odczytanych danych
+                    # np. przypisz je do obiektów Player, wyświetl, itp.
+                    LoadMenu.active = False
+                    pygame.mixer.music.load("music/music_background/2.mp3")
+                    pygame.mixer.music.play(-1)
+                    pygame.mixer.music.set_volume(MUSIC_VOLUME)
 
-        game.allevents = []
-        game.allbuildingmenu =[]
-        from gameplay import Decision
-        for i in range(Player.MAX):
-            game.alldec.append(Decision(game.screen,game.map,game.allplayers[i]))
-        for p in range(len(game.allplayers)):
-            game.alldec[p].fupdate.start(game.allplayers[p])
+            time.sleep(1)
 
-        from gameplay import EventMenagment
-        for e in range(len(game.allplayers)):
-            game.allevents.append(EventMenagment(game.screen, game.allplayers[e]))
-            game.allevents[e].start_event_list()
-            game.allbuildingmenu.append(BuildingMenu(game.screen,game.allbuildingList[e],SCREEN_WIDTH/2,
-                                                     500,int(0.25*SCREEN_WIDTH),int(0.2*SCREEN_HEIGHT)))
-            if game.allplayers[e].nacja == "kupcy":
-                for i in game.allbuildingList[e]:
-                    i.cost = i.cost - int(i.cost/100 * 30)
 
-        game.currentplayer = game.allplayers[Player.ID]
-        game.currentevent = game.allevents[Player.ID]
-        game.currentmenu = game.allbuildingmenu[Player.ID]
-        game.currentdec = game.alldec[Player.ID]
-        
-        # game.map.allhex = {}
-        # game.map.allhex['hex',i] =  Hex((polozenie_hex_x), (polozenie_hex_y), i, game.map, False, False,False,False,-1)
-        import time
-        time.sleep(1)
-        gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
-        if not os.path.exists(gameinfo_file):
-            return 0
-        with open(f'save/save_{self.name}.bin', 'rb') as file_combined:
-            # Wczytaj dane
-            data = pickle.load(file_combined)
 
-        # Odzyskaj dane z słownika
-        gameinfo_data = data['gameinfo']
-        playerStats_data = data['playerStats']
-        HexRect_data = data['HexRect']
-        hexmap_data = data['hexmap']
+            game.map.num_hex_x = game.size
 
-        # Wykonaj odpowiednie operacje na danych...
-        with open('save/gameinfo.bin', 'wb') as file_gameinfo:
-            file_gameinfo.write(gameinfo_data)
+            game.map.num_hex_y = game.size
+            game.map.num_hex_all = game.size * game.size
+            game.map.num_hex_side = game.map.num_hex_y
+            game.map.num_hex_right_side = game.map.num_hex_x
+            game.map.all_zajete_surface = {}
 
-        with open('save/playerStats.csv', 'w') as file_playerStats:
-            file_playerStats.write(playerStats_data)
 
-        with open('save/HexRect.csv', 'w') as file_HexRect:
-            file_HexRect.write(HexRect_data)
 
-        with open('save/hexmap.csv', 'w') as file_hexmap:
-            file_hexmap.write(hexmap_data)
+            game.map.players = game.allplayers
+            for x in range(Player.MAX):
+                t = 2
+                if game.map.players[x].nacja == "wojownicy":
+                    t = 0
+                if game.map.players[x].nacja == "nomadzi":
+                    t = 1
+                if game.map.players[x].nacja == "kupcy":
+                    t = 3
 
-        from gameplay import Player,Camera
-        self.button_image.fill('#00aa90')
-        
-        with open('save/gameinfo.bin', 'rb') as f:
-            game.size = int(f.readline().decode().rstrip('\n'))
-            game.PlayerCount = int(f.readline().decode().rstrip('\n'))
-            game.Fog = True if str(f.readline().decode().rstrip('\n')) == 'True' else False
-            ID = int(f.readline().decode().rstrip('\n'))
-            MAX = int(f.readline().decode().rstrip('\n'))
-            castle_hex = eval(f.readline().decode().rstrip('\n'))
-            use_castle = eval(f.readline().decode().rstrip('\n'))
-            Camera.camera_x = int(f.readline().decode().rstrip('\n'))
-            Camera.camera_y = int(f.readline().decode().rstrip('\n'))
-        game.allplayers = []
-        time.sleep(1)
-        for _ in range(game.PlayerCount):
-            game.allplayers.append(Player('tmp','tmp'))
-        with open('save/playerStats.csv', 'r',encoding='utf-8') as csvfile:
-            reader = csv.reader(csvfile, delimiter=';')
-            next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
-            i = 0 
-            for row in reader:
-                player_name = row[0]
-                home = int(row[1])
-                home_x = int(row[2])
-                home_y = int(row[3])
-                nacja = row[4]
-                wyb = True if (row[5]) == 'True' else False
-                turn_stop = True if (row[6]) == 'True' else False
-                field_status = True if (row[7]) == 'True' else False
-                camera_stop = True if (row[8]) == 'True' else False
-                player_hex_status = True if (row[9]) == 'True' else False
-                atack_stop = True if (row[10]) == 'True' else False
-                attack_fail = True if (row[11]) == 'True' else False
-                gold_count = int(row[12])
-                army_count = int(row[13])
-                terrain_count = int(row[14])
-                turn_count = int(row[15])
-                army_count_bonus = int(row[16])
-                gold_count_bonus = int(row[17])
-                clay = int(row[18])
-                mine_diamonds = int(row[19])
-                mine_rocks = int(row[20])
-                mine_iron = int(row[21])
-                mine_gold = int(row[22])
-                fish_port = int(row[23])
-                
-                grain = int(row[24])
-                resource_sell_bonus = int(row[25])
-                field_bonus = True if (row[26]) == 'True' else False
-                building_buy_bonus = int(row[27])
-                licznik = int(row[28])
-                barbarian_bonus = True if (row[29]) == 'True' else False
-                crypt_bonus = True if (row[30]) == 'True' else False
-                new_pick = True if (row[30]) == 'True' else False
-                game.allplayers[i].set_data(player_name, home, home_x, home_y, nacja, wyb, turn_stop, field_status, camera_stop, player_hex_status,
-                     atack_stop, attack_fail, gold_count, army_count, terrain_count, turn_count, army_count_bonus, gold_count_bonus,
-                     clay, mine_diamonds, mine_rocks, mine_iron, mine_gold, fish_port, grain, resource_sell_bonus,
-                     field_bonus, building_buy_bonus, licznik, barbarian_bonus, crypt_bonus, new_pick, MAX, ID,
-                use_castle, castle_hex)
-                i+=1
-                # Wykonaj operacje na odczytanych danych
-                # np. przypisz je do obiektów Player, wyświetl, itp.
+                game.map.all_zajete_surface[f'{game.map.players[x].player_name}'] = game.map.zajete[t]
 
-        time.sleep(1)
-                
-                
-        game.map.num_hex_x = game.size
-        game.map.num_hex_y = game.size
-        game.map.num_hex_all = game.size * game.size
-        game.map.num_hex_side = game.map.num_hex_y
-        game.map.num_hex_right_side = game.map.num_hex_x
-        game.map.all_zajete_surface = {}
 
-        
+            game.alldec = []
 
-        game.map.players = game.allplayers
-        for x in range(Player.MAX):
-            t = 2
-            if game.map.players[x].nacja == "wojownicy":
-                t = 0
-            if game.map.players[x].nacja == "nomadzi":
-                t = 1
-            if game.map.players[x].nacja == "kupcy":
-                t = 3
 
-            game.map.all_zajete_surface[f'{game.map.players[x].player_name}'] = game.map.zajete[t]
-        
-        
-        game.alldec = []
-        
+            game.allevents = []
+            game.allbuildingmenu =[]
+            from gameplay import Decision
+            for i in range(Player.MAX):
+                game.alldec.append(Decision(game.screen,game.map,game.allplayers[i]))
+            for p in range(len(game.allplayers)):
+                game.alldec[p].fupdate.start(game.allplayers[p])
 
-        game.allevents = []
-        game.allbuildingmenu =[]
-        from gameplay import Decision
-        for i in range(Player.MAX):
-            game.alldec.append(Decision(game.screen,game.map,game.allplayers[i]))
-        for p in range(len(game.allplayers)):
-            game.alldec[p].fupdate.start(game.allplayers[p])
+            from gameplay import EventMenagment
+            for e in range(len(game.allplayers)):
+                game.allevents.append(EventMenagment(game.screen, game.allplayers[e]))
+                game.allevents[e].start_event_list()
+                game.allbuildingmenu.append(BuildingMenu(game.screen,game.allbuildingList[e],SCREEN_WIDTH/2,
+                                                         500,int(0.25*SCREEN_WIDTH),int(0.2*SCREEN_HEIGHT)))
+                if game.allplayers[e].nacja == "kupcy":
+                    for i in game.allbuildingList[e]:
+                        i.cost = i.cost - int(i.cost/100 * 30)
 
-        from gameplay import EventMenagment
-        for e in range(len(game.allplayers)):
-            game.allevents.append(EventMenagment(game.screen, game.allplayers[e]))
-            game.allevents[e].start_event_list()
-            game.allbuildingmenu.append(BuildingMenu(game.screen,game.allbuildingList[e],SCREEN_WIDTH/2,
-                                                     500,int(0.25*SCREEN_WIDTH),int(0.2*SCREEN_HEIGHT)))
-            if game.allplayers[e].nacja == "kupcy":
-                for i in game.allbuildingList[e]:
-                    i.cost = i.cost - int(i.cost/100 * 30)
+            game.currentplayer = game.allplayers[Player.ID]
+            game.currentevent = game.allevents[Player.ID]
+            game.currentmenu = game.allbuildingmenu[Player.ID]
+            game.currentdec = game.alldec[Player.ID]
 
-        game.currentplayer = game.allplayers[Player.ID]
-        game.currentevent = game.allevents[Player.ID]
-        game.currentmenu = game.allbuildingmenu[Player.ID]
-        game.currentdec = game.alldec[Player.ID]
-        
-        # game.map.allhex = {}
-        # game.map.allhex['hex',i] =  Hex((polozenie_hex_x), (polozenie_hex_y), i, game.map, False, False,False,False,-1)
-        from graphics import Hex
-        with open('save/hexmap.csv', 'r',encoding='utf-8') as csvfile:
-            reader = csv.reader(csvfile, delimiter=';')
-            next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
-            i = 0 
-            for row in reader:
-                polozenie_hex_x= int(row[0])
-                polozenie_hex_y= int(row[1])
-                number= int(row[2])
-                obwodka = True if row[3] == 'True' else False
-                zajete = True if row[4] == 'True' else False
-                odkryte  = True if row[5] == 'True' else False
-                field_add   = True if row[6] == 'True' else False
-                texture_index = int(row[7])
-                rodzaj= row[8]
-                rodzaj_surowca_var = row[9]
-                player= (row[10])  # Odczytanie jako listy, używając funkcji eval()
-                playerable = eval(row[11])  # Odczytanie jako listy, używając funkcji eval()
-                atack = eval(row[12])  # Odczytanie jako listy, używając funkcji eval()
-                
-                game.map.allhex['hex',i].data_update(polozenie_hex_x,polozenie_hex_y,number,
-                    obwodka,zajete,odkryte,field_add,texture_index,
-                    rodzaj,rodzaj_surowca_var,player,playerable,
-                    atack)
-                i+=1
-        time.sleep(1)
-        # ###########
-        
-        with open('save/HexRect.csv', 'r',encoding='utf-8') as csvfile:
-            reader = csv.reader(csvfile, delimiter=';')
-            next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
-            i = 0 
-            for row in reader:
-                x= int(row[0])
-                y= int(row[1])
-                w= int(row[2])
-                h= int(row[3])
-                game.map.set_allrect(i,x,y,w,h)
-                i+=1
-        time.sleep(1)
+            # game.map.allhex = {}
+            # game.map.allhex['hex',i] =  Hex((polozenie_hex_x), (polozenie_hex_y), i, game.map, False, False,False,False,-1)
+            import time
+            time.sleep(1)
+            gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
+            if not os.path.exists(gameinfo_file):
+                return 0
+            with open(f'save/save_{self.name}.bin', 'rb') as file_combined:
+                # Wczytaj dane
+                data = pickle.load(file_combined)
 
-        os.remove('save/gameinfo.bin')
-        os.remove('save/hexmap.csv')
-        os.remove('save/HexRect.csv')
-        os.remove('save/playerStats.csv')
-        
+            # Odzyskaj dane z słownika
+            gameinfo_data = data['gameinfo']
+            playerStats_data = data['playerStats']
+            HexRect_data = data['HexRect']
+            hexmap_data = data['hexmap']
 
-        pass
+            # Wykonaj odpowiednie operacje na danych...
+            with open('save/gameinfo.bin', 'wb') as file_gameinfo:
+                file_gameinfo.write(gameinfo_data)
 
+            with open('save/playerStats.csv', 'w') as file_playerStats:
+                file_playerStats.write(playerStats_data)
+
+            with open('save/HexRect.csv', 'w') as file_HexRect:
+                file_HexRect.write(HexRect_data)
+
+            with open('save/hexmap.csv', 'w') as file_hexmap:
+                file_hexmap.write(hexmap_data)
+
+            from gameplay import Player,Camera
+            self.button_image.fill('#00aa90')
+
+            with open('save/gameinfo.bin', 'rb') as f:
+                game.size = int(f.readline().decode().rstrip('\n'))
+                game.PlayerCount = int(f.readline().decode().rstrip('\n'))
+                game.Fog = True if str(f.readline().decode().rstrip('\n')) == 'True' else False
+                ID = int(f.readline().decode().rstrip('\n'))
+                MAX = int(f.readline().decode().rstrip('\n'))
+                castle_hex = eval(f.readline().decode().rstrip('\n'))
+                use_castle = eval(f.readline().decode().rstrip('\n'))
+                Camera.camera_x = int(f.readline().decode().rstrip('\n'))
+                Camera.camera_y = int(f.readline().decode().rstrip('\n'))
+            game.allplayers = []
+            time.sleep(1)
+            for _ in range(game.PlayerCount):
+                game.allplayers.append(Player('tmp','tmp',game.size))
+            with open('save/playerStats.csv', 'r',encoding='utf-8') as csvfile:
+                reader = csv.reader(csvfile, delimiter=';')
+                next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
+                i = 0
+                for row in reader:
+                    player_name = row[0]
+                    home = int(row[1])
+                    home_x = int(row[2])
+                    home_y = int(row[3])
+                    nacja = row[4]
+                    wyb = True if (row[5]) == 'True' else False
+                    turn_stop = True if (row[6]) == 'True' else False
+                    field_status = True if (row[7]) == 'True' else False
+                    camera_stop = True if (row[8]) == 'True' else False
+                    player_hex_status = True if (row[9]) == 'True' else False
+                    atack_stop = True if (row[10]) == 'True' else False
+                    attack_fail = True if (row[11]) == 'True' else False
+                    gold_count = int(row[12])
+                    army_count = int(row[13])
+                    terrain_count = int(row[14])
+                    turn_count = int(row[15])
+                    army_count_bonus = int(row[16])
+                    gold_count_bonus = int(row[17])
+                    clay = int(row[18])
+                    mine_diamonds = int(row[19])
+                    mine_rocks = int(row[20])
+                    mine_iron = int(row[21])
+                    mine_gold = int(row[22])
+                    fish_port = int(row[23])
+
+                    grain = int(row[24])
+                    resource_sell_bonus = int(row[25])
+                    field_bonus = True if (row[26]) == 'True' else False
+                    building_buy_bonus = int(row[27])
+                    licznik = int(row[28])
+                    barbarian_bonus = True if (row[29]) == 'True' else False
+                    crypt_bonus = True if (row[30]) == 'True' else False
+                    new_pick = True if (row[30]) == 'True' else False
+                    game.allplayers[i].set_data(player_name, home, home_x, home_y, nacja, wyb, turn_stop, field_status, camera_stop, player_hex_status,
+                         atack_stop, attack_fail, gold_count, army_count, terrain_count, turn_count, army_count_bonus, gold_count_bonus,
+                         clay, mine_diamonds, mine_rocks, mine_iron, mine_gold, fish_port, grain, resource_sell_bonus,
+                         field_bonus, building_buy_bonus, licznik, barbarian_bonus, crypt_bonus, new_pick, MAX, ID,
+                    use_castle, castle_hex)
+                    i+=1
+                    # Wykonaj operacje na odczytanych danych
+                    # np. przypisz je do obiektów Player, wyświetl, itp.
+
+            time.sleep(1)
+
+
+            game.map.num_hex_x = game.size
+            game.map.num_hex_y = game.size
+            game.map.num_hex_all = game.size * game.size
+            game.map.num_hex_side = game.map.num_hex_y
+            game.map.num_hex_right_side = game.map.num_hex_x
+            game.map.all_zajete_surface = {}
+
+
+
+            game.map.players = game.allplayers
+            for x in range(Player.MAX):
+                t = 2
+                if game.map.players[x].nacja == "wojownicy":
+                    t = 0
+                if game.map.players[x].nacja == "nomadzi":
+                    t = 1
+                if game.map.players[x].nacja == "kupcy":
+                    t = 3
+
+                game.map.all_zajete_surface[f'{game.map.players[x].player_name}'] = game.map.zajete[t]
+
+
+            game.alldec = []
+
+
+            game.allevents = []
+            game.allbuildingmenu =[]
+            from gameplay import Decision
+            for i in range(Player.MAX):
+                game.alldec.append(Decision(game.screen,game.map,game.allplayers[i]))
+            for p in range(len(game.allplayers)):
+                game.alldec[p].fupdate.start(game.allplayers[p])
+
+            from gameplay import EventMenagment
+            for e in range(len(game.allplayers)):
+                game.allevents.append(EventMenagment(game.screen, game.allplayers[e]))
+                game.allevents[e].start_event_list()
+                game.allbuildingmenu.append(BuildingMenu(game.screen,game.allbuildingList[e],SCREEN_WIDTH/2,
+                                                         500,int(0.25*SCREEN_WIDTH),int(0.2*SCREEN_HEIGHT)))
+                if game.allplayers[e].nacja == "kupcy":
+                    for i in game.allbuildingList[e]:
+                        i.cost = i.cost - int(i.cost/100 * 30)
+
+            game.currentplayer = game.allplayers[Player.ID]
+            game.currentevent = game.allevents[Player.ID]
+            game.currentmenu = game.allbuildingmenu[Player.ID]
+            game.currentdec = game.alldec[Player.ID]
+
+            # game.map.allhex = {}
+            # game.map.allhex['hex',i] =  Hex((polozenie_hex_x), (polozenie_hex_y), i, game.map, False, False,False,False,-1)
+            from graphics import Hex
+            with open('save/hexmap.csv', 'r',encoding='utf-8') as csvfile:
+                reader = csv.reader(csvfile, delimiter=';')
+                next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
+                i = 0
+                for row in reader:
+                    polozenie_hex_x= int(row[0])
+                    polozenie_hex_y= int(row[1])
+                    number= int(row[2])
+                    obwodka = True if row[3] == 'True' else False
+                    zajete = True if row[4] == 'True' else False
+                    odkryte  = True if row[5] == 'True' else False
+                    field_add   = True if row[6] == 'True' else False
+                    texture_index = int(row[7])
+                    rodzaj= row[8]
+                    rodzaj_surowca_var = row[9]
+                    player= (row[10])  # Odczytanie jako listy, używając funkcji eval()
+                    playerable = eval(row[11])  # Odczytanie jako listy, używając funkcji eval()
+                    atack = eval(row[12])  # Odczytanie jako listy, używając funkcji eval()
+
+                    game.map.allhex['hex',i].data_update(polozenie_hex_x,polozenie_hex_y,number,
+                        obwodka,zajete,odkryte,field_add,texture_index,
+                        rodzaj,rodzaj_surowca_var,player,playerable,
+                        atack)
+                    i+=1
+            time.sleep(1)
+            # ###########
+
+            with open('save/HexRect.csv', 'r',encoding='utf-8') as csvfile:
+                reader = csv.reader(csvfile, delimiter=';')
+                next(reader)  # Pomijanie pierwszego wiersza z tytułami kolumn
+                i = 0
+                for row in reader:
+                    x= int(row[0])
+                    y= int(row[1])
+                    w= int(row[2])
+                    h= int(row[3])
+                    game.map.set_allrect(i,x,y,w,h)
+                    i+=1
+            time.sleep(1)
+
+            os.remove('save/gameinfo.bin')
+            os.remove('save/hexmap.csv')
+            os.remove('save/HexRect.csv')
+            os.remove('save/playerStats.csv')
+
+
+            pass
+        except AttributeError:
+            Menu.SAVE_START = True
+            Menu.new_game = True
+            self.save_selected = True
+            Menu.status = False
+
+            pass
     def button_action2(self):
         gameinfo_file = os.path.join('save', f'save_{self.name}.bin')
         if not os.path.exists(gameinfo_file):
@@ -2441,7 +2683,7 @@ class ItemLoad:
 
 class LoadMenu:
     active = False
-
+    Save_Select = None
     def __init__(self, window: pygame.Surface, items: list[ItemLoad], menu_width: int, menu_height: int):
         self.window = window
         self.menu_items = items  # Przykładowa lista przedmiotów w menu
@@ -2449,8 +2691,8 @@ class LoadMenu:
         self.menu_height = menu_height
         self.menu_item_height = 100
         self.menu_top_item_index = 0
-        self.item_spacing = 20  # Odstęp między przedmiotami
-
+        self.item_spacing = 15  # Odstęp między przedmiotami
+        self.font = pygame.font.Font('fonts/PirataOne-Regular.ttf', 36)
         # Scrollbar settings
         self.scrollbar_width = 16
         self.scrollbar_margin = 8
@@ -2464,21 +2706,21 @@ class LoadMenu:
         self.menu_y = 0  # Set the desired y-coordinate of the menu
 
         self.back_rect = pygame.Rect(self.scrollbar_x - 200, 50, 150, 50)
-        self.backtext = pygame.font.Font('fonts/PirataOne-Regular.ttf', 30).render("BACK", True, (0, 0, 0))
+        self.backtext = pygame.font.Font('fonts/PirataOne-Regular.ttf', 30).render("    BACK", True, (0, 0, 0))
         self.scrollbar_rect = pygame.Rect(255, 0, 255, 0)
 
         # Load the images
         self.left_side_art = pygame.image.load('texture/ui/load_menu/heroine_left.png')
-        self.left_side_art = pygame.transform.scale(self.left_side_art, (350, 720))
+        self.left_side_art = pygame.transform.scale(self.left_side_art, (self.window.get_width()*0.24, self.window.get_height()))
         self.right_side_art = pygame.image.load('texture/ui/load_menu/warior_right.png')
-        self.right_side_art = pygame.transform.scale(self.right_side_art, (350, 720))
+        self.right_side_art = pygame.transform.scale(self.right_side_art, (self.window.get_width()*0.24, self.window.get_height()))
 
         # Set the initial position of the side art
-        self.left_side_rect = self.left_side_art.get_rect(topleft=(self.window.get_width() - 1320, 0))
-        self.right_side_rect = self.right_side_art.get_rect(topleft=(self.window.get_width() - 350, 0))
+        self.left_side_rect = self.left_side_art.get_rect(topleft=(0, 0))
+        self.right_side_rect = self.right_side_art.get_rect(topleft=(self.window.get_width() - self.window.get_width()*0.265, 0))
 
     def draw_menu(self):
-        self.window.fill((0, 16, 31))  # Ustawia kolor tła na czarny (RGB: 0, 0, 0)
+        self.window.fill((0, 16, 31))
         # Draw the left side art
         self.window.blit(self.left_side_art, self.left_side_rect)
 
@@ -2493,9 +2735,11 @@ class LoadMenu:
                     self.menu_item_height + self.item_spacing)
             item_rect = pygame.Rect(self.menu_width / 4, item_y, self.menu_width / 2.1, self.menu_item_height)
             if item_rect.collidepoint(pygame.mouse.get_pos()):
+
                 # Zaznaczony przedmiot
                 pygame.draw.rect(self.window, (192, 192, 255), item_rect)
-            pygame.draw.rect(self.window, (255, 170, 20), item_rect, 1)
+            else:
+                pygame.draw.rect(self.window, (255, 170, 20), item_rect, 1)
 
             item.draw(self.window, item_rect.x, item_y)
 
@@ -2531,10 +2775,15 @@ class LoadMenu:
                         item.button_action2()
 
                     if item_rect2.collidepoint(mouse_pos) and item.available:
-                        # print(item.name)
+
                         self.window.fill('#000000')
+                        LoadMenu.Save_Select = item
+
                         item.button_action(game)
-                        pygame.time.Clock().tick(2)
+
+                        # pygame.time.Clock().tick(2)
+                        pass
+
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_WHEELUP:  # Scroll up
@@ -2583,21 +2832,61 @@ class MenuPause:
     WHITE = (255, 255, 255)
     TRANSPARENT_WHITE = (0,0,0, 180)
     BLUE = (0, 0, 255)
-    def __init__(self,screen:pygame.Surface,w,h) -> None:
+
+    def __init__(self,screen:pygame.Surface, w, h) -> None:
         self.menu_width = w
         self.menu_height = h
-        # self.menu_x = (SCREEN_WIDTH - self.menu_width) // 2
-        # self.menu_y = (SCREEN_HEIGHT - self.menu_height) // 2
         self.screen = screen
         self.selected_option = 0
-        self.options = ['TEst','Test22']
-        self.overlay = pygame.transform.scale(pygame.image.load('texture/pause_menu/back.png').convert_alpha(),(SCREEN_WIDTH,SCREEN_HEIGHT))
-        self.button_resume = pygame.transform.scale_by(pygame.image.load('texture/pause_menu/button_resume.png').convert_alpha(),0.9)
-        self.button_wczytaj = pygame.transform.scale_by(pygame.image.load('texture/pause_menu/button_wczytaj.png').convert_alpha(),0.9)
-        self.button_zapisz = pygame.transform.scale_by(pygame.image.load('texture/pause_menu/button_zapisz.png').convert_alpha(),0.9)
-        self.button_menu = pygame.transform.scale_by(pygame.image.load('texture/pause_menu/button_menu.png').convert_alpha(),0.9)
-        
-        self.resume_rect = self.button_resume.get_rect(topleft = ((SCREEN_WIDTH-self.button_resume.get_width())/2,(SCREEN_HEIGHT)*0.4))
+        self.options = ['TEst', 'Test22']
+        self.overlay = pygame.transform.smoothscale(pygame.image.load('texture/pause_menu/back.png').convert_alpha(),(SCREEN_WIDTH,SCREEN_HEIGHT))
+
+        if SCREEN_WIDTH == 1920:
+
+            self.button_resume = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_resume.png').convert_alpha(), 1)
+            self.button_wczytaj = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_wczytaj.png').convert_alpha(), 1)
+            self.button_zapisz = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_zapisz.png').convert_alpha(), 1)
+            self.button_menu = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_menu.png').convert_alpha(), 1)
+
+            self.button_resume_h = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_resume_h.png').convert_alpha(), 1)
+
+            self.button_wczytaj_h = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_wczytaj_h.png').convert_alpha(), 1)
+
+            self.button_zapisz_h = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_zapisz_h.png').convert_alpha(), 1)
+
+            self.button_menu_h = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_menu_h.png').convert_alpha(), 1)
+        else:
+            self.button_resume = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_resume.png').convert_alpha(), 0.8)
+            self.button_wczytaj = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_wczytaj.png').convert_alpha(), 0.8)
+            self.button_zapisz = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_zapisz.png').convert_alpha(), 0.8)
+            self.button_menu = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_menu.png').convert_alpha(), 0.8)
+
+            self.button_resume_h = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_resume_h.png').convert_alpha(), 0.8)
+
+            self.button_wczytaj_h = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_wczytaj_h.png').convert_alpha(), 0.8)
+
+            self.button_zapisz_h = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_zapisz_h.png').convert_alpha(), 0.8)
+
+            self.button_menu_h = pygame.transform.smoothscale_by(
+                pygame.image.load('texture/pause_menu/button_menu_h.png').convert_alpha(), 0.8)
+
+
+        self.resume_rect = self.button_resume.get_rect(topleft = ((SCREEN_WIDTH-self.button_resume.get_width())/2,(SCREEN_HEIGHT)*0.42))
         self.load_rect = self.button_wczytaj.get_rect(topleft = ((SCREEN_WIDTH-self.button_resume.get_width())/2,self.resume_rect.bottom+SCREEN_HEIGHT*0.02))
         self.save_rect = self.button_zapisz.get_rect(topleft = ((SCREEN_WIDTH-self.button_resume.get_width())/2,self.load_rect.bottom+SCREEN_HEIGHT*0.02))
         self.menu_rect = self.button_menu.get_rect(topleft = ((SCREEN_WIDTH-self.button_resume.get_width())/2,self.save_rect.bottom+SCREEN_HEIGHT*0.02))
@@ -2608,30 +2897,50 @@ class MenuPause:
         if self.Active:
             
             # Obliczanie wymiarów i położenia menu
-            
-            
+
+            pos = pygame.mouse.get_pos()
             
             # Rysowanie tła z przeźroczystością
             overlay = pygame.Surface((SCREEN_WIDTH,SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill(self.TRANSPARENT_WHITE)
             
-            self.screen.blit(overlay, (0,0))
-            self.screen.blit(self.overlay, (0,0))
+            self.screen.blit(overlay, (0, 0))
+            self.screen.blit(self.overlay, (0, 0))
             
             # Rysowanie opcji menu
-            self.screen.blit(self.button_resume,self.resume_rect)
-            self.screen.blit(self.button_wczytaj,self.load_rect)
-            self.screen.blit(self.button_zapisz,self.save_rect)
-            self.screen.blit(self.button_menu,self.menu_rect)
+            if self.resume_rect.collidepoint(pos):
+                self.screen.blit(self.button_resume_h,self.resume_rect)
+            else:
+                self.screen.blit(self.button_resume, self.resume_rect)
+
+
+            if self.load_rect.collidepoint(pos):
+                self.screen.blit(self.button_wczytaj_h, self.load_rect)
+            else:
+                self.screen.blit(self.button_wczytaj, self.load_rect)
+
+
+            if self.save_rect.collidepoint(pos):
+                self.screen.blit(self.button_zapisz_h, self.save_rect)
+            else:
+                self.screen.blit(self.button_zapisz, self.save_rect)
+
+
+            if self.menu_rect.collidepoint(pos):
+                self.screen.blit(self.button_menu_h, self.menu_rect)
+            else:
+                self.screen.blit(self.button_menu, self.menu_rect)
+
     def handle_event(self,event:pygame.event):
         from gameplay import Stats
         pos = pygame.mouse.get_pos()
         if event.type == MOUSEBUTTONDOWN:
             if self.menu_rect.collidepoint(pos):
-                Menu.status= True
-                
-                MenuPause.Active = False
-                Stats.camera_stop = False
+                # Menu.status= True
+                # MenuPause.Active = False
+                # Stats.camera_stop = False
+                sys.exit(0)
+
         if event.type == MOUSEBUTTONDOWN:
             if self.resume_rect.collidepoint(pos):
                 MenuPause.Active = False

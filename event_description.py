@@ -1,7 +1,7 @@
 
-#opis 97 max 776 znaków 7/8 linijek
-#select 38
-#result 39
+# opis 97 max 776 znaków 7/8 linijek
+# select 38
+# result 39
 
 
 # nacje 35
@@ -122,14 +122,14 @@ nomad_staty = "\n\n" \
               " zdobycia\n  2 pól w jednej turzę\n"
 
 
-architekt = " Królestwo posiada największe i\n" \
-            " najwspanialsze miasta na całym " \
+architekt = " Korona Konstruktów posiada największe\n" \
+            " i najwspanialsze miasta na całym " \
             "\n kontynencie. To właśnie w nim" \
             "\n urodziła się Aurora, młoda " \
             "\n następczyni tronu. Aurora," \
             "\n już od najmłodszych lat była" \
             "\n pełna wizji i kreatywności," \
-            "\n zawsze marzyła ona o " \
+            "\n zawsze marzyła  o " \
             "\n ,wybudowaniu cudów które " \
             "\n zadziwią świat. Spędzała" \
             "\n długie godziny nad swoim stołem" \
@@ -149,8 +149,8 @@ architekt = " Królestwo posiada największe i\n" \
             "\n i rozbudowy swojego królestwa." \
             "\n\n Królowa Aurora jest niezłomna w " \
             "\n dążeniu do realizacji swojej wizji." \
-            "\n Ma ona za cel, żeby królestwo stało" \
-            "\n się oazą majestatu architektonicznej" \
+            "\n Żeby królestwo stało się " \
+            "\n oazą majestatu architektonicznej" \
             "\n i symbolem światowej renomy." \
             "" \
             " "
@@ -228,8 +228,10 @@ opis_turniej = "W sąsiednim królestwie zbliża się wielki turniej rycerski, k
 
 
 select_turniej = [" Wyslij swojego najlepszego rycerza,\n aby walczył w turnieju.\n oraz zapłać za 100 złota\n za wziecię udział",
-                  " Zorganizuj własny turniej rycerski w\n swoim królestwie.",
                   " Nie uczestnicz w turnieju i skup się na\n innych priorytetach."]
+
+
+
 
 # Turniej przygotowania
 
@@ -295,4 +297,26 @@ result_turniej_udzial = ["Po wielu godzinach cieżkich zmagań\n"
 
 
 
-# Nowy evencior
+refugees_opis = "\n\nUchodźcy z innych królestw proszą o schronienie.\nMożesz przyjąć ich, zyskując ich lojalność, ale musisz dostarczyć im żywność i schronienie"
+
+select_refugees = ["Trzeba pomóc tym ludziom przyjmij ich",
+                  "Zasoby są bardziej potrzebne\n dla naszych ludzi odmów im"]
+
+
+plony_opis = "\n\nW tym roku były wyjątkowo udane plony !\n Chciałbyś sprzedać nadwyżke żywności czy wolisz przekazać ją na poczet armii ?"
+select_plony = ["Królestwo potrzebuję złota !\n sprzedaj nadwyżke żywności",
+                  "Bezpieczeństwo jest najważniejsze \nnaszej armii przydadzą sie \ndodatkowe zasoby"]
+
+inwestycja_opis = "\nJuż najwyższy czas zainwestować zgromadzone środki w rozwój królestwa chciałbyś\n zainwestować w handel i zwiekszyć dochody królestwa czy w \nbudynki  szkoleniowe dla naszych zołnierzy ?"
+
+select_inwestycja = ["Zainwestuj w rozbudowe armii!",
+                    "Zainwetsuj w Handel",
+                    "Nie chcę teraz inwestować"]
+
+ucieczka_opis = "\n\nCzęść twojej armii dezercuje na skutek niezadowolenia.\nLiczebność twojej armi zmniejsza się !."
+
+select_ucieczka = ["OK"]
+
+
+zlodziej_opis = "\n\n  Złodziej włamał się do twojego skarbca i ukradł część złota."
+select_zlodziej = ["OK"]
