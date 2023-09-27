@@ -78,6 +78,8 @@ Lucyferiusz: https://github.com/Lucyferiusz
 - Main Menu
 - Resolution scaling
 - Game configuration 
+
+
 Patry321: https://github.com/Patry321
 - Hourglass graphics and animation
 - Settings menu design
@@ -85,6 +87,7 @@ Patry321: https://github.com/Patry321
 - Fog of War
 - Display of hex descriptions
   
+
 Herukles: https://github.com/Herukles
 - Graphics of all hexes
 - Graphics of all buttons
