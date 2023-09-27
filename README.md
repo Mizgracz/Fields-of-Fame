@@ -6,48 +6,61 @@ How to run ?
 
 In the current version run the main file in the future will be an .exe file
 
-Currently only playing in 1280x720 resolution works correctly, it is possible to launch fullscreen, adjust to other resolutions soon
 
 
 credits
 
- Maciej Bielenichin (Mizgracz):
+Maciej Bielenichin (Mizgracz):
 - Idea and concept of the game
 - Event system
-- Map display and generation
+- Map generation and display
 - Collision system 
 - Camera control 
 - System of turns and choices during gameplay
-- Game Configuration Menu
+- Gameplay configuration
+- Nations system
 - System of Adding new hexes
 - Display UI
 - Main Menu
+- Combat
+- Neutral enemy camps
+- Resources sale 
+- Balance of gameplay
+- Resolution scaling
+- Making a tutorial
 
-Lucyferiusz:
+Lucyferiusz: https://github.com/Lucyferiusz
 - Save and Load
 - Multiplayer gameplay
 - Build Menu
 - Main Menu
-- Autosave
+- Resolution scaling
+- Game configuration 
 
-Patry321:
+Patry321: https://github.com/Patry321
 - Hourglass graphics and animation
-- Game Settings Menu
+- Settings menu design
 - Graphics of the interface during the game
-- Add sound
 - Fog of War
+- Display of hex descriptions
+  
 
-Herukles:
+Herukles: https://github.com/Herukles
 - Graphics of all hexes
-- Event graphics
-- Graphics of the buttons in the main menu
+- Graphics of all buttons
+- Some event graphics
+- Main menu design
 - Building graphics
 - Resource system
-
+- Resource menu design
+- Nation menu design  
+- Nations leaders graphics
+- Pause menu graphics 
 
 During the development of this project, we used the following resources:
 - Main Menu background graphic genereted by AI Stable Diffusion 
-- Option Box from : https://github.com/Rabbid76/PyGameExamplesAndAnswers/blob/master/documentation/pygame/pygame_ui_elements.md
-
+- Some Event graphics by AI
+- Free sounds and music
+- MartianMono-Regular and PirataOne-Regular fonts
 
 
