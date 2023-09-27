@@ -1,53 +1,109 @@
-# Fields of Fame
 
-Turn-based Strategy Game
+<h1 align="center">
 
-How to run ?
+<br>
 
-In the current version run the main file in the future will be an .exe file
+<p align="center">
+<img src="https://i.imgur.com/53mx1d6.png"  alt="Logo">
+</p>
 
-Currently only playing in 1280x720 resolution works correctly, it is possible to launch fullscreen, adjust to other resolutions soon
+<br>
+
+<br>
+
+</h1>
+
+<h4 align="center">Fields Of Fame</h4>
 
 
-credits
+## Project Overview 🎉
 
- Maciej Bielenichin (Mizgracz):
+Fields of Fame is a turn-based strategy game.
+hot-seat mode for up to 4 players
+
+
+
+## Screenshots 📺
+
+<p align="center">
+    <img src="https://i.imgur.com/3bnBqMs.png" alt="Screenshot">
+</p>
+
+<p align="center">
+    <img src="https://i.imgur.com/zC7lFcn.png" alt="Screenshot">
+</p>
+
+<p align="center">
+    <img src="https://i.imgur.com/yYbHPj2.png" alt="Screenshot">
+</p>
+
+
+## How to run 💾
+
+Just open Fields of Fame.exe file or main.py using python
+
+## Tech/framework used 🔧
+
+| Tech                                                    | Description                              |
+| ------------------------------------------------------- | ---------------------------------------- |
+| [Python](X)                           |Python is a high-level, general-purpose programming language. |
+| [Pygame](X)                           | is a cross-platform set of Python modules designed for writing video games. It includes computer graphics and sound libraries designed to be used with the Python programming language.|
+
+
+## Credits :trophy:
+
+
+Maciej Bielenichin (Mizgracz):
 - Idea and concept of the game
 - Event system
-- Map display and generation
+- Map generation and display
 - Collision system 
 - Camera control 
 - System of turns and choices during gameplay
-- Game Configuration Menu
+- Gameplay configuration
+- Nations system
 - System of Adding new hexes
 - Display UI
 - Main Menu
-
-Lucyferiusz:
+- Combat
+- Neutral enemy camps
+- Resources sale 
+- Balance of gameplay
+- Resolution scaling
+- Making a tutorial
+Lucyferiusz: https://github.com/Lucyferiusz
 - Save and Load
 - Multiplayer gameplay
 - Build Menu
 - Main Menu
-- Autosave
-
-Patry321:
+- Resolution scaling
+- Game configuration 
+Patry321: https://github.com/Patry321
 - Hourglass graphics and animation
-- Game Settings Menu
+- Settings menu design
 - Graphics of the interface during the game
-- Add sound
 - Fog of War
-
-Herukles:
+- Display of hex descriptions
+  
+Herukles: https://github.com/Herukles
 - Graphics of all hexes
-- Event graphics
-- Graphics of the buttons in the main menu
+- Graphics of all buttons
+- Some event graphics
+- Main menu design
 - Building graphics
 - Resource system
-
+- Resource menu design
+- Nation menu design  
+- Nations leaders graphics
+- Pause menu graphics 
 
 During the development of this project, we used the following resources:
 - Main Menu background graphic genereted by AI Stable Diffusion 
-- Option Box from : https://github.com/Rabbid76/PyGameExamplesAndAnswers/blob/master/documentation/pygame/pygame_ui_elements.md
+- Some Event graphics by AI
+- Free sounds and music
+- MartianMono-Regular and PirataOne-Regular fonts
 
 
 
+
+## License 🔱
