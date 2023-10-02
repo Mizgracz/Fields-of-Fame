@@ -1337,39 +1337,39 @@ class EventMenagment:
         refugees = Event(self.screen, refugees_opis, "texture/Events/Refugees.png", 2, select_refugees, "Uchodzcy", self, 50, 0,"Uchodzcy")
         self.events.append(refugees)
 
-        najemnicy = Event(self.screen, opis_najemnicy, "texture/Events/najemnicy_img.png", 3, select_najemnicy,
-                          "Najemnicy", self, 200, 50, "Najemnicy")
-        self.events.append(najemnicy)
-
-        ruiny = Event(self.screen, opis_ruiny, self.ruiny, 2, select_ruiny, "Ruiny", self, 0, 25, "Ruiny")
-        self.events.append(ruiny)
-
-        eliksir = Event(self.screen, opis_eliksir, "texture/Events/eliksir.png", 3, select_eliksir, "Eliksir", self, 200, 0,
-                        "Wędrowiec i Eliksir")
-        self.events.append(eliksir)
-
-        turniej = Event(self.screen, opis_turniej, self.turniej, 2, select_turniej, "Turniej", self, 100, 1,
-                        "Turniej Rycerski")
-        self.events.append(turniej)
-
-        plony = Event(self.screen, plony_opis, "texture/Events/harvest.png", 2, select_plony, "Plony", self, 0, 0,
-                        "Udane Plony")
-        self.events.append(plony)
-
-        inwestycje = Event(self.screen, inwestycja_opis, "texture/Events/invest.jpg", 3, select_inwestycja, "Inwestycje", self, 600, 0,
-                      "Inwestycje")
-        self.events.append(inwestycje)
-
-        ucieczka = Event(self.screen, ucieczka_opis, "texture/Events/ucieczka.jpg", 1, select_ucieczka,
-                           "Ucieczka", self, 0, 50,
-                           "Ucieczka Armii")
-        self.events.append(ucieczka)
-
-        zlodziej = Event(self.screen, zlodziej_opis, "texture/Events/zlodziej.png", 1, select_zlodziej,
-                         "Zlodziej", self, 80, 0,
-                         "Złodziej")
-
-        self.events.append(zlodziej)
+        # najemnicy = Event(self.screen, opis_najemnicy, "texture/Events/najemnicy_img.png", 3, select_najemnicy,
+        #                   "Najemnicy", self, 200, 50, "Najemnicy")
+        # self.events.append(najemnicy)
+        #
+        # ruiny = Event(self.screen, opis_ruiny, self.ruiny, 2, select_ruiny, "Ruiny", self, 0, 25, "Ruiny")
+        # self.events.append(ruiny)
+        #
+        # eliksir = Event(self.screen, opis_eliksir, "texture/Events/eliksir.png", 3, select_eliksir, "Eliksir", self, 200, 0,
+        #                 "Wędrowiec i Eliksir")
+        # self.events.append(eliksir)
+        #
+        # turniej = Event(self.screen, opis_turniej, self.turniej, 2, select_turniej, "Turniej", self, 100, 1,
+        #                 "Turniej Rycerski")
+        # self.events.append(turniej)
+        #
+        # plony = Event(self.screen, plony_opis, "texture/Events/harvest.png", 2, select_plony, "Plony", self, 0, 0,
+        #                 "Udane Plony")
+        # self.events.append(plony)
+        #
+        # inwestycje = Event(self.screen, inwestycja_opis, "texture/Events/invest.jpg", 3, select_inwestycja, "Inwestycje", self, 600, 0,
+        #               "Inwestycje")
+        # self.events.append(inwestycje)
+        #
+        # ucieczka = Event(self.screen, ucieczka_opis, "texture/Events/ucieczka.jpg", 1, select_ucieczka,
+        #                    "Ucieczka", self, 0, 50,
+        #                    "Ucieczka Armii")
+        # self.events.append(ucieczka)
+        #
+        # zlodziej = Event(self.screen, zlodziej_opis, "texture/Events/zlodziej.png", 1, select_zlodziej,
+        #                  "Zlodziej", self, 80, 0,
+        #                  "Złodziej")
+        #
+        # self.events.append(zlodziej)
 
     def random_event(self):
         if self.turn < self.player.turn_count:
@@ -1502,10 +1502,10 @@ class Event:
 
 
         if self.Wybor == 1:
-            if x > 1:
-                opis = "Odmówiłeś pomocy, uchodźcy\nopuszczają twoje królestwo i idą dalej"
-                Result = EventResults(opis, self.ekran, self.managment)
-                managment.add_result(Result)
+
+            opis = "Odmówiłeś pomocy, uchodźcy\nopuszczają twoje królestwo i idą dalej"
+            Result = EventResults(opis, self.ekran, self.managment)
+            managment.add_result(Result)
 
     def Plony(self, managment):
 
