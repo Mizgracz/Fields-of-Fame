@@ -1,15 +1,12 @@
 
 <h1 align="center">
 
-<br>
 
 <p align="center">
-<img src="https://i.imgur.com/53mx1d6.png"  alt="Logo">
+<img src="https://i.imgur.com/53mx1d6.png" width="370" height="370"  alt="Logo">
 </p>
 
-<br>
 
-<br>
 
 </h1>
 
@@ -18,23 +15,31 @@
 
 ## Project Overview 🎉
 
-Fields of Fame is a turn-based strategy game.
-hot-seat mode for up to 4 players
 
+Thank you for visiting my repository! I'd like to introduce you to Fields of Fame, a turn-based strategy computer game project developed by a
+group of students. This exciting game is designed for up to 4 players and can be played in hot-seat mode, allowing you to enjoy multiplayer
+battles with your friends on a single computer.
 
+During the development process, in addition to enhancing our programming skills, we had the opportunity to learn about teamwork and project 
+management using the Agile system, which was supervised by one of the instructors at Opole University of Technology. The game was
+written in the Python programming language using the Pygame library.
+
+Fields of Fame is set in a medieval setting and includes various mechanics, such as random events, a resource system, combat, building, and much more!
+
+<br>
 
 ## Screenshots 📺
 
-<p align="center">
-    <img src="https://i.imgur.com/3bnBqMs.png" alt="Screenshot">
+<p align="left">
+    <img src="https://i.imgur.com/3bnBqMs.png" width="700" height="400" alt="Screenshot1">
 </p>
 
-<p align="center">
-    <img src="https://i.imgur.com/zC7lFcn.png" alt="Screenshot">
+<p align="left">
+    <img src="https://i.imgur.com/zC7lFcn.png" width="700" height="400" alt="Screenshot2">
 </p>
 
-<p align="center">
-    <img src="https://i.imgur.com/yYbHPj2.png" alt="Screenshot">
+<p align="left">
+    <img src="https://i.imgur.com/yYbHPj2.png" width="700" height="400" alt="Screenshot3">
 </p>
 
 
@@ -108,7 +113,3 @@ During the development of this project, we used the following resources:
 - Free sounds and music
 - MartianMono-Regular and PirataOne-Regular fonts
 
-
-
-
-## License 🔱
