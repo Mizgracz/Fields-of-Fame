@@ -99,13 +99,16 @@ Herukles: https://github.com/Herukles
 - Graphics of all hexes
 - Graphics of all buttons
 - Some event graphics
-- Main menu design
+- Main menu 
 - Building graphics
 - Resource system
+- Fog of War
 - Resource menu design
 - Nation menu design  
 - Nations leaders graphics
 - Pause menu graphics 
+- System of Adding new hexes
+- Performance optimization
 
 During the development of this project, we used the following resources:
 - Main Menu background graphic genereted by AI Stable Diffusion 
